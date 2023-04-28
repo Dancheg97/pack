@@ -9,20 +9,10 @@ import (
 
 var rootCmd = &cobra.Command{
 	Use:   "fmnx-gen",
-	Short: "🧰 Cli tool for something awesome.",
-	Long:  "long example",
+	Short: "📦 git-based pacman-compatible package manager",
 }
 
-var flags = []Flag{
-	{
-		Cmd:         rootCmd,
-		Name:        "flg",
-		ShortName:   "f",
-		Env:         "FLG",
-		Value:       "value",
-		Description: "📄 cool description",
-	},
-}
+var flags = []Flag{}
 
 func Execute() {
 	for _, flag := range flags {

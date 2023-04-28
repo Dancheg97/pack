@@ -25,11 +25,11 @@ build-deps:
   - cmake
 build-script:
   - flutter build linux
-pack:
-  build/linux/x64/release/bundle: /usr/share/pkg
+pack-map:
   pkg: /usr/bin/pkg
   pkg.desktop: /usr/share/applications/pkg.desktop
   logo.png: /usr/share/icons/hicolor/512x512/apps/pkg.png
+  build/linux/x64/release/bundle: /usr/share/pkg
 `
 
 func Gen(cmd *cobra.Command, args []string) {

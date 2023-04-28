@@ -10,7 +10,7 @@ func init() {
 
 var getCmd = &cobra.Command{
 	Use:   "get",
-	Short: "",
+	Short: "📥 insatll new packages",
 	Run:   Gen,
 }
 
