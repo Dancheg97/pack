@@ -2,7 +2,7 @@
 <img style="align: center; padding-left: 10px; padding-right: 10px; padding-bottom: 10px;" width="238px" height="238px" src="./logo.png" />
 </p>
 
-<h2 align="center">☯️ Pack - packge manager 🈶</h2>
+<h2 align="center">Pack - packge manager</h2>
 
 [![Generic badge](https://img.shields.io/badge/LICENSE-GPL-orange.svg)](https://fmnx.io/dev/pack/src/branch/main/LICENSE)
 [![Generic badge](https://img.shields.io/badge/GITEA-REPO-red.svg)](https://fmnx.io/dev/pack)
