@@ -11,7 +11,7 @@
 
 Git-based pacman-compatible package manager. Since `go` creators started reusing `git` in go package management system, the value of decentralized systems shined from another perspective.
 
-This package manager is trying to reuse the power of both `git` and `pacman` to become new age way of arch package distribution.
+This package manager is trying to reuse the power of both `git` and `pacman` to become new way of arch package distribution.
 
 ---
 
