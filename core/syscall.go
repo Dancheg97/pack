@@ -12,7 +12,7 @@ func SystemCallf(format string, a ...any) error {
 }
 
 func SystemCall(cmd string) error {
-	fmt.Println("\n => ", cmd)
+	fmt.Println(" => ", cmd)
 	commad := exec.Command("bash", "-c", cmd)
 	commad.Stdout = os.Stdout
 	commad.Stderr = os.Stderr
@@ -27,7 +27,7 @@ func SystemCallOutf(format string, a ...any) (string, error) {
 }
 
 func SystemCallOut(cmd string) (string, error) {
-	fmt.Println("Running: ", cmd)
+	fmt.Println(" => ", cmd)
 	commad := exec.Command("bash", "-c", cmd)
 	var buf bytes.Buffer
 	commad.Stdout = &buf

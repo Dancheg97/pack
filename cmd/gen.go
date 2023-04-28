@@ -15,7 +15,7 @@ var genCmd = &cobra.Command{
 	Run:   Gen,
 }
 
-var template = `run-deps:
+var packYmlTemplate = `run-deps:
   - vlc
   - wget
   - git
@@ -33,5 +33,5 @@ pack-map:
 `
 
 func Gen(cmd *cobra.Command, args []string) {
-	core.WriteFile("pack.yml", template)
+	core.WriteFile("pack.yml", packYmlTemplate)
 }
