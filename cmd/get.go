@@ -6,7 +6,22 @@ import (
 
 	"fmnx.io/dev/pack/core"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v2"
 )
+
+type PackageInfo struct {
+	Name    string
+	Link    string
+	Version string
+	Owner   string
+}
+
+type PackYml struct {
+	RunDeps     []string          `yaml:"run-deps"`
+	BuildDeps   []string          `yaml:"build-deps"`
+	BuildScript []string          `yaml:"build-script"`
+	PackMap     map[string]string `yaml:"pack-map"`
+}
 
 const (
 	CacheDir = `~/.pack-cache`
@@ -30,15 +45,9 @@ func Get(cmd *cobra.Command, pkgs []string) {
 		info := EjectInfo(pkg)
 		PrepareRepo(info)
 		SwitchToVersion(info)
-		GeneratePkgbuild(info)
+		packyml := ReadPackYml(info)
+		fmt.Println(packyml)
 	}
-}
-
-type PackageInfo struct {
-	Name    string
-	Link    string
-	Version string
-	Owner   string
 }
 
 func EjectInfo(pkg string) PackageInfo {
@@ -86,10 +95,23 @@ func SwitchToVersion(i PackageInfo) {
 	CheckErr(err)
 }
 
-func GeneratePkgbuild(i PackageInfo) {
-
+func ReadPackYml(i PackageInfo) PackYml {
+	content, err := core.SystemCallOutf("cat %s/%s/pack.yml", CacheDir, i.Name)
+	CheckErr(err)
+	var packyml PackYml
+	err = yaml.Unmarshal([]byte(content), &packyml)
+	CheckErr(err)
+	return packyml
 }
 
-func InstallPackage() {
+// func ResolveDependecies(i PackageInfo) error {
 
-}
+// }
+
+// func GeneratePkgbuild(i PackageInfo) {
+
+// }
+
+// func InstallPackage() {
+
+// }
