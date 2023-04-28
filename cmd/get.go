@@ -38,8 +38,10 @@ var getCmd = &cobra.Command{
 }
 
 func Get(cmd *cobra.Command, pkgs []string) {
-	err := core.SystemCallf("mkdir -p %s", CacheDir)
-	CheckErr(err)
+	if len(pkgs) != 0 {
+		err := core.SystemCallf("mkdir -p %s", CacheDir)
+		CheckErr(err)
+	}
 
 	for _, pkg := range pkgs {
 		info := EjectInfo(pkg)
@@ -131,13 +133,9 @@ func ResolvePacmanDeps(pkgs []string) {
 	}
 }
 
-// func ResolveDependecies(i PackageInfo) error {
+func GeneratePkgbuild(i PackageInfo) {
 
-// }
-
-// func GeneratePkgbuild(i PackageInfo) {
-
-// }
+}
 
 // func InstallPackage() {
 
