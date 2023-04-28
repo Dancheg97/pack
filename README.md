@@ -9,11 +9,13 @@
 [![Generic badge](https://img.shields.io/badge/GITHUB-REPO-white.svg)](https://github.com/fmnx-io/pack)
 [![Build Status](https://ci.fmnx.io/api/badges/dev/repo/status.svg)](https://ci.fmnx.io/dev/pack)
 
-Git-based pacman-compatible package manager. Since `go` creators started reusing `git` for in go package management system, the value of decentralized systems shined from another perspective. This package manager is trying to reuse the power of both `git` and `pacman` to become new age way of arch package distribution.
+Git-based pacman-compatible package manager. Since `go` creators started reusing `git` in go package management system, the value of decentralized systems shined from another perspective.
+
+This package manager is trying to reuse the power of both `git` and `pacman` to become new age way of arch package distribution.
 
 ---
 
-## 🚀 Features:
+### 🚀 Features:
 
 - Install and update packages using git repositories
 - Create packages compatible with all arch-based distros
@@ -21,7 +23,7 @@ Git-based pacman-compatible package manager. Since `go` creators started reusing
 
 ---
 
-## 💾 Installationion
+### 💾 Installationion
 
 You can install `pack` on any arch-based distribution using go.
 
@@ -34,7 +36,7 @@ go install fmnx.io/dev/pack@latest
 
 ---
 
-## 📄 Usage
+### 📄 Usage
 
 You can find all commands and description by running `pack -h`.
 
