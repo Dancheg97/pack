@@ -1,0 +1,23 @@
+kind: pipeline
+name: default
+type: docker
+
+trigger:
+  branch:
+    - main
+
+volumes:
+  - name: docker
+    host:
+      path: /var/run/docker.sock
+
+steps:
+  - name: push github mirror
+    image: appleboy/drone-git-push
+    settings:
+      branch: main
+      remote: git@github.com:fmnx-ru/pack.git
+      force: false
+      commit: true
+      ssh_key:
+        from_secret: SSHKEY
