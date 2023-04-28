@@ -50,7 +50,7 @@ func Get(cmd *cobra.Command, pkgs []string) {
 		pacmanPkgs, packPkgs := SplitDependencies(allDeps)
 		ResolvePacmanDeps(pacmanPkgs)
 		Get(cmd, packPkgs)
-		
+
 	}
 }
 
@@ -121,9 +121,14 @@ func SplitDependencies(deps []string) ([]string, []string) {
 	return pacmandeps, packdeps
 }
 
-func ResolvePacmanDeps(deps []string) {
-	err := core.SystemCall("sudo pacman --noconfirm -Sy " + strings.Join(deps, " "))
-	CheckErr(err)
+func ResolvePacmanDeps(pkgs []string) {
+	for _, pkg := range pkgs {
+		_, err := core.SystemCallOut("pacman -Q " + pkg)
+		if err != nil {
+			err := core.SystemCall("sudo pacman --noconfirm -Sy " + pkg)
+			CheckErr(err)
+		}
+	}
 }
 
 // func ResolveDependecies(i PackageInfo) error {
