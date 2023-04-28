@@ -27,13 +27,45 @@ func Get(cmd *cobra.Command, pkgs []string) {
 	CheckErr(err)
 
 	for _, pkg := range pkgs {
-		pkgLink := "https://" + strings.Split(pkg, "@")[0]
-		pkgsplit := strings.Split(pkgLink, "/")
-		pkgName := pkgsplit[len(pkgsplit)-1]
-		err := core.SystemCallf("git clone %s %s/%s", pkgLink, CacheDir, pkgName)
-		if strings.Contains(err.Error(), "already exists and is not an empty") {
-			fmt.Println("pulling changes")
-			core.SystemCallf("git -C %s/%s pull ", CacheDir, pkgName)
-		}
+		PrepareRepo(pkg)
+		SwitchToVersion(pkg)
 	}
+}
+
+func PrepareRepo(pkg string) {
+	pkgLink := "https://" + strings.Split(pkg, "@")[0]
+	pkgSplit := strings.Split(pkgLink, "/")
+	pkgName := pkgSplit[len(pkgSplit)-1]
+	err := core.SystemCallf("git clone %s %s/%s", pkgLink, CacheDir, pkgName)
+	if err != nil {
+		if !strings.Contains(err.Error(), "exit status 128") {
+			CheckErr(err)
+		}
+		fmt.Println("pulling changes")
+		err = core.SystemCallf("git -C %s/%s pull ", CacheDir, pkgName)
+		CheckErr(err)
+	}
+}
+
+func SwitchToVersion(pkg string) {
+	pkgRepo := strings.Split(pkg, "@")[0]
+	pkgSplit := strings.Split(pkgRepo, "/")
+	pkgName := pkgSplit[len(pkgSplit)-1]
+	if len(strings.Split(pkg, "@")) == 1 {
+		branch, err := GetDefaultBranch(pkg)
+		CheckErr(err)
+		err = core.SystemCallf("git -C %s/%s checkout %s", CacheDir, pkgName, branch)
+		CheckErr(err)
+		return
+	}
+	pkgVer := strings.Split(pkg, "@")[1]
+	err := core.SystemCallf("git -C %s/%s checkout %s", CacheDir, pkgName, pkgVer)
+	CheckErr(err)
+}
+
+func GetDefaultBranch(pkg string) (string, error) {
+	pkgLink := "https://" + strings.Split(pkg, "@")[0]
+	out, err := core.SystemCallOutf("git remote show %s | sed -n '/HEAD branch/s/.*: //p'", pkgLink)
+	CheckErr(err)
+	return strings.Trim(out, "\n"), nil
 }
