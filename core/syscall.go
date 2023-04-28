@@ -12,7 +12,7 @@ func SystemCallf(format string, a ...any) error {
 }
 
 func SystemCall(cmd string) error {
-	fmt.Println("Running: ", cmd)
+	fmt.Println("\n => ", cmd)
 	commad := exec.Command("bash", "-c", cmd)
 	commad.Stdout = os.Stdout
 	commad.Stderr = os.Stderr

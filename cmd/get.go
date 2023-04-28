@@ -46,7 +46,11 @@ func Get(cmd *cobra.Command, pkgs []string) {
 		PrepareRepo(info)
 		SwitchToVersion(info)
 		packyml := ReadPackYml(info)
-		fmt.Println(packyml)
+		allDeps := append(packyml.RunDeps, packyml.BuildDeps...)
+		pacmanPkgs, packPkgs := SplitDependencies(allDeps)
+		ResolvePacmanDeps(pacmanPkgs)
+		Get(cmd, packPkgs)
+		
 	}
 }
 
@@ -102,6 +106,24 @@ func ReadPackYml(i PackageInfo) PackYml {
 	err = yaml.Unmarshal([]byte(content), &packyml)
 	CheckErr(err)
 	return packyml
+}
+
+func SplitDependencies(deps []string) ([]string, []string) {
+	var pacmandeps []string
+	var packdeps []string
+	for _, dep := range deps {
+		if strings.Contains(dep, ".") {
+			packdeps = append(packdeps, dep)
+			continue
+		}
+		pacmandeps = append(pacmandeps, dep)
+	}
+	return pacmandeps, packdeps
+}
+
+func ResolvePacmanDeps(deps []string) {
+	err := core.SystemCall("sudo pacman --noconfirm -Sy " + strings.Join(deps, " "))
+	CheckErr(err)
 }
 
 // func ResolveDependecies(i PackageInfo) error {

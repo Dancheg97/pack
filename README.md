@@ -17,9 +17,9 @@ This package manager is trying to reuse the power of both `git` and `pacman` to 
 
 ### 🚀 Features:
 
-- Install and update packages using git repositories
-- Create packages compatible with all arch-based distros
-- One simple to write file to adapt git repo - `pack.yml`
+- Install and update packages using git links
+- Compatability with all arch based distros
+- Simple to write configuration - `pack.yml`
 
 ---
 
