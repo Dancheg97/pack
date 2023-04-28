@@ -5,8 +5,8 @@
 <h2 align="center">pack - package manager</h2>
 
 [![Generic badge](https://img.shields.io/badge/LICENSE-GPL-orange.svg)](https://fmnx.io/dev/pack/src/branch/main/LICENSE)
-[![Generic badge](https://img.shields.io/badge/GITEA-REPO-red.svg)](https://fmnx.io/dev/pack)
-[![Generic badge](https://img.shields.io/badge/GITHUB-REPO-white.svg)](https://github.com/fmnx-io/repo)
+[![Generic badge](https://img.shields.io/badge/GITEA-REPO-blue.svg)](https://fmnx.io/dev/pack)
+[![Generic badge](https://img.shields.io/badge/GITHUB-REPO-white.svg)](https://github.com/fmnx-io/pack)
 [![Build Status](https://ci.fmnx.io/api/badges/dev/repo/status.svg)](https://ci.fmnx.io/dev/pack)
 
 Git-based pacman-compatible package manager. Since `go` creators started reusing `git` for in go package management system, the value of decentralized systems shined from another perspective. This package manager is trying to reuse the power of both `git` and `pacman` to become new age way of arch package distribution.
@@ -70,4 +70,4 @@ pack remove link.io/owner/pkg
 pack list
 ```
 
-- `gen` - generate `pack.yml` template, not to search
+- `gen` - generate `pack.yml` template

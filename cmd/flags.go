@@ -5,7 +5,6 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -70,7 +69,7 @@ func AddFlag(cmd Flag) {
 
 func checkErr(err error) {
 	if err != nil {
-		logrus.Error(err)
+		fmt.Println(err)
 		os.Exit(1)
 	}
 }

@@ -3,7 +3,6 @@ module fmnx.io/dev/pack
 go 1.20
 
 require (
-	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.15.0
 )

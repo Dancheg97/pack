@@ -1,2 +1,15 @@
-deps:
-buildeps:
+run-deps:
+  - vlc
+  - wget
+  - git
+build-deps:
+  - flutter
+  - clang
+  - cmake
+build-script:
+  - flutter build linux
+pack:
+  build/linux/x64/release/bundle: /usr/share/pkg
+  pkg: /usr/bin/pkg
+  pkg.desktop: /usr/share/applications/pkg.desktop
+  logo.png: /usr/share/icons/hicolor/512x512/apps/pkg.png
