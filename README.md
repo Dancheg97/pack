@@ -21,6 +21,40 @@ This package manager is trying to reuse the power of both `git` and `pacman` to 
 - Compatability with all arch based distros
 - Simple to write configuration - `pack.yml`
 
+Configuration [example](add_fl_tmp_link) for flutter project:
+
+```yml
+# Dependencies, that are required for project at runtime
+run-deps:
+  - vlc
+# Build dependencies
+build-deps:
+  - flutter
+  - clang
+  - cmake
+# Scripts, that would be executed in root directory of a project
+build-script:
+  - flutter build linux
+# File mapping from build results in folder to destination file system
+# Each file/folder will be installed as it mapped in this file
+pack-map:
+  assets/logo.png: /usr/share/icons/hicolor/512x512/apps/flutter-fmnx-package.png
+  flutter-fmnx-package.sh: /usr/bin/flutter-fmnx-package
+  flutter_fmnx_package.desktop: /usr/share/applications/flutter-fmnx-package.desktop
+  build/linux/x64/release/bundle: /usr/share/flutter-fmnx-package
+```
+
+Configuration [example](add_fl_tmp_link) for go cli tool:
+
+```yml
+build-deps:
+  - go
+build-script:
+  - go build -o iambinary .
+pack-map:
+  iambinary: /usr/bin/iambinary
+```
+
 ---
 
 ### 💾 Installationion
