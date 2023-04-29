@@ -18,10 +18,10 @@ type PackageInfo struct {
 }
 
 type PackYml struct {
-	RunDeps     []string          `yaml:"run-deps"`
-	BuildDeps   []string          `yaml:"build-deps"`
-	BuildScript []string          `yaml:"build-scripts"`
-	PackMap     map[string]string `yaml:"pack-map"`
+	RunDeps      []string          `yaml:"run-deps"`
+	BuildDeps    []string          `yaml:"build-deps"`
+	BuildScripts []string          `yaml:"build-scripts"`
+	PackMap      map[string]string `yaml:"pack-map"`
 }
 
 const (
@@ -37,7 +37,7 @@ package() {
   cd ..
   %s
 }`
-	writeFileCmd = `tee -a ~/.ssh/config << END
+	writeFileCmd = `tee -a %s << END
 %s
 END
 `
@@ -58,7 +58,6 @@ func Get(cmd *cobra.Command, pkgs []string) {
 		err := core.SystemCallf("mkdir -p %s", cacheDir)
 		CheckErr(err)
 	}
-
 	for _, pkg := range pkgs {
 		info := EjectInfo(pkg)
 		PrepareRepo(info)
@@ -67,6 +66,7 @@ func Get(cmd *cobra.Command, pkgs []string) {
 		pacmanPkgs, packPkgs := SplitDependencies(allDeps)
 		ResolvePacmanDeps(pacmanPkgs)
 		Get(cmd, packPkgs)
+		BuildPackage(info, packyml)
 		GeneratePkgbuild(info, packyml)
 	}
 }
@@ -148,10 +148,13 @@ func ResolvePacmanDeps(pkgs []string) {
 
 func BuildPackage(i PackageInfo, y PackYml) {
 	CheckErr(os.Chdir(cacheDir + "/" + i.Name))
-	
+	for _, script := range y.BuildScripts {
+		CheckErr(core.SystemCall(script))
+	}
 }
 
 func GeneratePkgbuild(i PackageInfo, y PackYml) {
+	CheckErr(os.Chdir(cacheDir + "/" + i.Name))
 	deps := "depends=(\n  \"" + strings.Join(y.RunDeps, "\"\n  \"") + "\"\n)\n"
 	if len(y.RunDeps) == 0 {
 		deps = ""
@@ -162,12 +165,11 @@ func GeneratePkgbuild(i PackageInfo, y PackYml) {
 	}
 	var installScripts []string
 	for src, dst := range y.PackMap {
-		fullSrc := fmt.Sprintf("%s/%s/%s", cacheDir, i.Name, src)
-		installScripts = append(installScripts, FormatInstallSrc(fullSrc, dst))
+		installScripts = append(installScripts, FormatInstallSrc(src, dst))
 	}
 	install := strings.Join(installScripts, "\n  ")
 	pkgb := fmt.Sprintf(pkgbuild, i.Name, i.Version, i.Link, deps, makedeps, install)
-	err := core.SystemCallf(writeFileCmd, pkgb)
+	err := core.SystemCallf(writeFileCmd, "PKGBUILD", pkgb)
 	CheckErr(err)
 }
 
