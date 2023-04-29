@@ -179,11 +179,11 @@ func FormatInstallSrc(src string, dst string) string {
 	i, err := os.Stat(src)
 	CheckErr(err)
 	if i.IsDir() {
-		return fmt.Sprintf(`cd %s && find . -type f -exec install -Dm755 {} "${pkgdir}%s/{}" \; && cd $srcdir && cd ..`, src, dst)
+		return fmt.Sprintf(`cd %s;find . -type f -exec install -Dm755 {} "${pkgdir}%s/{}" \;cd $srcdir/..`, src, dst)
 	}
 	return fmt.Sprintf(`install -Dm755 %s "${pkgdir}%s"`, src, dst)
 }
 
-// func InstallPackage() {
+func InstallPackage() {
 
-// }
+}

@@ -16,7 +16,7 @@ remove-build-deps: false
 # Remove .pkg.tar.zst file after installation
 remove-built-packages: false
 # Cache dir for repositories
-repo-cache-dir: %s/.pack-cache
+repo-cache-dir: %s/.pack
 # Where pack will store built .pkg.tar.zst files
 package-cache-dir: /var/cache/pacman/pkg
 `
@@ -35,10 +35,10 @@ func GetConfig() *Config {
 		fmt.Println("unable to get current user")
 		os.Exit(1)
 	}
-	cfg, err := os.Stat(usr.HomeDir + "/.config/pack.yml")
+	cfg, err := os.Stat(usr.HomeDir + "/.pack/pack.yml")
 	if err != nil || cfg.IsDir() {
 		contents := fmt.Sprintf(DefaultConfig, usr.HomeDir)
-		err = core.WriteFile(usr.HomeDir+"/.config/pack.yml", contents)
+		err = core.WriteFile(usr.HomeDir+"/.pack/pack.yml", contents)
 		if err != nil {
 			fmt.Println("Unable to wrute default configuration ", err)
 			os.Exit(1)
@@ -47,19 +47,19 @@ func GetConfig() *Config {
 			RemoveGitRepos:      false,
 			RemoveBuildDeps:     false,
 			RemoveBuiltPackages: false,
-			RepoCacheDir:        usr.HomeDir + "/.pack-cache",
+			RepoCacheDir:        usr.HomeDir + "/.pack",
 			PackageCacheDir:     "/var/cache/pacman/pkg",
 		}
 	}
-	b, err := os.ReadFile(usr.HomeDir + "/.config/pack.yml")
+	b, err := os.ReadFile(usr.HomeDir + "/.pack/pack.yml")
 	if err != nil {
-		fmt.Println("unable to read config ~/.config/pack.yml")
+		fmt.Println("unable to read config ~/.pack/pack.yml")
 		os.Exit(1)
 	}
 	var conf Config
 	err = yaml.Unmarshal(b, &conf)
 	if err != nil {
-		fmt.Println("unable unmarshall yaml in cfg: ~/.config/pack.yml")
+		fmt.Println("unable unmarshall yaml in cfg: ~/.pack/pack.yml")
 		os.Exit(1)
 	}
 	return &conf
