@@ -1,0 +1,6 @@
+build-deps:
+  - go
+build-scripts:
+  - go build .
+pack-map:
+  pack: /usr/bin/pack

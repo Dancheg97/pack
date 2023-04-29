@@ -52,7 +52,7 @@ PKGBUILD
 
 ---
 
-📦 Install package with pack:
+### 📦 Install package with pack:
 
 %s
 pack get %s
@@ -63,7 +63,7 @@ pack get %s
 func Gen(cmd *cobra.Command, args []string) {
 	core.WriteFile("pack.yml", packYmlTemplate)
 	core.AppendToFile(".gitignore", gitignoreTemplate)
-	insatllMd := fmt.Sprintf(readmeTemplate, "```", readmeTemplate, "```")
+	insatllMd := fmt.Sprintf(readmeTemplate, "```", GetInstallLink(), "```")
 	core.AppendToFile("README.md", insatllMd)
 }
 
