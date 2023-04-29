@@ -1,10 +1,11 @@
-package cmd
+package cfg
 
 import (
 	"fmt"
 	"os"
 	"os/user"
 
+	"fmnx.io/dev/pack/core"
 	"gopkg.in/yaml.v2"
 )
 
@@ -24,7 +25,7 @@ type Config struct {
 	RemoveGitRepos      bool   `yaml:"remove-git-repo"`
 	RemoveBuildDeps     bool   `yaml:"remove-build-deps"`
 	RemoveBuiltPackages bool   `yaml:"remove-built-packages"`
-	RepoCacheDir        string `yaml:"cache-dir"`
+	RepoCacheDir        string `yaml:"repo-cache-dir"`
 	PackageCacheDir     string `yaml:"package-cache-dir"`
 }
 
@@ -36,8 +37,8 @@ func GetConfig() *Config {
 	}
 	cfg, err := os.Stat(usr.HomeDir + "/.config/pack.yml")
 	if err != nil || cfg.IsDir() {
-		contents := []byte(fmt.Sprintf(DefaultConfig, usr.HomeDir))
-		err = os.WriteFile(usr.HomeDir+"/.config/pack.yml", contents, 0o600)
+		contents := fmt.Sprintf(DefaultConfig, usr.HomeDir)
+		err = core.WriteFile(usr.HomeDir+"/.config/pack.yml", contents)
 		if err != nil {
 			fmt.Println("Unable to wrute default configuration ", err)
 			os.Exit(1)

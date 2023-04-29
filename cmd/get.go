@@ -3,9 +3,9 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"os/user"
 	"strings"
 
+	"fmnx.io/dev/pack/cfg"
 	"fmnx.io/dev/pack/core"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
@@ -26,9 +26,7 @@ type PackYml struct {
 }
 
 var (
-	usr, _   = user.Current()
-	dir      = usr.HomeDir
-	cacheDir = `~/.pack-cache`
+	config   = cfg.GetConfig()
 	pkgbuild = `pkgname="%s"
 pkgver="%s"
 pkgrel="1"
@@ -58,7 +56,9 @@ var getCmd = &cobra.Command{
 
 func Get(cmd *cobra.Command, pkgs []string) {
 	if len(pkgs) != 0 {
-		err := core.SystemCallf("mkdir -p %s", cacheDir)
+		err := core.PrepareDir(config.RepoCacheDir)
+		CheckErr(err)
+		err = core.PrepareDir(config.PackageCacheDir)
 		CheckErr(err)
 	}
 	for _, pkg := range pkgs {
@@ -102,26 +102,25 @@ func GetDefaultBranch(pkg string) string {
 }
 
 func PrepareRepo(i PackageInfo) {
-	CheckErr(os.Chdir(cacheDir))
-	err := core.SystemCallf("git clone %s", i.Link, cacheDir, i.Name)
-	CheckErr(os.Chdir(cacheDir + "/" + i.Name))
+	CheckErr(os.Chdir(config.RepoCacheDir))
+	err := core.SystemCallf("git clone %s", i.Link)
+	CheckErr(os.Chdir(i.Name))
 	if err != nil {
 		if !strings.Contains(err.Error(), "exit status 128") {
 			CheckErr(err)
 		}
-		fmt.Println("pulling changes")
-		err = core.SystemCallf("git -C %s/%s pull ", cacheDir, i.Name)
+		err = core.SystemCallf("git pull")
 		CheckErr(err)
 	}
-	err = core.SystemCallf("git checkout %s", cacheDir, i.Name, i.Version)
+	err = core.SystemCallf("git checkout %s", i.Version)
 	CheckErr(err)
 }
 
 func ReadPackYml(i PackageInfo) PackYml {
-	content, err := core.SystemCallOutf("cat %s/%s/pack.yml", cacheDir, i.Name)
+	b, err := os.ReadFile("pack.yml")
 	CheckErr(err)
 	var packyml PackYml
-	err = yaml.Unmarshal([]byte(content), &packyml)
+	err = yaml.Unmarshal(b, &packyml)
 	CheckErr(err)
 	return packyml
 }
@@ -150,14 +149,14 @@ func ResolvePacmanDeps(pkgs []string) {
 }
 
 func BuildPackage(i PackageInfo, y PackYml) {
-	CheckErr(os.Chdir(cacheDir + "/" + i.Name))
+	CheckErr(os.Chdir(config.RepoCacheDir + "/" + i.Name))
 	for _, script := range y.BuildScripts {
 		CheckErr(core.SystemCall(script))
 	}
 }
 
 func GeneratePkgbuild(i PackageInfo, y PackYml) {
-	CheckErr(os.Chdir(cacheDir + "/" + i.Name))
+	CheckErr(os.Chdir(config.RepoCacheDir + "/" + i.Name))
 	deps := "depends=(\n  \"" + strings.Join(y.RunDeps, "\"\n  \"") + "\"\n)\n"
 	if len(y.RunDeps) == 0 {
 		deps = ""
