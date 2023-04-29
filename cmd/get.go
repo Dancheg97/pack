@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"fmnx.io/dev/pack/core"
@@ -19,39 +20,27 @@ type PackageInfo struct {
 type PackYml struct {
 	RunDeps     []string          `yaml:"run-deps"`
 	BuildDeps   []string          `yaml:"build-deps"`
-	BuildScript []string          `yaml:"build-script"`
+	BuildScript []string          `yaml:"build-scripts"`
 	PackMap     map[string]string `yaml:"pack-map"`
 }
 
 const (
 	cacheDir = `~/.pack-cache`
-
-// 	pkgbuildTemplate = `pkgname=flutter-fmnx-package
-// pkgver="1"
-// pkgrel="1"
-// pkgdesc="Autoinstalled from repo: https://fmnx.ru/dancheg97/flutter-fmnx-package"
-// arch=("x86_64")
-// url="https://fmnx.ru/dancheg97/flutter-fmnx-package"
-// depends=(
-//   "vlc"
-// )
-
-// makedepends=(
-//   "flutter"
-//   "clang"
-//   "cmake"
-// )
-
-//	package() {
-//	  cd ..
-//	  %s
-//	  cd build/linux/x64/release/bundle && find . -type f -exec install -Dm755 {} "${pkgdir}/usr/share/flutter-fmnx-package/{}" \; && cd $srcdir && cd ..
-//	  install -Dm755 flutter-fmnx-package "${pkgdir}/usr/bin/flutter-fmnx-package"
-//	  install -Dm755 flutter_fmnx_package.desktop "${pkgdir}/usr/share/applications/flutter-fmnx-package.desktop"
-//	  install -Dm755 logo.png "${pkgdir}/usr/share/icons/hicolor/512x512/apps/flutter-fmnx-package.png"
-//	}
-//
-// `
+	pkgbuild = `pkgname="%s"
+pkgver="%s"
+pkgrel="1"
+arch=('i686' 'pentium4' 'x86_64' 'arm' 'armv7h' 'armv6h' 'aarch64' 'riscv64')
+url="%s"
+%s
+%s
+package() {
+  cd ..
+  %s
+}`
+	writeFileCmd = `tee -a ~/.ssh/config << END
+%s
+END
+`
 )
 
 func init() {
@@ -60,7 +49,7 @@ func init() {
 
 var getCmd = &cobra.Command{
 	Use:   "get",
-	Short: "📥 insatll new packages",
+	Short: "📥 install new packages",
 	Run:   Get,
 }
 
@@ -73,13 +62,12 @@ func Get(cmd *cobra.Command, pkgs []string) {
 	for _, pkg := range pkgs {
 		info := EjectInfo(pkg)
 		PrepareRepo(info)
-		SwitchToVersion(info)
 		packyml := ReadPackYml(info)
 		allDeps := append(packyml.RunDeps, packyml.BuildDeps...)
 		pacmanPkgs, packPkgs := SplitDependencies(allDeps)
 		ResolvePacmanDeps(pacmanPkgs)
 		Get(cmd, packPkgs)
-
+		GeneratePkgbuild(info, packyml)
 	}
 }
 
@@ -90,8 +78,7 @@ func EjectInfo(pkg string) PackageInfo {
 	owner := strings.Join(split[0:len(split)-1], "/")
 	version := ""
 	if len(strings.Split(pkg, "@")) == 1 {
-		branch, err := GetDefaultBranch(pkg)
-		CheckErr(err)
+		branch := GetDefaultBranch(pkg)
 		version = branch
 	} else {
 		version = strings.Split(pkg, "@")[1]
@@ -104,15 +91,17 @@ func EjectInfo(pkg string) PackageInfo {
 	}
 }
 
-func GetDefaultBranch(pkg string) (string, error) {
+func GetDefaultBranch(pkg string) string {
 	pkgLink := "https://" + strings.Split(pkg, "@")[0]
 	out, err := core.SystemCallOutf("git remote show %s | sed -n '/HEAD branch/s/.*: //p'", pkgLink)
 	CheckErr(err)
-	return strings.Trim(out, "\n"), nil
+	return strings.Trim(out, "\n")
 }
 
 func PrepareRepo(i PackageInfo) {
-	err := core.SystemCallf("git clone %s %s/%s", i.Link, cacheDir, i.Name)
+	CheckErr(os.Chdir(cacheDir))
+	err := core.SystemCallf("git clone %s", i.Link, cacheDir, i.Name)
+	CheckErr(os.Chdir(cacheDir + "/" + i.Name))
 	if err != nil {
 		if !strings.Contains(err.Error(), "exit status 128") {
 			CheckErr(err)
@@ -121,10 +110,7 @@ func PrepareRepo(i PackageInfo) {
 		err = core.SystemCallf("git -C %s/%s pull ", cacheDir, i.Name)
 		CheckErr(err)
 	}
-}
-
-func SwitchToVersion(i PackageInfo) {
-	err := core.SystemCallf("git -C %s/%s checkout %s", cacheDir, i.Name, i.Version)
+	err = core.SystemCallf("git checkout %s", cacheDir, i.Name, i.Version)
 	CheckErr(err)
 }
 
@@ -160,8 +146,38 @@ func ResolvePacmanDeps(pkgs []string) {
 	}
 }
 
-func GeneratePkgbuild(i PackageInfo) {
+func BuildPackage(i PackageInfo, y PackYml) {
+	CheckErr(os.Chdir(cacheDir + "/" + i.Name))
+	
+}
 
+func GeneratePkgbuild(i PackageInfo, y PackYml) {
+	deps := "depends=(\n  \"" + strings.Join(y.RunDeps, "\"\n  \"") + "\"\n)\n"
+	if len(y.RunDeps) == 0 {
+		deps = ""
+	}
+	makedeps := "makedepends=(\n  \"" + strings.Join(y.BuildDeps, "\"\n  \"") + "\"\n)\n"
+	if len(makedeps) == 0 {
+		makedeps = ""
+	}
+	var installScripts []string
+	for src, dst := range y.PackMap {
+		fullSrc := fmt.Sprintf("%s/%s/%s", cacheDir, i.Name, src)
+		installScripts = append(installScripts, FormatInstallSrc(fullSrc, dst))
+	}
+	install := strings.Join(installScripts, "\n  ")
+	pkgb := fmt.Sprintf(pkgbuild, i.Name, i.Version, i.Link, deps, makedeps, install)
+	err := core.SystemCallf(writeFileCmd, pkgb)
+	CheckErr(err)
+}
+
+func FormatInstallSrc(src string, dst string) string {
+	filetype, err := core.SystemCallOutf("stat -c %%F %s", src)
+	CheckErr(err)
+	if filetype == "directory" {
+		return fmt.Sprintf(`cd %s && find . -type f -exec install -Dm755 {} "${pkgdir}%s/{}" \; && cd $srcdir && cd ..`, src, dst)
+	}
+	return fmt.Sprintf(`install -Dm755 %s "${pkgdir}%s"`, src, dst)
 }
 
 // func InstallPackage() {

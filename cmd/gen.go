@@ -23,7 +23,7 @@ build-deps:
   - flutter
   - clang
   - cmake
-build-script:
+build-scripts:
   - flutter build linux
 pack-map:
   pkg: /usr/bin/pkg

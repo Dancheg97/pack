@@ -31,7 +31,7 @@ build-deps:
   - clang
   - cmake
 # Scripts, that would be executed in root directory to get build files.
-build-script:
+build-scripts:
   - flutter build linux
 # File mapping for resulting build files and directories from project root
 # to resulting file system.
@@ -48,7 +48,7 @@ Configuration [example](add_fl_tmp_link) for go cli tool:
 ```yml
 build-deps:
   - go
-build-script:
+build-scripts:
   - go build -o iambinary .
 pack-map:
   iambinary: /usr/bin/iambinary
