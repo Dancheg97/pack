@@ -9,9 +9,7 @@
 [![Generic badge](https://img.shields.io/badge/GITHUB-REPO-white.svg)](https://github.com/fmnx-io/pack)
 [![Build Status](https://ci.fmnx.io/api/badges/dev/repo/status.svg)](https://ci.fmnx.io/dev/pack)
 
-Git-based pacman-compatible package manager. Since `go` creators started reusing `git` in go package management system, the value of decentralized systems shined from another perspective.
-
-This package manager is trying to reuse the power of both `git` and `pacman` to become new way of arch package distribution.
+Git-based pacman-compatible package manager. Accumulates power of both `git` and `pacman` to provide new way of arch package distribution.
 
 ---
 
@@ -24,19 +22,20 @@ This package manager is trying to reuse the power of both `git` and `pacman` to 
 Configuration [example](add_fl_tmp_link) for flutter project:
 
 ```yml
-# Dependencies, that are required for project at runtime
+# Dependencies, that are required for project at runtime.
 run-deps:
   - vlc
-# Build dependencies
+# Dependencies, that are required to build project.
 build-deps:
   - flutter
   - clang
   - cmake
-# Scripts, that would be executed in root directory of a project
+# Scripts, that would be executed in root directory to get build files.
 build-script:
   - flutter build linux
-# File mapping from build results in folder to destination file system
-# Each file/folder will be installed as it mapped in this file
+# File mapping for resulting build files and directories from project root
+# to resulting file system.
+# Each file or folder will be installed as it is mapped in this file.
 pack-map:
   assets/logo.png: /usr/share/icons/hicolor/512x512/apps/flutter-fmnx-package.png
   flutter-fmnx-package.sh: /usr/bin/flutter-fmnx-package
