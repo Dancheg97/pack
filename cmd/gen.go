@@ -1,6 +1,10 @@
 package cmd
 
 import (
+	"fmt"
+	"os"
+	"strings"
+
 	"fmnx.io/dev/pack/core"
 	"github.com/spf13/cobra"
 )
@@ -15,7 +19,8 @@ var genCmd = &cobra.Command{
 	Run:   Gen,
 }
 
-var packYmlTemplate = `# Dependencies, that are required for project at runtime.
+const (
+	packYmlTemplate = `# Dependencies, that are required for project at runtime.
 run-deps:
   - vlc
   - wget
@@ -37,7 +42,43 @@ pack-map:
   logo.png: /usr/share/icons/hicolor/512x512/apps/pkg.png
   build/linux/x64/release/bundle: /usr/share/pkg
 `
+	gitignoreTemplate = `
+pkg/**
+src/**
+**.pkg.tar.zst
+PKGBUILD
+`
+	readmeTemplate = `
+
+---
+
+📦 Install package with pack:
+
+%s
+pack get %s
+%s
+`
+)
 
 func Gen(cmd *cobra.Command, args []string) {
 	core.WriteFile("pack.yml", packYmlTemplate)
+	core.AppendToFile(".gitignore", gitignoreTemplate)
+	insatllMd := fmt.Sprintf(readmeTemplate, "```", readmeTemplate, "```")
+	core.AppendToFile("README.md", insatllMd)
+}
+
+func GetInstallLink() string {
+	gitconf, err := os.ReadFile(`.git/config`)
+	CheckErr(err)
+	for _, line := range strings.Split(string(gitconf), "\n") {
+		if strings.Contains(line, "url = ") {
+			line = strings.Split(line, "url = ")[1]
+			line = strings.ReplaceAll(line, "https://", "")
+			line = strings.ReplaceAll(line, "git@", "")
+			return strings.ReplaceAll(line, ".git", "")
+		}
+	}
+	fmt.Println("unable to find ref in git config")
+	os.Exit(1)
+	return ""
 }

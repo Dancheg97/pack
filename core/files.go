@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	"os"
 	"strings"
 )
@@ -25,6 +26,30 @@ func PrepareDir(filePath string) error {
 		if err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+func AppendToFile(path string, contents string) error {
+	i, err := os.Stat(path)
+	if err != nil {
+		err = os.WriteFile(path, []byte(""), 0644)
+		if err != nil {
+			return err
+		}
+	}
+	if i.IsDir() {
+		return fmt.Errorf("file %s is dir, should be file", path)
+	}
+	f, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return err
+	}
+	if _, err := f.Write([]byte(contents)); err != nil {
+		return err
+	}
+	if err := f.Close(); err != nil {
+		return err
 	}
 	return nil
 }
