@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"os/user"
 	"strings"
 
 	"fmnx.io/dev/pack/core"
@@ -24,7 +25,9 @@ type PackYml struct {
 	PackMap      map[string]string `yaml:"pack-map"`
 }
 
-const (
+var (
+	usr, _   = user.Current()
+	dir      = usr.HomeDir
 	cacheDir = `~/.pack-cache`
 	pkgbuild = `pkgname="%s"
 pkgver="%s"

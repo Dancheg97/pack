@@ -15,16 +15,22 @@ var genCmd = &cobra.Command{
 	Run:   Gen,
 }
 
-var packYmlTemplate = `run-deps:
+var packYmlTemplate = `# Dependencies, that are required for project at runtime.
+run-deps:
   - vlc
   - wget
   - git
+# Dependencies, that are required to build project.
 build-deps:
   - flutter
   - clang
   - cmake
+  # Scripts, that would be executed in root directory to get build files.
 build-scripts:
   - flutter build linux
+# File mapping for resulting build files and directories from project root
+# to resulting file system.
+# Each file or folder will be installed as it is mapped in this file.
 pack-map:
   pkg: /usr/bin/pkg
   pkg.desktop: /usr/share/applications/pkg.desktop
