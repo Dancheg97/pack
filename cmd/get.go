@@ -65,6 +65,10 @@ func Get(cmd *cobra.Command, pkgs []string) {
 	}
 	for _, pkg := range pkgs {
 		info := EjectInfo(pkg)
+		if info.IsPacman {
+			core.SystemCall("pacman --noconfirm -Sy " + pkg)
+			continue
+		}
 		if CheckIfInstalled(info) {
 			continue
 		}
@@ -79,6 +83,7 @@ func Get(cmd *cobra.Command, pkgs []string) {
 		InstallPackage()
 		AddToMapping(info)
 	}
+	lf.Unlock()
 }
 
 func EjectInfo(pkg string) PackageInfo {
