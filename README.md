@@ -108,8 +108,6 @@ pack list
 - `gen` - generate `pack.yml` template
 
 <!--
-- separate uninstalled build deps
-- makepkg -sfri
 - add to mapping file
 - optional del deps
 - optional del repo
