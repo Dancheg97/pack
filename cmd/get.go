@@ -66,7 +66,7 @@ func Get(cmd *cobra.Command, pkgs []string) {
 	for _, pkg := range pkgs {
 		info := EjectInfo(pkg)
 		if info.IsPacman {
-			core.SystemCall("pacman --noconfirm -Sy " + pkg)
+			core.SystemCall("sudo pacman --noconfirm -Sy " + pkg)
 			continue
 		}
 		if CheckIfInstalled(info) {
