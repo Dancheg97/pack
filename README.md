@@ -60,11 +60,16 @@ mapping:
 
 You can install `pack` on any arch-based distribution using go.
 
-- With go
+- With `git`&`makepkg`:
 
 ```sh
-sudo pacman -S go
-go install fmnx.io/dev/pack@latest
+git clone https://fmnx.io/dev/pack && cd pack && makepkg --noconfirm -sfri
+```
+
+- With go:
+
+```sh
+sudo pacman -S go && go install fmnx.io/dev/pack@latest
 ```
 
 ---
