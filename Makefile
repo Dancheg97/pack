@@ -1,6 +1,6 @@
 
 self:
-	sudo rm -r ~/.pack
+	sudo rm -rf ~/.pack
 	sudo rm -f pack
-	sudo rm /tmp/pack.lock
+	sudo rm -f /tmp/pack.lock
 	go run . get fmnx.io/dev/pack  
