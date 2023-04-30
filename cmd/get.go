@@ -87,7 +87,7 @@ func Get(cmd *cobra.Command, pkgs []string) {
 }
 
 func EjectInfo(pkg string) PackageInfo {
-	if strings.Contains(pkg, ".") {
+	if !strings.Contains(pkg, ".") {
 		return PackageInfo{
 			Name:     pkg,
 			IsPacman: true,
