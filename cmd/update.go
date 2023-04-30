@@ -10,10 +10,13 @@ func init() {
 
 var updateCmd = &cobra.Command{
 	Use:   "update",
-	Short: "",
+	Short: "🔁 update packages",
 	Run:   Update,
 }
 
-func Update(cmd *cobra.Command, args []string) {
-	
+func Update(cmd *cobra.Command, pkgs []string) {
+	// mp := ReadMapping()
+	// if len(pkgs) == 0 {
+
+	// }
 }

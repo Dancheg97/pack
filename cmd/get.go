@@ -11,11 +11,12 @@ import (
 )
 
 type PackageInfo struct {
-	Name     string
-	Link     string
-	Version  string
-	Owner    string
-	IsPacman bool
+	FullName  string
+	ShortName string
+	HttpsLink string
+	Version   string
+	Owner     string
+	IsPacman  bool
 }
 
 type PackYml struct {
@@ -89,13 +90,14 @@ func Get(cmd *cobra.Command, pkgs []string) {
 func EjectInfo(pkg string) PackageInfo {
 	if !strings.Contains(pkg, ".") {
 		return PackageInfo{
-			Name:     pkg,
-			IsPacman: true,
+			ShortName: pkg,
+			IsPacman:  true,
 		}
 	}
-	link := "https://" + strings.Split(pkg, "@")[0]
-	split := strings.Split(link, "/")
-	name := split[len(split)-1]
+	fullName := strings.Split(pkg, "@")[0]
+	httpslink := "https://" + fullName
+	split := strings.Split(httpslink, "/")
+	shortname := split[len(split)-1]
 	owner := strings.Join(split[0:len(split)-1], "/")
 	version := ""
 	if len(strings.Split(pkg, "@")) == 1 {
@@ -105,11 +107,12 @@ func EjectInfo(pkg string) PackageInfo {
 		version = strings.Split(pkg, "@")[1]
 	}
 	return PackageInfo{
-		Name:     name,
-		Link:     link,
-		Version:  version,
-		Owner:    owner,
-		IsPacman: false,
+		FullName:  fullName,
+		ShortName: shortname,
+		HttpsLink: httpslink,
+		Version:   version,
+		Owner:     owner,
+		IsPacman:  false,
 	}
 }
 
@@ -122,10 +125,10 @@ func GetDefaultBranch(pkg string) string {
 
 func CheckIfInstalled(i PackageInfo) bool {
 	mp := ReadMapping()
-	if _, packageExists := mp[i.Link]; packageExists {
+	if _, packageExists := mp[i.HttpsLink]; packageExists {
 		return true
 	}
-	_, err := core.SystemCallOut("pacman -Q " + i.Name)
+	_, err := core.SystemCallOut("pacman -Q " + i.ShortName)
 	return err == nil
 }
 
@@ -145,8 +148,8 @@ func ReadMapping() PackMap {
 
 func PrepareRepo(i PackageInfo) {
 	CheckErr(os.Chdir(cfg.RepoCacheDir))
-	err := core.SystemCallf("git clone %s", i.Link)
-	CheckErr(os.Chdir(i.Name))
+	err := core.SystemCallf("git clone %s", i.HttpsLink)
+	CheckErr(os.Chdir(i.ShortName))
 	if err != nil {
 		if !strings.Contains(err.Error(), "exit status 128") {
 			CheckErr(err)
@@ -191,14 +194,14 @@ func ResolvePacmanDeps(pkgs []string) {
 }
 
 func BuildPackage(i PackageInfo, y PackYml) {
-	CheckErr(os.Chdir(cfg.RepoCacheDir + "/" + i.Name))
+	CheckErr(os.Chdir(cfg.RepoCacheDir + "/" + i.ShortName))
 	for _, script := range y.BuildScripts {
 		CheckErr(core.SystemCall(script))
 	}
 }
 
 func GeneratePkgbuild(i PackageInfo, y PackYml) {
-	CheckErr(os.Chdir(cfg.RepoCacheDir + "/" + i.Name))
+	CheckErr(os.Chdir(cfg.RepoCacheDir + "/" + i.ShortName))
 	deps := fmt.Sprintf(depsTmpl, strings.Join(y.RunDeps, "\"\n  \""))
 	if len(y.RunDeps) == 0 {
 		deps = ""
@@ -212,7 +215,7 @@ func GeneratePkgbuild(i PackageInfo, y PackYml) {
 		installScripts = append(installScripts, FormatInstallSrc(src, dst))
 	}
 	install := strings.Join(installScripts, "\n  ")
-	pkgb := fmt.Sprintf(pkgbuildTmpl, i.Name, i.Version, i.Link, deps, makedeps, install)
+	pkgb := fmt.Sprintf(pkgbuildTmpl, i.ShortName, i.Version, i.HttpsLink, deps, makedeps, install)
 	CheckErr(core.WriteFile("PKGBUILD", pkgb))
 }
 
@@ -231,6 +234,6 @@ func InstallPackage() {
 }
 
 func AddToMapping(i PackageInfo) {
-	err := core.AppendToFile(cfg.MapFile, fmt.Sprintf("%s: %s", i.Link, i.Name))
+	err := core.AppendToFile(cfg.MapFile, fmt.Sprintf("%s: %s", i.HttpsLink, i.ShortName))
 	CheckErr(err)
 }
