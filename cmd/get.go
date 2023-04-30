@@ -121,21 +121,26 @@ func GetDefaultBranch(pkg string) string {
 }
 
 func CheckIfInstalled(i PackageInfo) bool {
+	mp := ReadMapping()
+	if _, packageExists := mp[i.Link]; packageExists {
+		return true
+	}
+	_, err := core.SystemCallOut("pacman -Q " + i.Name)
+	return err == nil
+}
+
+func ReadMapping() PackMap {
 	_, err := os.Stat(cfg.MapFile)
 	if err != nil {
 		core.AppendToFile(cfg.MapFile, "")
-		return false
+		return PackMap{}
 	}
 	b, err := os.ReadFile(cfg.MapFile)
 	CheckErr(err)
 	var mapping PackMap
 	err = yaml.Unmarshal(b, &mapping)
 	CheckErr(err)
-	if _, packageExists := mapping[i.Link]; packageExists {
-		return true
-	}
-	_, err = core.SystemCallOut("pacman -Q " + i.Name)
-	return err == nil
+	return mapping
 }
 
 func PrepareRepo(i PackageInfo) {
