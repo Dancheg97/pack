@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strings"
 
@@ -78,7 +79,7 @@ func GetInstallLink() string {
 			return strings.ReplaceAll(line, ".git", "")
 		}
 	}
-	fmt.Println("unable to find ref in git config")
+	log.Println("unable to find ref in git config")
 	lf.Unlock()
 	os.Exit(1)
 	return ""

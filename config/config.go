@@ -49,6 +49,8 @@ func GetConfig() (*Config, error) {
 			RemoveBuiltPackages: false,
 			RepoCacheDir:        usr.HomeDir + "/.pack",
 			PackageCacheDir:     "/var/cache/pacman/pkg",
+			MapFile:             usr.HomeDir + "/.pack/packmap.yml",
+			LockFile:            "/tmp/pack.lock",
 		}, nil
 	}
 	b, err := os.ReadFile(usr.HomeDir + "/.pack/pack.yml")
