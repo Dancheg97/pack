@@ -64,7 +64,9 @@ func Get(cmd *cobra.Command, pkgs []string) {
 	}
 	for _, pkg := range pkgs {
 		info := EjectInfo(pkg)
-		// check if installed
+		if CheckIfInstalled(info) {
+			continue
+		}
 		PrepareRepo(info)
 		packyml := ReadPackYml(info)
 		allDeps := append(packyml.RunDeps, packyml.BuildDeps...)
@@ -105,8 +107,22 @@ func GetDefaultBranch(pkg string) string {
 	return strings.Trim(out, "\n")
 }
 
-func CheckIfInstalled() {
-
+func CheckIfInstalled(i PackageInfo) bool {
+	_, err := os.Stat(cfg.MapFile)
+	if err != nil {
+		core.AppendToFile(cfg.MapFile, "")
+		return false
+	}
+	b, err := os.ReadFile(cfg.MapFile)
+	CheckErr(err)
+	var mapping PackMap
+	err = yaml.Unmarshal(b, &mapping)
+	CheckErr(err)
+	if _, packageExists := mapping[i.Link]; packageExists {
+		return true
+	}
+	_, err = core.SystemCallOut("pacman -Q " + i.Name)
+	return err == nil
 }
 
 func PrepareRepo(i PackageInfo) {
