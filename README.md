@@ -108,5 +108,5 @@ pack list
 - `gen` - generate `pack.yml` template
 
 <!--
-add ability to mix with pacman packages
+make better logging and output system
 -->

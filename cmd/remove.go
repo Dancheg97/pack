@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"fmnx.io/dev/pack/core"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v2"
 )
 
 func init() {
@@ -10,10 +12,20 @@ func init() {
 
 var removeCmd = &cobra.Command{
 	Use:   "remove",
-	Short: "",
+	Short: "🚫 remove package from system",
 	Run:   Remove,
 }
 
-func Remove(cmd *cobra.Command, args []string) {
+func Remove(cmd *cobra.Command, pkgs []string) {
+	mp := ReadMapping()
+	for _, pkg := range pkgs {
+		core.SystemCall("sudo pacman -R " + mp[pkg])
+		delete(mp, pkg)
+	}
+}
 
+func WriteMapping(m PackMap) {
+	yamlData, err := yaml.Marshal(&m)
+	CheckErr(err)
+	core.WriteFile(cfg.MapFile, string(yamlData))
 }
