@@ -101,7 +101,7 @@ func EjectInfo(pkg string) PackageInfo {
 	owner := strings.Join(split[0:len(split)-1], "/")
 	version := ""
 	if len(strings.Split(pkg, "@")) == 1 {
-		branch := GetDefaultBranch(pkg)
+		branch := GetDefaultBranch(httpslink)
 		version = branch
 	} else {
 		version = strings.Split(pkg, "@")[1]
@@ -116,16 +116,15 @@ func EjectInfo(pkg string) PackageInfo {
 	}
 }
 
-func GetDefaultBranch(pkg string) string {
-	pkgLink := "https://" + strings.Split(pkg, "@")[0]
-	out, err := core.SystemCallOutf("git remote show %s | sed -n '/HEAD branch/s/.*: //p'", pkgLink)
+func GetDefaultBranch(link string) string {
+	out, err := core.SystemCallOutf("git remote show %s | sed -n '/HEAD branch/s/.*: //p'", link)
 	CheckErr(err)
 	return strings.Trim(out, "\n")
 }
 
 func CheckIfInstalled(i PackageInfo) bool {
 	mp := ReadMapping()
-	if _, packageExists := mp[i.HttpsLink]; packageExists {
+	if _, packageExists := mp[i.FullName]; packageExists {
 		return true
 	}
 	_, err := core.SystemCallOut("pacman -Q " + i.ShortName)
@@ -234,6 +233,6 @@ func InstallPackage() {
 }
 
 func AddToMapping(i PackageInfo) {
-	err := core.AppendToFile(cfg.MapFile, fmt.Sprintf("%s: %s", i.HttpsLink, i.ShortName))
+	err := core.AppendToFile(cfg.MapFile, fmt.Sprintf("%s: %s", i.FullName, i.ShortName))
 	CheckErr(err)
 }
