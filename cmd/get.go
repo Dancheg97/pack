@@ -11,10 +11,11 @@ import (
 )
 
 type PackageInfo struct {
-	Name    string
-	Link    string
-	Version string
-	Owner   string
+	Name     string
+	Link     string
+	Version  string
+	Owner    string
+	IsPacman bool
 }
 
 type PackYml struct {
@@ -81,6 +82,12 @@ func Get(cmd *cobra.Command, pkgs []string) {
 }
 
 func EjectInfo(pkg string) PackageInfo {
+	if strings.Contains(pkg, ".") {
+		return PackageInfo{
+			Name:     pkg,
+			IsPacman: true,
+		}
+	}
 	link := "https://" + strings.Split(pkg, "@")[0]
 	split := strings.Split(link, "/")
 	name := split[len(split)-1]
@@ -93,10 +100,11 @@ func EjectInfo(pkg string) PackageInfo {
 		version = strings.Split(pkg, "@")[1]
 	}
 	return PackageInfo{
-		Name:    name,
-		Link:    link,
-		Version: version,
-		Owner:   owner,
+		Name:     name,
+		Link:     link,
+		Version:  version,
+		Owner:    owner,
+		IsPacman: false,
 	}
 }
 
