@@ -55,9 +55,9 @@ var getCmd = &cobra.Command{
 
 func Get(cmd *cobra.Command, pkgs []string) {
 	if len(pkgs) != 0 {
-		err := core.PrepareDir(config.RepoCacheDir)
+		err := core.PrepareDir(cfg.RepoCacheDir)
 		CheckErr(err)
-		err = core.PrepareDir(config.PackageCacheDir)
+		err = core.PrepareDir(cfg.PackageCacheDir)
 		CheckErr(err)
 	}
 	for _, pkg := range pkgs {
@@ -105,7 +105,7 @@ func GetDefaultBranch(pkg string) string {
 }
 
 func PrepareRepo(i PackageInfo) {
-	CheckErr(os.Chdir(config.RepoCacheDir))
+	CheckErr(os.Chdir(cfg.RepoCacheDir))
 	err := core.SystemCallf("git clone %s", i.Link)
 	CheckErr(os.Chdir(i.Name))
 	if err != nil {
@@ -152,14 +152,14 @@ func ResolvePacmanDeps(pkgs []string) {
 }
 
 func BuildPackage(i PackageInfo, y PackYml) {
-	CheckErr(os.Chdir(config.RepoCacheDir + "/" + i.Name))
+	CheckErr(os.Chdir(cfg.RepoCacheDir + "/" + i.Name))
 	for _, script := range y.BuildScripts {
 		CheckErr(core.SystemCall(script))
 	}
 }
 
 func GeneratePkgbuild(i PackageInfo, y PackYml) {
-	CheckErr(os.Chdir(config.RepoCacheDir + "/" + i.Name))
+	CheckErr(os.Chdir(cfg.RepoCacheDir + "/" + i.Name))
 	deps := fmt.Sprintf(depsTmpl, strings.Join(y.RunDeps, "\"\n  \""))
 	if len(y.RunDeps) == 0 {
 		deps = ""

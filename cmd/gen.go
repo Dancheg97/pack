@@ -79,6 +79,7 @@ func GetInstallLink() string {
 		}
 	}
 	fmt.Println("unable to find ref in git config")
+	lf.Unlock()
 	os.Exit(1)
 	return ""
 }

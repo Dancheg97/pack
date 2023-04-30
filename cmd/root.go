@@ -38,6 +38,7 @@ func Execute() {
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
+		lf.Unlock()
 		os.Exit(1)
 	}
 }
