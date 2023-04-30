@@ -31,12 +31,12 @@ build-deps:
   - clang
   - cmake
   # Scripts, that would be executed in root directory to get build files.
-build-scripts:
+scripts:
   - flutter build linux
 # File mapping for resulting build files and directories from project root
 # to resulting file system.
 # Each file or folder will be installed as it is mapped in this file.
-pack-map:
+mapping:
   pkg: /usr/bin/pkg
   pkg.desktop: /usr/share/applications/pkg.desktop
   logo.png: /usr/share/icons/hicolor/512x512/apps/pkg.png

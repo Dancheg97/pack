@@ -20,9 +20,11 @@ type PackageInfo struct {
 type PackYml struct {
 	RunDeps      []string          `yaml:"run-deps"`
 	BuildDeps    []string          `yaml:"build-deps"`
-	BuildScripts []string          `yaml:"build-scripts"`
-	PackMap      map[string]string `yaml:"pack-map"`
+	BuildScripts []string          `yaml:"scripts"`
+	PackMap      map[string]string `yaml:"mapping"`
 }
+
+type PackMap map[string]string
 
 var (
 	depsTmpl     = "depends=(\n  \"%s\"\n)"
@@ -61,7 +63,6 @@ func Get(cmd *cobra.Command, pkgs []string) {
 		CheckErr(err)
 	}
 	for _, pkg := range pkgs {
-		// check if unlocked
 		info := EjectInfo(pkg)
 		// check if installed
 		PrepareRepo(info)
@@ -73,7 +74,7 @@ func Get(cmd *cobra.Command, pkgs []string) {
 		BuildPackage(info, packyml)
 		GeneratePkgbuild(info, packyml)
 		InstallPackage()
-		// add mapping file
+		AddToMapping(info)
 	}
 }
 
@@ -102,6 +103,10 @@ func GetDefaultBranch(pkg string) string {
 	out, err := core.SystemCallOutf("git remote show %s | sed -n '/HEAD branch/s/.*: //p'", pkgLink)
 	CheckErr(err)
 	return strings.Trim(out, "\n")
+}
+
+func CheckIfInstalled() {
+
 }
 
 func PrepareRepo(i PackageInfo) {
@@ -188,5 +193,10 @@ func FormatInstallSrc(src string, dst string) string {
 
 func InstallPackage() {
 	err := core.SystemCall("makepkg --noconfirm -sfri")
+	CheckErr(err)
+}
+
+func AddToMapping(i PackageInfo) {
+	err := core.AppendToFile(cfg.MapFile, fmt.Sprintf("%s: %s", i.Link, i.Name))
 	CheckErr(err)
 }

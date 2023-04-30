@@ -31,12 +31,12 @@ build-deps:
   - clang
   - cmake
 # Scripts, that would be executed in root directory to get build files.
-build-scripts:
+scripts:
   - flutter build linux
 # File mapping for resulting build files and directories from project root
 # to resulting file system.
 # Each file or folder will be installed as it is mapped in this file.
-pack-map:
+mapping:
   assets/logo.png: /usr/share/icons/hicolor/512x512/apps/flutter-fmnx-package.png
   flutter-fmnx-package.sh: /usr/bin/flutter-fmnx-package
   flutter_fmnx_package.desktop: /usr/share/applications/flutter-fmnx-package.desktop
@@ -48,9 +48,9 @@ Configuration [example](add_fl_tmp_link) for go cli tool:
 ```yml
 build-deps:
   - go
-build-scripts:
+scripts:
   - go build -o iambinary .
-pack-map:
+mapping:
   iambinary: /usr/bin/iambinary
 ```
 
@@ -106,11 +106,3 @@ pack list
 ```
 
 - `gen` - generate `pack.yml` template
-
-<!--
-- add to mapping file
-- optional del deps
-- optional del repo
-- optional del pkg.tar.zst
-- optional move pkg.tar.zst
--->
