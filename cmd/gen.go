@@ -16,7 +16,7 @@ func init() {
 
 var genCmd = &cobra.Command{
 	Use:   "gen",
-	Short: "📋 generate pack.yml template",
+	Short: "📋 generate .pack.yml, update gitignore and readme",
 	Run:   Gen,
 }
 
@@ -62,13 +62,13 @@ pack get %s
 )
 
 func Gen(cmd *cobra.Command, args []string) {
-	core.WriteFile("pack.yml", packYmlTemplate)
+	core.WriteFile(".pack.yml", packYmlTemplate)
 	core.AppendToFile(".gitignore", gitignoreTemplate)
 	insatllMd := fmt.Sprintf(readmeTemplate, "```", GetInstallLink(), "```")
 	core.AppendToFile("README.md", insatllMd)
 	fmt.Printf(
 		"Generated file: %s \nUpdated files: %s, %s\n",
-		color.RedString("pack.yml"),
+		color.RedString(".pack.yml"),
 		color.CyanString("README.md"),
 		color.HiYellowString(".gitignore"),
 	)

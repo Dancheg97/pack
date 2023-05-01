@@ -11,13 +11,19 @@
 
 Git-based pacman-compatible package manager. Accumulates power of both `git` and `pacman` to provide new way of arch package distribution.
 
+💾 Single line installation script:
+
+```sh
+git clone https://fmnx.io/dev/pack && cd pack && makepkg --noconfirm -sfri
+```
+
 ---
 
 ### 🚀 Features:
 
 - Install and update packages using git links
 - Compatability with all arch based distros
-- Simple to write configuration - `pack.yml`
+- Simple to write configuration - `.pack.yml`
 
 Configuration [example](add_fl_tmp_link) for flutter project:
 
@@ -52,24 +58,6 @@ scripts:
   - go build -o example .
 mapping:
   example: /usr/bin/example
-```
-
----
-
-### 💾 Installationion
-
-You can install `pack` on any arch-based distribution using go.
-
-- With `git`&`makepkg`:
-
-```sh
-git clone https://fmnx.io/dev/pack && cd pack && makepkg --noconfirm -sfri
-```
-
-- With go:
-
-```sh
-sudo pacman -S go && go install fmnx.io/dev/pack@latest
 ```
 
 ---
@@ -110,8 +98,4 @@ pack remove link.sh/owner/pkg
 pack list
 ```
 
-- `gen` - generate `pack.yml` template
-
-<!--
-make better logging and output system
--->
+- `gen` - generate `.pack.yml` and update `.gitignore` and `README.md`

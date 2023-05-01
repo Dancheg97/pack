@@ -171,7 +171,7 @@ func PrepareRepo(i PackageInfo) {
 }
 
 func ReadPackYml(i PackageInfo) PackYml {
-	b, err := os.ReadFile("pack.yml")
+	b, err := os.ReadFile(".pack.yml")
 	CheckErr(err)
 	var packyml PackYml
 	err = yaml.Unmarshal(b, &packyml)

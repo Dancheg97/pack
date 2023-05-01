@@ -18,7 +18,7 @@ repo-cache-dir: %s/.pack
 # Where pack will store built .pkg.tar.zst files
 package-cache-dir: /var/cache/pacman/pkg
 # Location of mapping file (pack packages and related pacman packages)
-map-file: %s/.pack/packmap.yml
+map-file: %s/.pack/mapping.yml
 # Location of lock file
 lock-file: /tmp/pack.lock
 `
@@ -37,10 +37,10 @@ func GetConfig() (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	cfg, err := os.Stat(usr.HomeDir + "/.pack/pack.yml")
+	cfg, err := os.Stat(usr.HomeDir + "/.pack/config.yml")
 	if err != nil || cfg.IsDir() {
 		contents := fmt.Sprintf(DefaultConfig, usr.HomeDir, usr.HomeDir)
-		err = core.WriteFile(usr.HomeDir+"/.pack/pack.yml", contents)
+		err = core.WriteFile(usr.HomeDir+"/.pack/config.yml", contents)
 		if err != nil {
 			return nil, err
 		}
@@ -49,11 +49,11 @@ func GetConfig() (*Config, error) {
 			RemoveBuiltPackages: false,
 			RepoCacheDir:        usr.HomeDir + "/.pack",
 			PackageCacheDir:     "/var/cache/pacman/pkg",
-			MapFile:             usr.HomeDir + "/.pack/packmap.yml",
+			MapFile:             usr.HomeDir + "/.pack/mapping.yml",
 			LockFile:            "/tmp/pack.lock",
 		}, nil
 	}
-	b, err := os.ReadFile(usr.HomeDir + "/.pack/pack.yml")
+	b, err := os.ReadFile(usr.HomeDir + "/.pack/config.yml")
 	if err != nil {
 		return nil, err
 	}
