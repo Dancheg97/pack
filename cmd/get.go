@@ -66,18 +66,18 @@ func Get(cmd *cobra.Command, pkgs []string) {
 	}
 	for _, pkg := range pkgs {
 		info := EjectInfo(pkg)
+		if CheckIfInstalled(info) {
+			YellowPrint("Package installed, skipping: ", info.FullName)
+			continue
+		}
 		if info.IsPacman {
-			BluePrint("Updating package with pacman: ", info.FullName)
+			BluePrint("Installing package with pacman: ", info.FullName)
 			out, err := core.SystemCall("sudo pacman --noconfirm -Sy " + pkg)
 			if err != nil {
 				fmt.Println("Pacman output: ", out)
 			}
 			CheckErr(err)
-			GreenPrint("Update success: ", info.FullName+" - OK")
-			continue
-		}
-		if CheckIfInstalled(info) {
-			YellowPrint("Package installed, skipping: ", info.FullName)
+			GreenPrint("Installed: ", info.FullName+" - OK")
 			continue
 		}
 		PrepareRepo(info)
