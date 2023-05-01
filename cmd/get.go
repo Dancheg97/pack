@@ -111,8 +111,11 @@ func EjectInfo(pkg string) PackageInfo {
 	owner := strings.Join(split[0:len(split)-1], "/")
 	version := ""
 	if len(strings.Split(pkg, "@")) == 1 {
-		branch := GetDefaultBranch(httpslink)
-		version = branch
+		version = GetDefaultBranch(httpslink)
+		if strings.Contains(version, "redirecting to") {
+			RedPrint("adress mismatch (redirected): ", httpslink)
+			os.Exit(1)
+		}
 	} else {
 		version = strings.Split(pkg, "@")[1]
 	}
