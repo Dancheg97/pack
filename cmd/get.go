@@ -90,6 +90,7 @@ func Get(cmd *cobra.Command, pkgs []string) {
 		GeneratePkgbuild(info, packyml)
 		InstallPackage()
 		AddToMapping(info)
+		GreenPrint("Package installed: ", info.FullName)
 	}
 	lf.Unlock()
 }
@@ -157,17 +158,15 @@ func PrepareRepo(i PackageInfo) {
 	CheckErr(os.Chdir(cfg.RepoCacheDir))
 	BluePrint("Cloning repository: ", i.HttpsLink)
 	out, err := core.SystemCallf("git clone %s", i.HttpsLink)
-	if err != nil {
-		fmt.Println("Git clone output: ", out)
-	}
 	CheckErr(os.Chdir(i.ShortName))
-	if err != nil {
-		if !strings.Contains(err.Error(), "exit status 128") {
-			CheckErr(err)
-		}
-		BluePrint("Pulling changes: ", i.ShortName)
+	if strings.Contains(out, "already exists and is not an empty directory") {
+		YellowPrint("Repository exists: ", "pulling changes...")
 		ExecuteCheck("git pull")
+		GreenPrint("Changes pulled: ", "success")
+		err = nil
 	}
+	CheckErr(err)
+	BluePrint("Switching repo to version: ", i.Version)
 	ExecuteCheck("git checkout " + i.Version)
 }
 
@@ -206,6 +205,7 @@ func ResolvePacmanDeps(pkgs []string) {
 func BuildPackage(i PackageInfo, y PackYml) {
 	CheckErr(os.Chdir(cfg.RepoCacheDir + "/" + i.ShortName))
 	for _, script := range y.BuildScripts {
+		BluePrint("Executing build script: ", script)
 		ExecuteCheck(script)
 	}
 }
@@ -239,6 +239,7 @@ func FormatInstallSrc(src string, dst string) string {
 }
 
 func InstallPackage() {
+	BluePrint("Building and installing package: ", "makepkg")
 	ExecuteCheck("makepkg --noconfirm -sfri")
 }
 
