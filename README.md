@@ -81,11 +81,11 @@ You can find all commands and description by running `pack -h`.
 - `get` - get and install package from repo
 
 ```sh
-pack get link.io/owner/pkg
+pack get link.sh/owner/pkg
 ```
 
 ```sh
-pack get link.io/owner/pkg1@v0.12 link.io/owner/pkg2@latest
+pack get link.sh/owner/pkg1@v0.12 link.sh/owner/pkg2@latest
 ```
 
 - `update` - if no arguements provided, all packages would be updated, starting from pacman packages
@@ -95,13 +95,13 @@ pack update
 ```
 
 ```sh
-pack update link.io/owner/pkg1 link.io/owner/pkg2
+pack update link.sh/owner/pkg1 link.sh/owner/pkg2
 ```
 
 - `remove` - remove package from system
 
 ```sh
-pack remove link.io/owner/pkg
+pack remove link.sh/owner/pkg
 ```
 
 - `list` - list all packages installed with `pack`

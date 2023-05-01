@@ -3,6 +3,7 @@ module fmnx.io/dev/pack
 go 1.20
 
 require (
+	github.com/fatih/color v1.13.0
 	github.com/jedib0t/go-pretty v4.3.0+incompatible
 	github.com/nightlyone/lockfile v1.0.0
 	github.com/spf13/cobra v1.7.0
@@ -18,6 +19,8 @@ require (
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
+	github.com/mattn/go-colorable v0.1.12 // indirect
+	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mattn/go-runewidth v0.0.14 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect

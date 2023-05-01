@@ -15,8 +15,10 @@ var updateCmd = &cobra.Command{
 }
 
 func Update(cmd *cobra.Command, pkgs []string) {
-	// mp := ReadMapping()
-	// if len(pkgs) == 0 {
-
-	// }
+	if len(pkgs) == 0 {
+		for pkg := range ReadMapping() {
+			pkgs = append(pkgs, pkg)
+		}
+	}
+	Get(cmd, pkgs)
 }

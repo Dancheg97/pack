@@ -12,7 +12,7 @@ func init() {
 
 var removeCmd = &cobra.Command{
 	Use:   "remove",
-	Short: "🚫 remove package from system",
+	Short: "🚫 remove packages from system",
 	Run:   Remove,
 }
 
