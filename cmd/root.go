@@ -2,10 +2,11 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	"fmnx.io/dev/pack/config"
+	"fmnx.io/dev/pack/core"
+	"github.com/fatih/color"
 	"github.com/nightlyone/lockfile"
 	"github.com/spf13/cobra"
 )
@@ -45,8 +46,35 @@ func Execute() {
 
 func CheckErr(err error) {
 	if err != nil {
-		log.Printf("%+v", err)
+		RedPrint("Error occured: ", fmt.Sprintf("%+v", err))
 		lf.Unlock()
 		os.Exit(1)
 	}
+}
+
+func ExecuteCheck(script string) {
+	out, err := core.SystemCall(script)
+	if err != nil {
+		RedPrint("Command did not succed: ", script)
+		fmt.Println("System output: ", out)
+		RedPrint("Error occured: ", fmt.Sprintf("%+v", err))
+		lf.Unlock()
+		os.Exit(1)
+	}
+}
+
+func RedPrint(white string, red string) {
+	fmt.Printf(white + " " + color.RedString(red))
+}
+
+func BluePrint(white string, blue string) {
+	fmt.Printf(white + " " + color.BlueString(blue))
+}
+
+func GreenPrint(white string, green string) {
+	fmt.Printf(white + " " + color.GreenString(green))
+}
+
+func YellowPrint(white string, yellow string) {
+	fmt.Printf(white + " " + color.YellowString(yellow))
 }

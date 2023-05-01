@@ -67,10 +67,17 @@ func Get(cmd *cobra.Command, pkgs []string) {
 	for _, pkg := range pkgs {
 		info := EjectInfo(pkg)
 		if info.IsPacman {
-			core.SystemCall("sudo pacman --noconfirm -Sy " + pkg)
+			BluePrint("Updating package with pacman: ", info.FullName)
+			out, err := core.SystemCall("sudo pacman --noconfirm -Sy " + pkg)
+			if err != nil {
+				fmt.Println("Pacman output: ", out)
+			}
+			CheckErr(err)
+			GreenPrint("Update success: ", info.FullName+" - OK")
 			continue
 		}
 		if CheckIfInstalled(info) {
+			YellowPrint("Package installed, skipping: ", info.FullName)
 			continue
 		}
 		PrepareRepo(info)
@@ -90,6 +97,7 @@ func Get(cmd *cobra.Command, pkgs []string) {
 func EjectInfo(pkg string) PackageInfo {
 	if !strings.Contains(pkg, ".") {
 		return PackageInfo{
+			FullName:  pkg,
 			ShortName: pkg,
 			IsPacman:  true,
 		}
@@ -117,7 +125,7 @@ func EjectInfo(pkg string) PackageInfo {
 }
 
 func GetDefaultBranch(link string) string {
-	out, err := core.SystemCallOutf("git remote show %s | sed -n '/HEAD branch/s/.*: //p'", link)
+	out, err := core.SystemCallf("git remote show %s | sed -n '/HEAD branch/s/.*: //p'", link)
 	CheckErr(err)
 	return strings.Trim(out, "\n")
 }
@@ -127,7 +135,7 @@ func CheckIfInstalled(i PackageInfo) bool {
 	if _, packageExists := mp[i.FullName]; packageExists {
 		return true
 	}
-	_, err := core.SystemCallOut("pacman -Q " + i.ShortName)
+	_, err := core.SystemCall("pacman -Q " + i.ShortName)
 	return err == nil
 }
 
@@ -147,17 +155,20 @@ func ReadMapping() PackMap {
 
 func PrepareRepo(i PackageInfo) {
 	CheckErr(os.Chdir(cfg.RepoCacheDir))
-	err := core.SystemCallf("git clone %s", i.HttpsLink)
+	BluePrint("Cloning repository: ", i.HttpsLink)
+	out, err := core.SystemCallf("git clone %s", i.HttpsLink)
+	if err != nil {
+		fmt.Println("Git clone output: ", out)
+	}
 	CheckErr(os.Chdir(i.ShortName))
 	if err != nil {
 		if !strings.Contains(err.Error(), "exit status 128") {
 			CheckErr(err)
 		}
-		err = core.SystemCallf("git pull")
-		CheckErr(err)
+		BluePrint("Pulling changes: ", i.ShortName)
+		ExecuteCheck("git pull")
 	}
-	err = core.SystemCallf("git checkout %s", i.Version)
-	CheckErr(err)
+	ExecuteCheck("git checkout " + i.Version)
 }
 
 func ReadPackYml(i PackageInfo) PackYml {
@@ -184,10 +195,10 @@ func SplitDependencies(deps []string) ([]string, []string) {
 
 func ResolvePacmanDeps(pkgs []string) {
 	for _, pkg := range pkgs {
-		_, err := core.SystemCallOut("pacman -Q " + pkg)
+		_, err := core.SystemCall("pacman -Q " + pkg)
 		if err != nil {
-			err := core.SystemCall("sudo pacman --noconfirm -Sy " + pkg)
-			CheckErr(err)
+			BluePrint("Gettings dependecy package: ", pkg)
+			ExecuteCheck("sudo pacman --noconfirm -Sy " + pkg)
 		}
 	}
 }
@@ -195,7 +206,7 @@ func ResolvePacmanDeps(pkgs []string) {
 func BuildPackage(i PackageInfo, y PackYml) {
 	CheckErr(os.Chdir(cfg.RepoCacheDir + "/" + i.ShortName))
 	for _, script := range y.BuildScripts {
-		CheckErr(core.SystemCall(script))
+		ExecuteCheck(script)
 	}
 }
 
@@ -228,8 +239,7 @@ func FormatInstallSrc(src string, dst string) string {
 }
 
 func InstallPackage() {
-	err := core.SystemCall("makepkg --noconfirm -sfri")
-	CheckErr(err)
+	ExecuteCheck("makepkg --noconfirm -sfri")
 }
 
 func AddToMapping(i PackageInfo) {

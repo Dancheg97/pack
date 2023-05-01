@@ -3,32 +3,14 @@ package core
 import (
 	"bytes"
 	"fmt"
-	"log"
-	"os"
 	"os/exec"
 )
 
-func SystemCallf(format string, a ...any) error {
+func SystemCallf(format string, a ...any) (string, error) {
 	return SystemCall(fmt.Sprintf(format, a...))
 }
 
-func SystemCall(cmd string) error {
-	log.Println(" => ", cmd)
-	commad := exec.Command("bash", "-c", cmd)
-	commad.Stdout = os.Stdout
-	commad.Stderr = os.Stderr
-	err := commad.Run()
-	if err != nil {
-		return err
-	}
-	return nil
-}
-func SystemCallOutf(format string, a ...any) (string, error) {
-	return SystemCallOut(fmt.Sprintf(format, a...))
-}
-
-func SystemCallOut(cmd string) (string, error) {
-	log.Println(" => ", cmd)
+func SystemCall(cmd string) (string, error) {
 	commad := exec.Command("bash", "-c", cmd)
 	var buf bytes.Buffer
 	commad.Stdout = &buf
