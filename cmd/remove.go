@@ -39,6 +39,7 @@ func Remove(cmd *cobra.Command, pkgs []string) {
 func WriteMapping(m PackMap) {
 	if len(m) == 0 {
 		core.WriteFile(cfg.MapFile, "")
+		return
 	}
 	yamlData, err := yaml.Marshal(&m)
 	CheckErr(err)
