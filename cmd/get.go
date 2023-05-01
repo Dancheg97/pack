@@ -255,5 +255,4 @@ func AddToMapping(i PackageInfo) {
 func CleanGitDir() {
 	ExecuteCheck("git clean -fd")
 	ExecuteCheck("git reset --hard")
-	BluePrint("git directory cleaned up", "")
 }
