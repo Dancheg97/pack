@@ -90,6 +90,7 @@ func Get(cmd *cobra.Command, pkgs []string) {
 		GeneratePkgbuild(info, packyml)
 		InstallPackage()
 		AddToMapping(info)
+		CleanGitDir()
 		GreenPrint("Package installed: ", info.FullName)
 	}
 	lf.Unlock()
@@ -246,4 +247,10 @@ func InstallPackage() {
 func AddToMapping(i PackageInfo) {
 	err := core.AppendToFile(cfg.MapFile, fmt.Sprintf("%s: %s", i.FullName, i.ShortName))
 	CheckErr(err)
+}
+
+func CleanGitDir() {
+	ExecuteCheck("git clean -fd")
+	ExecuteCheck("git reset --hard")
+	BluePrint("git directory cleaned up", "")
 }
