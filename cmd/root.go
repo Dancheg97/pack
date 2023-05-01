@@ -13,7 +13,7 @@ import (
 
 var (
 	rootCmd = &cobra.Command{
-		Use:   "fmnx-gen",
+		Use:   "pack",
 		Short: "📦 git-based pacman-compatible package manager",
 	}
 	flags = []Flag{}
@@ -64,17 +64,17 @@ func ExecuteCheck(script string) {
 }
 
 func RedPrint(white string, red string) {
-	fmt.Printf(white + " " + color.RedString(red))
+	fmt.Printf(white + " " + color.RedString(red) + "\n")
 }
 
 func BluePrint(white string, blue string) {
-	fmt.Printf(white + " " + color.BlueString(blue))
+	fmt.Printf(white + " " + color.BlueString(blue) + "\n")
 }
 
 func GreenPrint(white string, green string) {
-	fmt.Printf(white + " " + color.GreenString(green))
+	fmt.Printf(white + " " + color.GreenString(green) + "\n")
 }
 
 func YellowPrint(white string, yellow string) {
-	fmt.Printf(white + " " + color.YellowString(yellow))
+	fmt.Printf(white + " " + color.YellowString(yellow) + "\n")
 }

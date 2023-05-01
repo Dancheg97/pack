@@ -19,7 +19,7 @@ var removeCmd = &cobra.Command{
 func Remove(cmd *cobra.Command, pkgs []string) {
 	mp := ReadMapping()
 	for _, pkg := range pkgs {
-		core.SystemCall("sudo pacman -R " + mp[pkg])
+		ExecuteCheck("sudo pacman -R " + mp[pkg])
 		delete(mp, pkg)
 	}
 }

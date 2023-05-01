@@ -49,9 +49,9 @@ Configuration [example](add_fl_tmp_link) for go cli tool:
 build-deps:
   - go
 scripts:
-  - go build -o iambinary .
+  - go build -o example .
 mapping:
-  iambinary: /usr/bin/iambinary
+  example: /usr/bin/example
 ```
 
 ---
