@@ -11,17 +11,48 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const descrTmpl = `{{if gt (len .Aliases) 0}}Aliases:
+{{.NameAndAliases}}{{end}}{{if .HasAvailableSubCommands}}{{$cmds := .Commands}}{{if eq (len .Groups) 0}}
+Available Commands:{{range $cmds}}{{if (or .IsAvailableCommand (eq .Name "help"))}}
+{{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}{{else}}{{range $group := .Groups}}
+
+{{.Title}}{{range $cmds}}{{if (and (eq .GroupID $group.ID) (or .IsAvailableCommand (eq .Name "help")))}}
+{{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}{{end}}{{if not .AllChildCommandsHaveGroup}}
+
+Additional Commands:{{range $cmds}}{{if (and (eq .GroupID "") (or .IsAvailableCommand (eq .Name "help")))}}
+{{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}{{end}}{{end}}{{end}}{{if .HasAvailableLocalFlags}}{{end}}
+`
+
+var rootCmd = &cobra.Command{
+	Use:   "pack",
+	Short: "📦 git-based pacman-compatible package manager.",
+	Long: `📦 git-based pacman-compatible package manager.
+
+This utility accumulates power of git and pacman to provide decentralized way
+of arch package distribution. Find more info at https://fmnx.io/dev/pack.
+
+You can specify git branch/tag for specific version of package @.
+
+Usage:
+pack [command] <package(s)>`,
+	SilenceUsage: true,
+	CompletionOptions: cobra.CompletionOptions{
+		DisableDefaultCmd:   true,
+		DisableNoDescFlag:   true,
+		DisableDescriptions: true,
+		HiddenDefaultCmd:    true,
+	},
+}
+
 var (
-	rootCmd = &cobra.Command{
-		Use:   "pack",
-		Short: "📦 git-based pacman-compatible package manager",
-	}
-	flags = []Flag{}
-	cfg   *config.Config
-	lf    *lockfile.Lockfile
+	cfg *config.Config
+	lf  *lockfile.Lockfile
 )
 
 func init() {
+	rootCmd.SetHelpCommand(&cobra.Command{})
+	rootCmd.SetUsageTemplate(descrTmpl)
+
 	conf, err := config.GetConfig()
 	CheckErr(err)
 	cfg = conf
@@ -33,10 +64,6 @@ func init() {
 }
 
 func Execute() {
-	for _, flag := range flags {
-		AddFlag(flag)
-	}
-
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		lf.Unlock()

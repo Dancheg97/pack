@@ -11,9 +11,17 @@ func init() {
 }
 
 var removeCmd = &cobra.Command{
-	Use:   "remove",
-	Short: "🚫 remove packages from system",
-	Run:   Remove,
+	Use:     "remove",
+	Aliases: []string{"rm", "r"},
+	Short:   "🚫 remove packages",
+	Long: `🚫 remove packages
+
+Use this command to remove packages from system. You can specify both pacman 
+packages and pack links.
+
+Example:
+pack rm fmnx.io/dev/ainst`,
+	Run: Remove,
 }
 
 func Remove(cmd *cobra.Command, pkgs []string) {

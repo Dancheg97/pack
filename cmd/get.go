@@ -10,6 +10,25 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+func init() {
+	rootCmd.AddCommand(getCmd)
+}
+
+var getCmd = &cobra.Command{
+	Use:     "get",
+	Example: "pack get fmnx.io/dev/ainst fmnx.io/dev/keks@main",
+	Aliases: []string{"install", "g"},
+	Short:   "📥 get and install new packages",
+	Long: `📥 get and install new packages
+
+You can mix pacman and pack packages, provoding names and git links. If you 
+need to specify version, you can provide it after @ symbol.
+
+Example:
+pack get fmnx.io/dev/ainst github.com/exm/pkg@v1.23 nano`,
+	Run: Get,
+}
+
 type PackageInfo struct {
 	FullName  string
 	ShortName string
@@ -46,16 +65,6 @@ package() {
   %s
 }`
 )
-
-func init() {
-	rootCmd.AddCommand(getCmd)
-}
-
-var getCmd = &cobra.Command{
-	Use:   "get",
-	Short: "📥 install new packages",
-	Run:   Get,
-}
 
 func Get(cmd *cobra.Command, pkgs []string) {
 	if len(pkgs) != 0 {

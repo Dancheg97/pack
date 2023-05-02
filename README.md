@@ -9,7 +9,7 @@
 [![Generic badge](https://img.shields.io/badge/GITHUB-REPO-white.svg)](https://github.com/fmnx-io/pack)
 [![Build Status](https://ci.fmnx.io/api/badges/dev/repo/status.svg)](https://ci.fmnx.io/dev/pack)
 
-Git-based pacman-compatible package manager. Accumulates power of both `git` and `pacman` to provide new way of arch package distribution.
+Git-based pacman-compatible package manager. Accumulates power of both `git` and `pacman` to provide easier way to create arch-compatible packages and distribute them using git links.
 
 💾 Single line installation script:
 

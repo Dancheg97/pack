@@ -12,9 +12,10 @@ func init() {
 }
 
 var listCmd = &cobra.Command{
-	Use:   "list",
-	Short: "📄 list packages installed with pack",
-	Run:   List,
+	Use:     "list",
+	Aliases: []string{"l"},
+	Short:   "📄 list packages installed with pack",
+	Run:     List,
 }
 
 func List(cmd *cobra.Command, args []string) {

@@ -15,9 +15,14 @@ func init() {
 }
 
 var genCmd = &cobra.Command{
-	Use:   "gen",
-	Short: "📋 generate .pack.yml, update gitignore and readme",
-	Run:   Gen,
+	Use:     "generate",
+	Aliases: []string{"gen"},
+	Short:   "📋 generate .pack.yml and update README.md",
+	Long: `📋 generate .pack.yml and update README.md
+
+This command will generate .pack.yml template and add some lines to README.md
+to provide information about installation with pack.`,
+	Run: Gen,
 }
 
 const (
@@ -43,17 +48,11 @@ mapping:
   logo.png: /usr/share/icons/hicolor/512x512/apps/pkg.png
   build/linux/x64/release/bundle: /usr/share/pkg
 `
-	gitignoreTemplate = `
-pkg/**
-src/**
-**.pkg.tar.zst
-PKGBUILD
-`
 	readmeTemplate = `
 
 ---
 
-### 📦 Install package with pack:
+### 📦 Install package with [pack](https://fmnx.io/dev/pack):
 
 %s
 pack get %s
@@ -63,7 +62,6 @@ pack get %s
 
 func Gen(cmd *cobra.Command, args []string) {
 	core.WriteFile(".pack.yml", packYmlTemplate)
-	core.AppendToFile(".gitignore", gitignoreTemplate)
 	insatllMd := fmt.Sprintf(readmeTemplate, "```", GetInstallLink(), "```")
 	core.AppendToFile("README.md", insatllMd)
 	fmt.Printf(
