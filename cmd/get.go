@@ -29,12 +29,11 @@ pack get fmnx.io/dev/ainst github.com/exm/pkg@v1.23 nano`,
 	Run: Get,
 }
 
-type PackageInfo struct {
+type PkgInfo struct {
 	FullName  string
 	ShortName string
 	HttpsLink string
 	Version   string
-	Owner     string
 	IsPacman  bool
 }
 
@@ -90,7 +89,7 @@ func Get(cmd *cobra.Command, pkgs []string) {
 			continue
 		}
 		PrepareRepo(info)
-		packyml := ReadPackYml(info)
+		packyml := ReadPackYml()
 		allDeps := append(packyml.RunDeps, packyml.BuildDeps...)
 		pacmanPkgs, packPkgs := SplitDependencies(allDeps)
 		ResolvePacmanDeps(pacmanPkgs)
@@ -105,9 +104,9 @@ func Get(cmd *cobra.Command, pkgs []string) {
 	lf.Unlock()
 }
 
-func EjectInfo(pkg string) PackageInfo {
+func EjectInfo(pkg string) PkgInfo {
 	if !strings.Contains(pkg, ".") {
-		return PackageInfo{
+		return PkgInfo{
 			FullName:  pkg,
 			ShortName: pkg,
 			IsPacman:  true,
@@ -117,7 +116,6 @@ func EjectInfo(pkg string) PackageInfo {
 	httpslink := "https://" + fullName
 	split := strings.Split(httpslink, "/")
 	shortname := split[len(split)-1]
-	owner := strings.Join(split[0:len(split)-1], "/")
 	version := ""
 	if len(strings.Split(pkg, "@")) == 1 {
 		version = GetDefaultBranch(httpslink)
@@ -128,12 +126,11 @@ func EjectInfo(pkg string) PackageInfo {
 	} else {
 		version = strings.Split(pkg, "@")[1]
 	}
-	return PackageInfo{
+	return PkgInfo{
 		FullName:  fullName,
 		ShortName: shortname,
 		HttpsLink: httpslink,
 		Version:   version,
-		Owner:     owner,
 		IsPacman:  false,
 	}
 }
@@ -144,7 +141,7 @@ func GetDefaultBranch(link string) string {
 	return strings.Trim(out, "\n")
 }
 
-func CheckIfInstalled(i PackageInfo) bool {
+func CheckIfInstalled(i PkgInfo) bool {
 	mp := ReadMapping()
 	if _, packageExists := mp[i.FullName]; packageExists {
 		return true
@@ -167,7 +164,7 @@ func ReadMapping() PackMap {
 	return mapping
 }
 
-func PrepareRepo(i PackageInfo) {
+func PrepareRepo(i PkgInfo) {
 	CheckErr(os.Chdir(cfg.RepoCacheDir))
 	BluePrint("Cloning repository: ", i.HttpsLink)
 	out, err := core.SystemCallf("git clone %s", i.HttpsLink)
@@ -183,7 +180,7 @@ func PrepareRepo(i PackageInfo) {
 	ExecuteCheck("git checkout " + i.Version)
 }
 
-func ReadPackYml(i PackageInfo) PackYml {
+func ReadPackYml() PackYml {
 	b, err := os.ReadFile(".pack.yml")
 	CheckErr(err)
 	var packyml PackYml
@@ -215,7 +212,7 @@ func ResolvePacmanDeps(pkgs []string) {
 	}
 }
 
-func BuildPackage(i PackageInfo, y PackYml) {
+func BuildPackage(i PkgInfo, y PackYml) {
 	CheckErr(os.Chdir(cfg.RepoCacheDir + "/" + i.ShortName))
 	for _, script := range y.BuildScripts {
 		BluePrint("Executing build script: ", script)
@@ -223,7 +220,7 @@ func BuildPackage(i PackageInfo, y PackYml) {
 	}
 }
 
-func GeneratePkgbuild(i PackageInfo, y PackYml) {
+func GeneratePkgbuild(i PkgInfo, y PackYml) {
 	CheckErr(os.Chdir(cfg.RepoCacheDir + "/" + i.ShortName))
 	deps := fmt.Sprintf(depsTmpl, strings.Join(y.RunDeps, "\"\n  \""))
 	if len(y.RunDeps) == 0 {
@@ -256,7 +253,7 @@ func InstallPackage() {
 	ExecuteCheck("makepkg --noconfirm -sfri")
 }
 
-func AddToMapping(i PackageInfo) {
+func AddToMapping(i PkgInfo) {
 	err := core.AppendToFile(cfg.MapFile, fmt.Sprintf("%s: %s", i.FullName, i.ShortName))
 	CheckErr(err)
 }

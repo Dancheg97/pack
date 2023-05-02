@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 	"strings"
 
 	"fmnx.io/dev/pack/core"
@@ -73,18 +72,11 @@ func Gen(cmd *cobra.Command, args []string) {
 }
 
 func GetInstallLink() string {
-	gitconf, err := os.ReadFile(`.git/config`)
+	link, err := core.SystemCallf("git config --get remote.origin.url")
 	CheckErr(err)
-	for _, line := range strings.Split(string(gitconf), "\n") {
-		if strings.Contains(line, "url = ") {
-			line = strings.Split(line, "url = ")[1]
-			line = strings.ReplaceAll(line, "https://", "")
-			line = strings.ReplaceAll(line, "git@", "")
-			return strings.ReplaceAll(line, ".git", "")
-		}
-	}
-	RedPrint("Error occured: ", "unable to find ref in git config")
-	lf.Unlock()
-	os.Exit(1)
-	return ""
+	link = strings.Trim(link, "\n")
+	link = strings.ReplaceAll(link, "https://", "")
+	link = strings.ReplaceAll(link, "git@", "")
+	link = strings.ReplaceAll(link, ":", "/")
+	return strings.ReplaceAll(link, ".git", "")
 }
