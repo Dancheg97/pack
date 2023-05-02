@@ -12,8 +12,7 @@ import (
 )
 
 const descrTmpl = `{{if gt (len .Aliases) 0}}Aliases:
-{{.NameAndAliases}}{{end}}{{if .HasAvailableSubCommands}}{{$cmds := .Commands}}{{if eq (len .Groups) 0}}
-Available Commands:{{range $cmds}}{{if (or .IsAvailableCommand (eq .Name "help"))}}
+{{.NameAndAliases}}{{end}}{{if .HasAvailableSubCommands}}{{$cmds := .Commands}}{{if eq (len .Groups) 0}}Available Commands:{{range $cmds}}{{if (or .IsAvailableCommand (eq .Name "help"))}}
 {{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}{{else}}{{range $group := .Groups}}
 
 {{.Title}}{{range $cmds}}{{if (and (eq .GroupID $group.ID) (or .IsAvailableCommand (eq .Name "help")))}}
@@ -31,10 +30,11 @@ var rootCmd = &cobra.Command{
 This utility accumulates power of git and pacman to provide decentralized way
 of arch package distribution. Find more info at https://fmnx.io/dev/pack.
 
-You can specify git branch/tag for specific version of package @.
-
 Usage:
-pack [command] <package(s)>`,
+pack [command] <package(s)>
+
+Example:
+pack get fmnx.io/dev/ainst`,
 	SilenceUsage: true,
 	CompletionOptions: cobra.CompletionOptions{
 		DisableDefaultCmd:   true,
