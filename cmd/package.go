@@ -31,7 +31,9 @@ func Package(cmd *cobra.Command, pkgs []string) {
 	pack := ReadPackYml()
 	info := GetInfoFromRepo()
 	GeneratePkgbuild(info, pack)
-	// ExecuteCheck("makepkg --noconfirm -S")
+	GreenPrint("file generated: ", "PKGBUILD")
+	ExecuteCheck("makepkg")
+	GreenPrint("package build: ", "success")
 }
 
 func GetInfoFromRepo() PkgInfo {

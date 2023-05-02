@@ -95,6 +95,7 @@ func Get(cmd *cobra.Command, pkgs []string) {
 		ResolvePacmanDeps(pacmanPkgs)
 		Get(cmd, packPkgs)
 		BuildPackage(info, packyml)
+		CheckErr(os.Chdir(cfg.RepoCacheDir + "/" + info.ShortName))
 		GeneratePkgbuild(info, packyml)
 		InstallPackage()
 		AddToMapping(info)
@@ -221,7 +222,6 @@ func BuildPackage(i PkgInfo, y PackYml) {
 }
 
 func GeneratePkgbuild(i PkgInfo, y PackYml) {
-	CheckErr(os.Chdir(cfg.RepoCacheDir + "/" + i.ShortName))
 	deps := fmt.Sprintf(depsTmpl, strings.Join(y.RunDeps, "\"\n  \""))
 	if len(y.RunDeps) == 0 {
 		deps = ""
