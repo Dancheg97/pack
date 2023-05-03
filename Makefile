@@ -22,4 +22,4 @@ delpack:
 	pack remove fmnx.io/dev/install fmnx.io/dancheg97/flutter-fmnx-package
 
 test:
-	docker run --rm -it fmnx.io/core/pack get aur.archlinux.org/yay aur.archlinux.org/visual-studio-code-bin
+	docker run --rm -it -e PACK_ALLOW_AUR=true -e PACK_DEBUG_MODE=true fmnx.io/core/pack get yamux aur.archlinux.org/yay aur.archlinux.org/visual-studio-code-bin

@@ -210,7 +210,7 @@ func ReadPkgbuildInfo() PkgbuildInfo {
 	}
 	buildeps, err := system.EjectShList("PKGBUILD", "makedepends")
 	if cfg.DebugMode {
-		YellowPrint("Build dependencies: ", strings.Join(deps, " "))
+		YellowPrint("Build dependencies: ", strings.Join(buildeps, " "))
 		fmt.Println(err)
 	}
 	YellowPrint("Installing with: ", "PKGBUILD")

@@ -20,9 +20,9 @@ func Call(cmd string) (string, error) {
 	var buf bytes.Buffer
 	commad.Stdout = &buf
 	commad.Stderr = &buf
+	err := commad.Run()
 	if Debug {
 		fmt.Println("Syscall - output: ", buf.String())
 	}
-	err := commad.Run()
 	return buf.String(), err
 }
