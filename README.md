@@ -5,16 +5,23 @@
 <h2 align="center">Pack - package manager</h2>
 
 [![Generic badge](https://img.shields.io/badge/LICENSE-GPL-orange.svg)](https://fmnx.io/core/pack/src/branch/main/LICENSE)
-[![Generic badge](https://img.shields.io/badge/GITEA-REPO-blue.svg)](https://fmnx.io/core/pack)
+[![Generic badge](https://img.shields.io/badge/GITEA-REPO-yellow.svg)](https://fmnx.io/core/pack)
 [![Generic badge](https://img.shields.io/badge/GITHUB-REPO-white.svg)](https://github.com/fmnx-io/pack)
+[![Generic badge](https://img.shields.io/badge/DOCKER-REGISTRY-blue.svg)](https://fmnx.io/core/-/packages/container/pack/latest)
 [![Build Status](https://ci.fmnx.io/api/badges/core/pack/status.svg)](https://ci.fmnx.io/core/pack)
 
 Distributed package manager based on git and pacman. Accumulates power of both `git` and `pacman` to provide easier way to create arch-compatible packages and distribute them using git links.
 
-💾 Single line installation script:
+💿 Single line installation script:
 
 ```sh
 git clone https://fmnx.io/core/pack && cd pack && makepkg --noconfirm -sfri
+```
+
+🐋 You can use `pack` with docker:
+
+```
+docker run --rm -it fmnx.io/core/pack --help
 ```
 
 ---
