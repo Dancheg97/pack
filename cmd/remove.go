@@ -1,9 +1,10 @@
 package cmd
 
 import (
+	"encoding/json"
+
 	"fmnx.io/dev/pack/system"
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v2"
 )
 
 func init() {
@@ -46,10 +47,10 @@ func Remove(cmd *cobra.Command, pkgs []string) {
 
 func WriteMapping(m PackMap) {
 	if len(m) == 0 {
-		system.WriteFile(cfg.MapFile, "")
+		system.WriteFile(cfg.MapFile, "{}")
 		return
 	}
-	yamlData, err := yaml.Marshal(&m)
+	jsonData, err := json.Marshal(&m)
 	CheckErr(err)
-	system.WriteFile(cfg.MapFile, string(yamlData))
+	system.WriteFile(cfg.MapFile, string(jsonData))
 }

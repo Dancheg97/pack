@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -178,13 +179,13 @@ func CheckIfInstalled(i PkgInfo) bool {
 func ReadMapping() PackMap {
 	_, err := os.Stat(cfg.MapFile)
 	if err != nil {
-		system.AppendToFile(cfg.MapFile, "")
+		system.AppendToFile(cfg.MapFile, "{}")
 		return PackMap{}
 	}
 	b, err := os.ReadFile(cfg.MapFile)
 	CheckErr(err)
 	var mapping PackMap
-	err = yaml.Unmarshal(b, &mapping)
+	err = json.Unmarshal(b, &mapping)
 	CheckErr(err)
 	return mapping
 }
@@ -296,13 +297,14 @@ func FormatInstallSrc(src string, dst string) string {
 }
 
 func InstallPackage() {
-	BluePrint("Building and installing package: ", "makepkg")
+	BluePrint("Building and installing package: ", "makepkg -sfri")
 	ExecuteCheck("makepkg --noconfirm -sfri")
 }
 
 func AddToMapping(i PkgInfo) {
-	err := system.AppendToFile(cfg.MapFile, fmt.Sprintf("%s: %s\n", i.FullName, i.ShortName))
-	CheckErr(err)
+	mp := ReadMapping()
+	mp[i.FullName] = i.ShortName
+	WriteMapping(mp)
 }
 
 func CleanGitDir() {

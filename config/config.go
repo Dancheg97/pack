@@ -20,7 +20,7 @@ repo-cache-dir: %s/.pack
 # Where pack will store built .pkg.tar.zst files
 package-cache-dir: /var/cache/pacman/pkg
 # Location of mapping file (pack packages and related pacman packages)
-map-file: %s/.pack/mapping.yml
+map-file: %s/.pack/mapping.json
 # Location of lock file
 lock-file: /tmp/pack.lock
 `
@@ -52,7 +52,7 @@ func GetConfig() (*Config, error) {
 			RemoveBuiltPackages: false,
 			RepoCacheDir:        usr.HomeDir + "/.pack",
 			PackageCacheDir:     "/var/cache/pacman/pkg",
-			MapFile:             usr.HomeDir + "/.pack/mapping.yml",
+			MapFile:             usr.HomeDir + "/.pack/mapping.json",
 			LockFile:            "/tmp/pack.lock",
 		}, nil
 	}
