@@ -1,7 +1,9 @@
 
 docker:
-	sudo rm --rf pkg
-	sudo rm --rf src
+	sudo rm -rf pkg
+	sudo rm -rf src
+	sudo rm -f pack
+	sudo rm -f *.pkg.tar.zst
 	docker build -t fmnx.io/core/pack:latest .
 	docker run --rm -it fmnx.io/core/pack --help
 	docker run --rm -it fmnx.io/core/pack info pack

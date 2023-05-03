@@ -141,10 +141,8 @@ func FormPkgInfoFromLink(pkg string) PkgInfo {
 	httpslink := "https://" + fullName
 	split := strings.Split(httpslink, "/")
 	shortname := split[len(split)-1]
-	version := ""
-	if len(strings.Split(pkg, "@")) == 1 {
-		version = GetDefaultBranch(httpslink)
-	} else {
+	version := "latest"
+	if len(strings.Split(pkg, "@")) != 1 {
 		version = strings.Split(pkg, "@")[1]
 	}
 	return PkgInfo{
@@ -154,25 +152,6 @@ func FormPkgInfoFromLink(pkg string) PkgInfo {
 		Version:   version,
 		IsPacman:  false,
 	}
-}
-
-func GetDefaultBranch(link string) string {
-	out, err := system.SystemCallf("git remote show %s", link)
-	CheckErr(err)
-	out = strings.Split(out, "HEAD branch: ")[1]
-	out = strings.Split(out, "\n")[0]
-	if strings.Contains(out, "not a git repository") {
-		RedPrint("Unable to get default branch for: ", link)
-		fmt.Println(out)
-		lf.Unlock()
-		os.Exit(1)
-	}
-	if strings.Contains(out, "redirecting to") {
-		RedPrint("Adress mismatch (redirected): ", link)
-		lf.Unlock()
-		os.Exit(1)
-	}
-	return strings.Trim(out, "\n")
 }
 
 func CheckIfInstalled(i PkgInfo) bool {
@@ -210,8 +189,10 @@ func PrepareRepo(i PkgInfo) {
 		err = nil
 	}
 	CheckErr(err)
-	BluePrint("Switching repo to version: ", i.Version)
-	ExecuteCheck("git checkout " + i.Version)
+	if i.Version != `latest` {
+		BluePrint("Switching repo to version: ", i.Version)
+		ExecuteCheck("git checkout " + i.Version)
+	}
 }
 
 func ReadPkgbuildInfo() PkgbuildInfo {
