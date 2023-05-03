@@ -10,7 +10,7 @@
 [![Generic badge](https://img.shields.io/badge/DOCKER-REGISTRY-blue.svg)](https://fmnx.io/core/-/packages/container/pack/latest)
 [![Build Status](https://ci.fmnx.io/api/badges/core/pack/status.svg)](https://ci.fmnx.io/core/pack)
 
-Decentralized package manager based on git and pacman. Accumulates power of both `git` and `pacman` to provide easier way to create arch-compatible packages and distribute them using git links.
+Decentralized package manager based on git and pacman. Accumulates power of both `git` and `pacman` to provide easier way to create arch packages and distribute them using git links.
 
 💿 Single line installation script:
 
@@ -29,7 +29,10 @@ You can use env variables to configure pack behaviour in docker:
 - `PACK_ALLOW_AUR` - automatically try downloading packages from AUR if they are not found in pacman repositories
 - `PACK_REMOVE_GIT_REPOS` - remove git repositories after installation
 - `PACK_REMOVE_BUILT_PACKAGES` - don't cache built `.pkg.tar.zst` packages
+- `PACK_DISABLE_PRETTYPRINT` - disable colors in CLI output
 - `PACK_DEBUG_MODE` - watch every system call execution
+
+Also you can modify `pack` configuration in `~/.pack/config.yml`.
 
 ---
 
