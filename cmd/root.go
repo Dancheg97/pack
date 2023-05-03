@@ -92,17 +92,17 @@ func ExecuteCheck(script string) {
 }
 
 func RedPrint(white string, red string) {
-	fmt.Printf(white + " " + color.RedString(red) + "\n")
+	fmt.Printf(white + color.RedString(red) + "\n")
 }
 
 func BluePrint(white string, blue string) {
-	fmt.Printf(white + " " + color.BlueString(blue) + "\n")
+	fmt.Printf(white + color.BlueString(blue) + "\n")
 }
 
 func GreenPrint(white string, green string) {
-	fmt.Printf(white + " " + color.GreenString(green) + "\n")
+	fmt.Printf(white + color.GreenString(green) + "\n")
 }
 
 func YellowPrint(white string, yellow string) {
-	fmt.Printf(white + " " + color.YellowString(yellow) + "\n")
+	fmt.Printf(white + color.YellowString(yellow) + "\n")
 }

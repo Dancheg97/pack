@@ -9,8 +9,8 @@ docker:
 	docker run --rm -it fmnx.io/core/pack info pack
 
 clean:
-	sudo rm --rf pkg
-	sudo rm --rf src
+	sudo rm -rf pkg
+	sudo rm -rf src
 	sudo rm -rf ~/.pack
 	sudo rm -f pack
 	sudo rm -f /tmp/pack.lock
@@ -23,4 +23,3 @@ delpack:
 
 test:
 	docker run --rm -it fmnx.io/core/pack get aur.archlinux.org/yay aur.archlinux.org/visual-studio-code-bin
-

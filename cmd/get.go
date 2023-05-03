@@ -96,7 +96,7 @@ func Get(cmd *cobra.Command, pkgs []string) {
 					RedPrint("Pacman package not found: ", pkg)
 					fmt.Printf("Use pack for aur.archlinux.org/%s? [Y/n]\n", pkg)
 					confirmed := input.AskForConfirmation()
-					if confirmed {
+					if confirmed || cfg.AllowAUR {
 						Get(cmd, []string{"aur.archlinux.org/" + pkg})
 						continue
 					}

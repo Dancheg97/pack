@@ -31,11 +31,11 @@ type Config struct {
 	RemoveGitRepos      bool   `yaml:"remove-git-repo"`
 	RemoveBuiltPackages bool   `yaml:"remove-built-packages"`
 	DebugMode           bool   `yaml:"debug-mode"`
+	AllowAUR            bool   `yaml:"allow-aur"`
 	RepoCacheDir        string `yaml:"repo-cache-dir"`
 	PackageCacheDir     string `yaml:"package-cache-dir"`
 	MapFile             string `yaml:"map-file"`
 	LockFile            string `yaml:"lock-file"`
-	AllowAUR            string `yaml:"allow-aur"`
 }
 
 func GetConfig() (*Config, error) {
