@@ -1,10 +1,14 @@
 
 docker:
+	sudo rm --rf pkg
+	sudo rm --rf src
 	docker build -t fmnx.io/core/pack:latest .
 	docker run --rm -it fmnx.io/core/pack --help
 	docker run --rm -it fmnx.io/core/pack info pack
 
 clean:
+	sudo rm --rf pkg
+	sudo rm --rf src
 	sudo rm -rf ~/.pack
 	sudo rm -f pack
 	sudo rm -f /tmp/pack.lock
@@ -16,11 +20,5 @@ delpack:
 	pack remove fmnx.io/dev/install fmnx.io/dancheg97/flutter-fmnx-package
 
 test:
-	make clean
-	pack get fmnx.io/dancheg97/flutter-fmnx-package fmnx.io/dev/install
-	pack list
-	pack remove fmnx.io/dancheg97/flutter-fmnx-package
-	pack list
-	pack get fmnx.io/dancheg97/flutter-fmnx-package
-	pack remove fmnx.io/dev/install
-	pack list
+	docker run --rm -it fmnx.io/core/pack get aur.archlinux.org/yay aur.archlinux.org/visual-studio-code-bin
+

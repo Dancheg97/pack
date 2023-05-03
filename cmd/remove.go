@@ -27,20 +27,23 @@ pack rm fmnx.io/dev/ainst`,
 
 func Remove(cmd *cobra.Command, pkgs []string) {
 	mp := ReadMapping()
-	for _, packpkg := range pkgs {
-		pacmanpkg, ok := mp[packpkg]
+	for _, pkg := range pkgs {
+		pacmanpkg, ok := mp[pkg]
 		if !ok {
-			_, err := system.Call("pacman -Q " + packpkg)
+			_, err := system.Call("pacman -Q " + pkg)
 			if err != nil {
-				YellowPrint("Package not found, skipping: ", packpkg)
+				YellowPrint("Package not found, skipping: ", pkg)
 				continue
 			}
-			ExecuteCheck("sudo pacman --noconfirm -R " + packpkg)
+			ExecuteCheck("sudo pacman --noconfirm -R " + pkg)
 			continue
 		}
-		ExecuteCheck("sudo pacman --noconfirm -R " + pacmanpkg)
-		delete(mp, packpkg)
-		RedPrint("Package removed: ", packpkg)
+		_, err := system.Call("sudo pacman --noconfirm -R " + pacmanpkg)
+		if err != nil {
+			YellowPrint("Package does not exist in pacman: ", pkg)
+		}
+		delete(mp, pkg)
+		RedPrint("Package removed: ", pkg)
 	}
 	WriteMapping(mp)
 }

@@ -157,10 +157,13 @@ func FormPkgInfoFromLink(pkg string) PkgInfo {
 }
 
 func GetDefaultBranch(link string) string {
-	out, err := system.SystemCallf("git remote show %s | sed -n '/HEAD branch/s/.*: //p'", link)
+	out, err := system.SystemCallf("git remote show %s", link)
 	CheckErr(err)
+	out = strings.Split(out, "HEAD branch: ")[1]
+	out = strings.Split(out, "\n")[0]
 	if strings.Contains(out, "not a git repository") {
 		RedPrint("Unable to get default branch for: ", link)
+		fmt.Println(out)
 		lf.Unlock()
 		os.Exit(1)
 	}
