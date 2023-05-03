@@ -6,17 +6,18 @@ import (
 	"os/user"
 
 	"fmnx.io/dev/pack/system"
+	"github.com/caarlos0/env/v8"
 	"gopkg.in/yaml.v2"
 )
 
 const DefaultConfig = `# Remove git repositroy after package installation
-remove-git-repo: false
+remove-git-repo: %t
 # Remove .pkg.tar.zst file after installation
-remove-built-packages: false
+remove-built-packages: %t
 # Print additional debug information
-debug-mode: false
+debug-mode: %t
 # Always OK to AUR packages
-allow-aur: false
+allow-aur: %t
 # Cache dir for repositories
 repo-cache-dir: %s/.pack
 # Where pack will store built .pkg.tar.zst files
@@ -26,6 +27,13 @@ map-file: %s/.pack/mapping.json
 # Location of lock file
 lock-file: /tmp/pack.lock
 `
+
+type EnvVars struct {
+	RemoveGitRepos      bool `env:"PACK_REMOVE_GIT_REPOS" envDefault:"false"`
+	RemoveBuiltPackages bool `env:"PACK_REMOVE_BUILT_PACKAGES" envDefault:"false"`
+	DebugMode           bool `env:"PACK_DEBUG_MODE" envDefault:"false"`
+	AllowAUR            bool `env:"PACK_ALLOW_AUR" envDefault:"false"`
+}
 
 type Config struct {
 	RemoveGitRepos      bool   `yaml:"remove-git-repo"`
@@ -45,14 +53,28 @@ func GetConfig() (*Config, error) {
 	}
 	cfg, err := os.Stat(usr.HomeDir + "/.pack/config.yml")
 	if err != nil || cfg.IsDir() {
-		contents := fmt.Sprintf(DefaultConfig, usr.HomeDir, usr.HomeDir)
-		err = system.WriteFile(usr.HomeDir+"/.pack/config.yml", contents)
+		envs := EnvVars{}
+		err = env.Parse(&envs)
+		if err != nil {
+			return nil, err
+		}
+		err = system.WriteFile(usr.HomeDir+"/.pack/config.yml", fmt.Sprintf(
+			DefaultConfig,
+			envs.RemoveGitRepos,
+			envs.RemoveBuiltPackages,
+			envs.DebugMode,
+			envs.AllowAUR,
+			usr.HomeDir,
+			usr.HomeDir,
+		))
 		if err != nil {
 			return nil, err
 		}
 		return &Config{
-			RemoveGitRepos:      false,
-			RemoveBuiltPackages: false,
+			RemoveGitRepos:      envs.RemoveGitRepos,
+			RemoveBuiltPackages: envs.RemoveBuiltPackages,
+			DebugMode:           envs.DebugMode,
+			AllowAUR:            envs.AllowAUR,
 			RepoCacheDir:        usr.HomeDir + "/.pack",
 			PackageCacheDir:     "/var/cache/pacman/pkg",
 			MapFile:             usr.HomeDir + "/.pack/mapping.json",

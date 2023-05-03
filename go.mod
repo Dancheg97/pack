@@ -3,6 +3,7 @@ module fmnx.io/dev/pack
 go 1.20
 
 require (
+	github.com/caarlos0/env/v8 v8.0.0
 	github.com/fatih/color v1.13.0
 	github.com/jedib0t/go-pretty v4.3.0+incompatible
 	github.com/nightlyone/lockfile v1.0.0

@@ -24,6 +24,13 @@ git clone https://fmnx.io/core/pack && cd pack && makepkg --noconfirm -sfri
 docker run --rm -it fmnx.io/core/pack --help
 ```
 
+You can use env variables to configure pack behaviour in docker:
+
+- `PACK_ALLOW_AUR` - automatically try downloading packages from AUR if they are not found in pacman repositories
+- `PACK_REMOVE_GIT_REPOS` - remove git repositories after installation
+- `PACK_REMOVE_BUILT_PACKAGES` - don't cache built packages
+- `PACK_DEBUG_MODE` - watch every system call execution
+
 ---
 
 ### 🚀 Features:
@@ -98,3 +105,7 @@ pack list
 ```
 
 - `gen` - generate `.pack.yml` and update `.gitignore` and `README.md`
+
+<!--
+Add package listing in pack same way as it is in yay.
+-->
