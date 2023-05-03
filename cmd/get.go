@@ -5,7 +5,8 @@ import (
 	"os"
 	"strings"
 
-	"fmnx.io/dev/pack/core"
+	"fmnx.io/dev/pack/input"
+	"fmnx.io/dev/pack/system"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 )
@@ -46,6 +47,12 @@ type PackYml struct {
 	PackMap      map[string]string `yaml:"mapping"`
 }
 
+type PkgbuildInfo struct {
+	PkgbuildExists bool
+	Dependencies   []string
+	BuildDeps      []string
+}
+
 type PackMap map[string]string
 
 var (
@@ -69,21 +76,33 @@ package() {
 
 func Get(cmd *cobra.Command, pkgs []string) {
 	if len(pkgs) != 0 {
-		err := core.PrepareDir(cfg.RepoCacheDir)
+		err := system.PrepareDir(cfg.RepoCacheDir)
 		CheckErr(err)
-		err = core.PrepareDir(cfg.PackageCacheDir)
+		err = system.PrepareDir(cfg.PackageCacheDir)
 		CheckErr(err)
 	}
 	for _, pkg := range pkgs {
-		info := EjectInfo(pkg)
+		info := FormPkgInfoFromLink(pkg)
 		if CheckIfInstalled(info) {
 			YellowPrint("Package installed, skipping: ", info.FullName)
 			continue
 		}
 		if info.IsPacman {
 			BluePrint("Installing package with pacman: ", info.FullName)
-			out, err := core.SystemCall("sudo pacman --noconfirm -Sy " + pkg)
+			out, err := system.Call("sudo pacman --noconfirm -Sy " + pkg)
 			if err != nil {
+				if strings.Contains(out, "target not found") {
+					RedPrint("Pacman package not found: ", pkg)
+					fmt.Printf("Use pack for aur.archlinux.org/%s? [Y/n]\n", pkg)
+					confirmed := input.AskForConfirmation()
+					if confirmed {
+						Get(cmd, []string{"aur.archlinux.org/" + pkg})
+						continue
+					}
+					RedPrint("Unable to install package: ", pkg)
+					lf.Unlock()
+					os.Exit(1)
+				}
 				fmt.Println("Pacman output: ", out)
 			}
 			CheckErr(err)
@@ -91,23 +110,25 @@ func Get(cmd *cobra.Command, pkgs []string) {
 			continue
 		}
 		PrepareRepo(info)
-		packyml := ReadPackYml()
-		allDeps := append(packyml.RunDeps, packyml.BuildDeps...)
-		pacmanPkgs, packPkgs := SplitDependencies(allDeps)
-		ResolvePacmanDeps(pacmanPkgs)
-		Get(cmd, packPkgs)
-		BuildPackage(info, packyml)
-		CheckErr(os.Chdir(cfg.RepoCacheDir + "/" + info.ShortName))
-		GeneratePkgbuild(info, packyml)
+		pkgbuildInfo := ReadPkgbuildInfo()
+		if !pkgbuildInfo.PkgbuildExists {
+			packyml := ReadPackYml()
+			allDeps := append(packyml.RunDeps, packyml.BuildDeps...)
+			Get(cmd, allDeps)
+			BuildPackage(info, packyml)
+			GeneratePkgbuild(info, packyml)
+		} else {
+			Get(cmd, pkgbuildInfo.Dependencies)
+		}
 		InstallPackage()
+		// Move package to cache
 		AddToMapping(info)
 		CleanGitDir()
 		GreenPrint("Package installed: ", info.FullName)
 	}
-	lf.Unlock()
 }
 
-func EjectInfo(pkg string) PkgInfo {
+func FormPkgInfoFromLink(pkg string) PkgInfo {
 	if !strings.Contains(pkg, ".") {
 		return PkgInfo{
 			FullName:  pkg,
@@ -124,6 +145,7 @@ func EjectInfo(pkg string) PkgInfo {
 		version = GetDefaultBranch(httpslink)
 		if strings.Contains(version, "redirecting to") {
 			RedPrint("adress mismatch (redirected): ", httpslink)
+			lf.Unlock()
 			os.Exit(1)
 		}
 	} else {
@@ -139,7 +161,7 @@ func EjectInfo(pkg string) PkgInfo {
 }
 
 func GetDefaultBranch(link string) string {
-	out, err := core.SystemCallf("git remote show %s | sed -n '/HEAD branch/s/.*: //p'", link)
+	out, err := system.SystemCallf("git remote show %s | sed -n '/HEAD branch/s/.*: //p'", link)
 	CheckErr(err)
 	return strings.Trim(out, "\n")
 }
@@ -149,14 +171,14 @@ func CheckIfInstalled(i PkgInfo) bool {
 	if _, packageExists := mp[i.FullName]; packageExists {
 		return true
 	}
-	_, err := core.SystemCall("pacman -Q " + i.ShortName)
+	_, err := system.Call("pacman -Q " + i.ShortName)
 	return err == nil
 }
 
 func ReadMapping() PackMap {
 	_, err := os.Stat(cfg.MapFile)
 	if err != nil {
-		core.AppendToFile(cfg.MapFile, "")
+		system.AppendToFile(cfg.MapFile, "")
 		return PackMap{}
 	}
 	b, err := os.ReadFile(cfg.MapFile)
@@ -170,7 +192,7 @@ func ReadMapping() PackMap {
 func PrepareRepo(i PkgInfo) {
 	CheckErr(os.Chdir(cfg.RepoCacheDir))
 	BluePrint("Cloning repository: ", i.HttpsLink)
-	out, err := core.SystemCallf("git clone %s", i.HttpsLink)
+	out, err := system.SystemCallf("git clone %s", i.HttpsLink)
 	CheckErr(os.Chdir(i.ShortName))
 	if strings.Contains(out, "already exists and is not an empty directory") {
 		YellowPrint("Repository exists: ", "pulling changes...")
@@ -181,6 +203,29 @@ func PrepareRepo(i PkgInfo) {
 	CheckErr(err)
 	BluePrint("Switching repo to version: ", i.Version)
 	ExecuteCheck("git checkout " + i.Version)
+}
+
+func ReadPkgbuildInfo() PkgbuildInfo {
+	_, err := os.Stat("PKGBUILD")
+	if err != nil {
+		return PkgbuildInfo{PkgbuildExists: false}
+	}
+	var deps []string
+	rundeps, err := system.Call("export PKGBUILD;echo $depends")
+	CheckErr(err)
+	if rundeps != "\n" {
+		deps = strings.Split(strings.Trim("\n", rundeps), " ")
+	}
+	makedeps, err := system.Call("export PKGBUILD;echo $makedepends")
+	CheckErr(err)
+	if makedeps != "\n" {
+		deps = append(deps, strings.Split(strings.Trim("\n", makedeps), " ")...)
+	}
+	YellowPrint("Installing with: ", "PKGBUILD")
+	return PkgbuildInfo{
+		PkgbuildExists: true,
+		Dependencies:   deps,
+	}
 }
 
 func ReadPackYml() PackYml {
@@ -207,7 +252,7 @@ func SplitDependencies(deps []string) ([]string, []string) {
 
 func ResolvePacmanDeps(pkgs []string) {
 	for _, pkg := range pkgs {
-		_, err := core.SystemCall("pacman -Q " + pkg)
+		_, err := system.Call("pacman -Q " + pkg)
 		if err != nil {
 			BluePrint("Gettings dependecy package: ", pkg)
 			ExecuteCheck("sudo pacman --noconfirm -Sy " + pkg)
@@ -238,7 +283,7 @@ func GeneratePkgbuild(i PkgInfo, y PackYml) {
 	}
 	install := strings.Join(installScripts, "\n  ")
 	pkgb := fmt.Sprintf(pkgbuildTmpl, i.ShortName, i.Version, i.HttpsLink, deps, makedeps, install)
-	CheckErr(core.WriteFile("PKGBUILD", pkgb))
+	CheckErr(system.WriteFile("PKGBUILD", pkgb))
 }
 
 func FormatInstallSrc(src string, dst string) string {
@@ -256,7 +301,7 @@ func InstallPackage() {
 }
 
 func AddToMapping(i PkgInfo) {
-	err := core.AppendToFile(cfg.MapFile, fmt.Sprintf("%s: %s", i.FullName, i.ShortName))
+	err := system.AppendToFile(cfg.MapFile, fmt.Sprintf("%s: %s", i.FullName, i.ShortName))
 	CheckErr(err)
 }
 

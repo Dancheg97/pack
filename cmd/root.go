@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"fmnx.io/dev/pack/config"
-	"fmnx.io/dev/pack/core"
+	"fmnx.io/dev/pack/system"
 	"github.com/fatih/color"
 	"github.com/nightlyone/lockfile"
 	"github.com/spf13/cobra"
@@ -55,6 +55,7 @@ func init() {
 
 	conf, err := config.GetConfig()
 	CheckErr(err)
+	system.Debug = conf.DebugMode
 	cfg = conf
 	lock, err := lockfile.New(conf.LockFile)
 	CheckErr(err)
@@ -80,7 +81,7 @@ func CheckErr(err error) {
 }
 
 func ExecuteCheck(script string) {
-	out, err := core.SystemCall(script)
+	out, err := system.Call(script)
 	if err != nil {
 		RedPrint("Command did not succed: ", script)
 		fmt.Println("System output: ", out)

@@ -6,7 +6,6 @@ pkgrel="1"
 pkgdesc="📦 git-based pacman-compatible package manager."
 arch=("x86_64")
 url="https://fmnx.io/dev/pack"
-options=(!lto)
 license=("GPL3")
 makedepends=(
   "go"

@@ -1,4 +1,4 @@
-package core
+package system
 
 import (
 	"bytes"
@@ -6,15 +6,23 @@ import (
 	"os/exec"
 )
 
+var Debug = false
+
 func SystemCallf(format string, a ...any) (string, error) {
-	return SystemCall(fmt.Sprintf(format, a...))
+	return Call(fmt.Sprintf(format, a...))
 }
 
-func SystemCall(cmd string) (string, error) {
+func Call(cmd string) (string, error) {
+	if Debug {
+		fmt.Println("Syscall - executing: ", cmd)
+	}
 	commad := exec.Command("bash", "-c", cmd)
 	var buf bytes.Buffer
 	commad.Stdout = &buf
 	commad.Stderr = &buf
+	if Debug {
+		fmt.Println("Syscall - output: ", buf.String())
+	}
 	err := commad.Run()
 	return buf.String(), err
 }

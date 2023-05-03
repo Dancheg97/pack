@@ -5,7 +5,7 @@ import (
 	"os"
 	"os/user"
 
-	"fmnx.io/dev/pack/core"
+	"fmnx.io/dev/pack/system"
 	"gopkg.in/yaml.v2"
 )
 
@@ -13,6 +13,8 @@ const DefaultConfig = `# Remove git repositroy after package installation
 remove-git-repo: false
 # Remove .pkg.tar.zst file after installation
 remove-built-packages: false
+# Print additional debug information
+debug-mode: false
 # Cache dir for repositories
 repo-cache-dir: %s/.pack
 # Where pack will store built .pkg.tar.zst files
@@ -26,6 +28,7 @@ lock-file: /tmp/pack.lock
 type Config struct {
 	RemoveGitRepos      bool   `yaml:"remove-git-repo"`
 	RemoveBuiltPackages bool   `yaml:"remove-built-packages"`
+	DebugMode           bool   `yaml:"debug-mode"`
 	RepoCacheDir        string `yaml:"repo-cache-dir"`
 	PackageCacheDir     string `yaml:"package-cache-dir"`
 	MapFile             string `yaml:"map-file"`
@@ -40,7 +43,7 @@ func GetConfig() (*Config, error) {
 	cfg, err := os.Stat(usr.HomeDir + "/.pack/config.yml")
 	if err != nil || cfg.IsDir() {
 		contents := fmt.Sprintf(DefaultConfig, usr.HomeDir, usr.HomeDir)
-		err = core.WriteFile(usr.HomeDir+"/.pack/config.yml", contents)
+		err = system.WriteFile(usr.HomeDir+"/.pack/config.yml", contents)
 		if err != nil {
 			return nil, err
 		}

@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"fmnx.io/dev/pack/core"
+	"fmnx.io/dev/pack/system"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 )
@@ -29,7 +29,7 @@ func Remove(cmd *cobra.Command, pkgs []string) {
 	for _, packpkg := range pkgs {
 		pacmanpkg, ok := mp[packpkg]
 		if !ok {
-			_, err := core.SystemCall("pacman -Q " + packpkg)
+			_, err := system.Call("pacman -Q " + packpkg)
 			if err != nil {
 				YellowPrint("Package not found, skipping: ", packpkg)
 				continue
@@ -46,10 +46,10 @@ func Remove(cmd *cobra.Command, pkgs []string) {
 
 func WriteMapping(m PackMap) {
 	if len(m) == 0 {
-		core.WriteFile(cfg.MapFile, "")
+		system.WriteFile(cfg.MapFile, "")
 		return
 	}
 	yamlData, err := yaml.Marshal(&m)
 	CheckErr(err)
-	core.WriteFile(cfg.MapFile, string(yamlData))
+	system.WriteFile(cfg.MapFile, string(yamlData))
 }

@@ -3,7 +3,7 @@ package cmd
 import (
 	"strings"
 
-	"fmnx.io/dev/pack/core"
+	"fmnx.io/dev/pack/system"
 	"github.com/spf13/cobra"
 )
 
@@ -29,15 +29,15 @@ To double check installation, you can run it inside pack docker.
 
 func Package(cmd *cobra.Command, pkgs []string) {
 	pack := ReadPackYml()
-	info := GetInfoFromRepo()
+	info := GetCurrentRepositoryInformation()
 	GeneratePkgbuild(info, pack)
 	GreenPrint("file generated: ", "PKGBUILD")
 	ExecuteCheck("makepkg")
 	GreenPrint("package build: ", "success")
 }
 
-func GetInfoFromRepo() PkgInfo {
-	out, err := core.SystemCall("git rev-parse --abbrev-ref HEAD")
+func GetCurrentRepositoryInformation() PkgInfo {
+	out, err := system.Call("git rev-parse --abbrev-ref HEAD")
 	CheckErr(err)
 	link := GetInstallLink()
 	splitted := strings.Split(link, "/")

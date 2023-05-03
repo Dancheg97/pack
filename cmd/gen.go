@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"fmnx.io/dev/pack/core"
+	"fmnx.io/dev/pack/system"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
@@ -60,9 +60,9 @@ pack get %s
 )
 
 func Gen(cmd *cobra.Command, args []string) {
-	core.WriteFile(".pack.yml", packYmlTemplate)
+	system.WriteFile(".pack.yml", packYmlTemplate)
 	insatllMd := fmt.Sprintf(readmeTemplate, "```", GetInstallLink(), "```")
-	core.AppendToFile("README.md", insatllMd)
+	system.AppendToFile("README.md", insatllMd)
 	fmt.Printf(
 		"Generated file: %s \nUpdated files: %s, %s\n",
 		color.RedString(".pack.yml"),
@@ -72,7 +72,7 @@ func Gen(cmd *cobra.Command, args []string) {
 }
 
 func GetInstallLink() string {
-	link, err := core.SystemCallf("git config --get remote.origin.url")
+	link, err := system.SystemCallf("git config --get remote.origin.url")
 	CheckErr(err)
 	link = strings.Trim(link, "\n")
 	link = strings.ReplaceAll(link, "https://", "")
