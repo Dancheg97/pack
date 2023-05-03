@@ -11,8 +11,8 @@ func init() {
 var updateCmd = &cobra.Command{
 	Use:     "update",
 	Aliases: []string{"upd", "u"},
-	Short:   "🔁 update packages",
-	Long: `🔁 update packages
+	Short:   "🗳️  update packages",
+	Long: `🗳️  update packages
 
 You can specify packages with versions, that you need them to update to, or 
 provide provide just links to get latest version from default branch.

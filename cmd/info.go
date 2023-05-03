@@ -17,8 +17,8 @@ func init() {
 var infoCmd = &cobra.Command{
 	Use:     "info",
 	Aliases: []string{"i"},
-	Short:   "🏷️  view information about package",
-	Long: `🏷️  view information about package
+	Short:   "🪪  view information about package",
+	Long: `🪪  view information about package
 
 This tool provides information about package retrieved from pacman.
 

@@ -14,8 +14,8 @@ func init() {
 var removeCmd = &cobra.Command{
 	Use:     "remove",
 	Aliases: []string{"rm", "r"},
-	Short:   "🚫 remove packages",
-	Long: `🚫 remove packages
+	Short:   "❌ remove packages",
+	Long: `❌ remove packages
 
 Use this command to remove packages from system. You can specify both pacman 
 packages and pack links.
@@ -27,6 +27,7 @@ pack rm fmnx.io/dev/ainst`,
 
 func Remove(cmd *cobra.Command, pkgs []string) {
 	mp := ReadMapping()
+	revmp := ReverseMapping(mp)
 	for _, pkg := range pkgs {
 		pacmanpkg, ok := mp[pkg]
 		if !ok {
@@ -35,6 +36,7 @@ func Remove(cmd *cobra.Command, pkgs []string) {
 				YellowPrint("Package not found, skipping: ", pkg)
 				continue
 			}
+			delete(mp, revmp[pkg])
 			ExecuteCheck("sudo pacman --noconfirm -R " + pkg)
 			continue
 		}
@@ -56,4 +58,12 @@ func WriteMapping(m PackMap) {
 	jsonData, err := json.Marshal(&m)
 	CheckErr(err)
 	system.WriteFile(cfg.MapFile, string(jsonData))
+}
+
+func ReverseMapping(in map[string]string) map[string]string {
+	r := map[string]string{}
+	for k, v := range in {
+		r[v] = k
+	}
+	return r
 }
