@@ -92,10 +92,15 @@ func Get(cmd *cobra.Command, pkgs []string) {
 			out, err := system.Call("sudo pacman --noconfirm -Sy " + pkg)
 			if err != nil {
 				if strings.Contains(out, "target not found") {
+					if cfg.AllowAUR {
+						BluePrint("Installing package from AUR: ", pkg)
+						Get(cmd, []string{"aur.archlinux.org/" + pkg})
+						continue
+					}
 					RedPrint("Pacman package not found: ", pkg)
 					fmt.Printf("Use pack for aur.archlinux.org/%s? [Y/n]\n", pkg)
 					confirmed := input.AskForConfirmation()
-					if confirmed || cfg.AllowAUR {
+					if confirmed {
 						Get(cmd, []string{"aur.archlinux.org/" + pkg})
 						continue
 					}
@@ -106,7 +111,7 @@ func Get(cmd *cobra.Command, pkgs []string) {
 				fmt.Println("Pacman output: ", out)
 			}
 			CheckErr(err)
-			GreenPrint("Installed: ", info.FullName+" - OK")
+			GreenPrint("Installation complete: ", info.FullName)
 			continue
 		}
 		PrepareRepo(info)
@@ -123,7 +128,7 @@ func Get(cmd *cobra.Command, pkgs []string) {
 		CachePkgTarZst()
 		AddToMapping(info)
 		CleanGitDir(info.ShortName)
-		GreenPrint("Package installed: ", info.FullName)
+		GreenPrint("Installation complete: ", info.FullName)
 	}
 }
 
