@@ -88,7 +88,7 @@ func Get(cmd *cobra.Command, pkgs []string) {
 			continue
 		}
 		if info.IsPacman {
-			BluePrint("Installing package with pacman: ", info.FullName)
+			BluePrint("Trying to install with pacman: ", info.FullName)
 			out, err := system.Call("sudo pacman --noconfirm -Sy " + pkg)
 			if err != nil {
 				if strings.Contains(out, "target not found") {
@@ -204,9 +204,15 @@ func ReadPkgbuildInfo() PkgbuildInfo {
 		return PkgbuildInfo{Exists: false}
 	}
 	deps, err := system.EjectShList("PKGBUILD", "depends")
-	CheckErr(err)
+	if cfg.DebugMode {
+		YellowPrint("Dependencies: ", strings.Join(deps, " "))
+		RedPrint("Errror: ", err.Error())
+	}
 	buildeps, err := system.EjectShList("PKGBUILD", "makedepends")
-	CheckErr(err)
+	if cfg.DebugMode {
+		YellowPrint("Build dependencies: ", strings.Join(deps, " "))
+		RedPrint("Errror: ", err.Error())
+	}
 	YellowPrint("Installing with: ", "PKGBUILD")
 	return PkgbuildInfo{
 		Exists: true,
