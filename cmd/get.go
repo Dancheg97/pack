@@ -124,7 +124,7 @@ func Get(cmd *cobra.Command, pkgs []string) {
 		InstallPackage()
 		CachePkgTarZst()
 		AddToMapping(info)
-		CleanGitDir()
+		CleanGitDir(info.ShortName)
 		GreenPrint("Package installed: ", info.FullName)
 	}
 }
@@ -296,11 +296,17 @@ func AddToMapping(i PkgInfo) {
 	WriteMapping(mp)
 }
 
-func CleanGitDir() {
-	ExecuteCheck("git clean -fd")
-	ExecuteCheck("git reset --hard")
+func CleanGitDir(repo string) {
+	if !cfg.RemoveGitRepos {
+		ExecuteCheck("git clean -fd")
+		ExecuteCheck("git reset --hard")
+		return
+	}
+	ExecuteCheck("sudo rm -rf " + cfg.RepoCacheDir + "/" + repo)
 }
 
 func CachePkgTarZst() {
-	ExecuteCheck("sudo mv *.pkg.tar.zst " + cfg.PackageCacheDir)
+	if !cfg.RemoveBuiltPackages {
+		ExecuteCheck("sudo mv *.pkg.tar.zst " + cfg.PackageCacheDir)
+	}
 }
