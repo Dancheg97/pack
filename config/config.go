@@ -15,6 +15,8 @@ remove-git-repo: false
 remove-built-packages: false
 # Print additional debug information
 debug-mode: false
+# Always OK to AUR packages
+allow-aur: false
 # Cache dir for repositories
 repo-cache-dir: %s/.pack
 # Where pack will store built .pkg.tar.zst files
@@ -33,6 +35,7 @@ type Config struct {
 	PackageCacheDir     string `yaml:"package-cache-dir"`
 	MapFile             string `yaml:"map-file"`
 	LockFile            string `yaml:"lock-file"`
+	AllowAUR            string `yaml:"allow-aur"`
 }
 
 func GetConfig() (*Config, error) {

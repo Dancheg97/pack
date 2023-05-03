@@ -12,6 +12,19 @@ volumes:
       path: /var/run/docker.sock
 
 steps:
+  - name: build and push docker registry
+    image: docker
+    volumes:
+      - name: docker
+        path: /var/run/docker.sock
+    environment:
+      PASS:
+        from_secret: PASS
+    commands:
+      - docker build -t fmnx.io/$DRONE_REPO:latest .
+      - docker login -u dancheg97 -p $PASS fmnx.io
+      - docker push fmnx.io/$DRONE_REPO:latest
+
   - name: push github mirror
     image: appleboy/drone-git-push
     settings:

@@ -24,8 +24,8 @@ Additional Commands:{{range $cmds}}{{if (and (eq .GroupID "") (or .IsAvailableCo
 
 var rootCmd = &cobra.Command{
 	Use:   "pack",
-	Short: "📦 git-based pacman-compatible package manager.",
-	Long: `📦 git-based pacman-compatible package manager.
+	Short: "📦 git based arch compatible package manager.",
+	Long: `📦 git based arch compatible package manager.
 
 This utility accumulates power of git and pacman to provide decentralized way
 of arch package distribution. Find more info at https://fmnx.io/dev/pack.

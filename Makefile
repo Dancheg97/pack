@@ -1,4 +1,8 @@
 
+docker:
+	docker build -t fmnx.io/core/pack:latest .
+	docker run --rm -it fmnx.io/core/pack --help
+
 clean:
 	sudo rm -rf ~/.pack
 	sudo rm -f pack
