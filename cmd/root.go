@@ -92,17 +92,33 @@ func ExecuteCheck(script string) {
 }
 
 func RedPrint(white string, red string) {
+	if cfg.DisablePrettyPrint {
+		fmt.Printf(white + red + "\n")
+		return
+	}
 	fmt.Printf(white + color.RedString(red) + "\n")
 }
 
 func BluePrint(white string, blue string) {
+	if cfg.DisablePrettyPrint {
+		fmt.Printf(white + blue + "\n")
+		return
+	}
 	fmt.Printf(white + color.BlueString(blue) + "\n")
 }
 
 func GreenPrint(white string, green string) {
+	if cfg.DisablePrettyPrint {
+		fmt.Printf(white + green + "\n")
+		return
+	}
 	fmt.Printf(white + color.GreenString(green) + "\n")
 }
 
 func YellowPrint(white string, yellow string) {
+	if cfg.DisablePrettyPrint {
+		fmt.Printf(white + yellow + "\n")
+		return
+	}
 	fmt.Printf(white + color.YellowString(yellow) + "\n")
 }

@@ -18,6 +18,8 @@ remove-built-packages: %t
 debug-mode: %t
 # Always OK to AUR packages
 allow-aur: %t
+# Disable colors in output
+pack-disable-prettyprint: %t
 # Cache dir for repositories
 repo-cache-dir: %s/.pack
 # Where pack will store built .pkg.tar.zst files
@@ -33,6 +35,7 @@ type EnvVars struct {
 	RemoveBuiltPackages bool `env:"PACK_REMOVE_BUILT_PACKAGES" envDefault:"false"`
 	DebugMode           bool `env:"PACK_DEBUG_MODE" envDefault:"false"`
 	AllowAUR            bool `env:"PACK_ALLOW_AUR" envDefault:"false"`
+	DisablePrettyPrint  bool `env:"PACK_DISABLE_PRETTYPRINT" envDefault:"false"`
 }
 
 type Config struct {
@@ -40,6 +43,7 @@ type Config struct {
 	RemoveBuiltPackages bool   `yaml:"remove-built-packages"`
 	DebugMode           bool   `yaml:"debug-mode"`
 	AllowAUR            bool   `yaml:"allow-aur"`
+	DisablePrettyPrint  bool   `yaml:"pack-disable-prettyprint"`
 	RepoCacheDir        string `yaml:"repo-cache-dir"`
 	PackageCacheDir     string `yaml:"package-cache-dir"`
 	MapFile             string `yaml:"map-file"`
@@ -63,6 +67,7 @@ func GetConfig() (*Config, error) {
 			envs.RemoveGitRepos,
 			envs.RemoveBuiltPackages,
 			envs.DebugMode,
+			envs.DisablePrettyPrint,
 			envs.AllowAUR,
 			usr.HomeDir,
 			usr.HomeDir,
@@ -75,6 +80,7 @@ func GetConfig() (*Config, error) {
 			RemoveBuiltPackages: envs.RemoveBuiltPackages,
 			DebugMode:           envs.DebugMode,
 			AllowAUR:            envs.AllowAUR,
+			DisablePrettyPrint:  envs.DisablePrettyPrint,
 			RepoCacheDir:        usr.HomeDir + "/.pack",
 			PackageCacheDir:     "/var/cache/pacman/pkg",
 			MapFile:             usr.HomeDir + "/.pack/mapping.json",
