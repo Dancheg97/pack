@@ -2,6 +2,7 @@
 docker:
 	docker build -t fmnx.io/core/pack:latest .
 	docker run --rm -it fmnx.io/core/pack --help
+	docker run --rm -it fmnx.io/core/pack info pack
 
 clean:
 	sudo rm -rf ~/.pack

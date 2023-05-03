@@ -11,9 +11,10 @@ RUN echo "$user ALL=(ALL:ALL) NOPASSWD:ALL" > /etc/sudoers.d/$user
 USER $user
 WORKDIR /home/$user
 
-RUN git clone https://fmnx.io/core/pack && cd pack && makepkg --noconfirm -sfri
+RUN git clone  https://fmnx.io/core/pack && cd pack && makepkg --noconfirm -sfri
 RUN sudo mv /home/$user/pack/*.pkg.tar.zst /var/cache/pacman/pkg
 RUN sudo rm -r /home/$user/pack
+RUN sudo rm -r /home/$user/go
 RUN sudo pacman --noconfirm -R wget go
 
 ENTRYPOINT ["pack"]
