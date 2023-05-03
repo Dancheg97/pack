@@ -9,7 +9,7 @@
 [![Generic badge](https://img.shields.io/badge/GITHUB-REPO-white.svg)](https://github.com/fmnx-io/pack)
 [![Build Status](https://ci.fmnx.io/api/badges/dev/repo/status.svg)](https://ci.fmnx.io/dev/pack)
 
-Distributed package manager, based on git and pacman. Accumulates power of both `git` and `pacman` to provide easier way to create arch-compatible packages and distribute them using git links.
+Distributed package manager based on git and pacman. Accumulates power of both `git` and `pacman` to provide easier way to create arch-compatible packages and distribute them using git links.
 
 💾 Single line installation script:
 
@@ -21,11 +21,11 @@ git clone https://fmnx.io/dev/pack && cd pack && makepkg --noconfirm -sfri
 
 ### 🚀 Features:
 
-- Install and update packages using git links
+- Install and update packages using git links (also allows to install AUR packages)
 - Compatability with all arch based distros
 - Simple to write configuration - `.pack.yml`
 
-Configuration [example](add_fl_tmp_link) for flutter project:
+Configuration example for flutter project:
 
 ```yml
 # Dependencies, that are required for project at runtime.
@@ -49,7 +49,7 @@ mapping:
   build/linux/x64/release/bundle: /usr/share/flutter-fmnx-package
 ```
 
-Configuration [example](add_fl_tmp_link) for go cli tool:
+Configuration example for go cli tool:
 
 ```yml
 build-deps:
@@ -72,18 +72,10 @@ You can find all commands and description by running `pack -h`.
 pack get link.sh/owner/pkg
 ```
 
-```sh
-pack get link.sh/owner/pkg1@v0.12 link.sh/owner/pkg2@latest
-```
-
 - `update` - if no arguements provided, all packages would be updated, starting from pacman packages
 
 ```sh
 pack update
-```
-
-```sh
-pack update link.sh/owner/pkg1 link.sh/owner/pkg2
 ```
 
 - `remove` - remove package from system
