@@ -121,7 +121,7 @@ func Get(cmd *cobra.Command, pkgs []string) {
 			Get(cmd, pkgbuildInfo.Dependencies)
 		}
 		InstallPackage()
-		// Move package to cache
+		CachePkgTarZst()
 		AddToMapping(info)
 		CleanGitDir()
 		GreenPrint("Package installed: ", info.FullName)
@@ -301,11 +301,15 @@ func InstallPackage() {
 }
 
 func AddToMapping(i PkgInfo) {
-	err := system.AppendToFile(cfg.MapFile, fmt.Sprintf("%s: %s", i.FullName, i.ShortName))
+	err := system.AppendToFile(cfg.MapFile, fmt.Sprintf("%s: %s\n", i.FullName, i.ShortName))
 	CheckErr(err)
 }
 
 func CleanGitDir() {
 	ExecuteCheck("git clean -fd")
 	ExecuteCheck("git reset --hard")
+}
+
+func CachePkgTarZst() {
+	ExecuteCheck("sudo mv *.pkg.tar.zst " + cfg.PackageCacheDir)
 }
