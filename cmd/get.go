@@ -144,11 +144,6 @@ func FormPkgInfoFromLink(pkg string) PkgInfo {
 	version := ""
 	if len(strings.Split(pkg, "@")) == 1 {
 		version = GetDefaultBranch(httpslink)
-		if strings.Contains(version, "redirecting to") {
-			RedPrint("adress mismatch (redirected): ", httpslink)
-			lf.Unlock()
-			os.Exit(1)
-		}
 	} else {
 		version = strings.Split(pkg, "@")[1]
 	}
@@ -164,6 +159,16 @@ func FormPkgInfoFromLink(pkg string) PkgInfo {
 func GetDefaultBranch(link string) string {
 	out, err := system.SystemCallf("git remote show %s | sed -n '/HEAD branch/s/.*: //p'", link)
 	CheckErr(err)
+	if strings.Contains(out, "not a git repository") {
+		RedPrint("Unable to get default branch for: ", link)
+		lf.Unlock()
+		os.Exit(1)
+	}
+	if strings.Contains(out, "redirecting to") {
+		RedPrint("Adress mismatch (redirected): ", link)
+		lf.Unlock()
+		os.Exit(1)
+	}
 	return strings.Trim(out, "\n")
 }
 
