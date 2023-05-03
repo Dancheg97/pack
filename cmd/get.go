@@ -49,9 +49,8 @@ type PackYml struct {
 }
 
 type PkgbuildInfo struct {
-	PkgbuildExists bool
-	Dependencies   []string
-	BuildDeps      []string
+	Exists bool
+	Deps   []string
 }
 
 type PackMap map[string]string
@@ -112,14 +111,13 @@ func Get(cmd *cobra.Command, pkgs []string) {
 		}
 		PrepareRepo(info)
 		pkgbuildInfo := ReadPkgbuildInfo()
-		if !pkgbuildInfo.PkgbuildExists {
+		if !pkgbuildInfo.Exists {
 			packyml := ReadPackYml()
-			allDeps := append(packyml.RunDeps, packyml.BuildDeps...)
-			Get(cmd, allDeps)
+			Get(cmd, append(packyml.RunDeps, packyml.BuildDeps...))
 			BuildPackage(info, packyml)
 			GeneratePkgbuild(info, packyml)
 		} else {
-			Get(cmd, pkgbuildInfo.Dependencies)
+			Get(cmd, pkgbuildInfo.Deps)
 		}
 		InstallPackage()
 		CachePkgTarZst()
@@ -198,23 +196,16 @@ func PrepareRepo(i PkgInfo) {
 func ReadPkgbuildInfo() PkgbuildInfo {
 	_, err := os.Stat("PKGBUILD")
 	if err != nil {
-		return PkgbuildInfo{PkgbuildExists: false}
+		return PkgbuildInfo{Exists: false}
 	}
-	var deps []string
-	rundeps, err := system.Call("export PKGBUILD;echo $depends")
+	deps, err := system.EjectShList("PKGBUILD", "depends")
 	CheckErr(err)
-	if rundeps != "\n" {
-		deps = strings.Split(strings.Trim("\n", rundeps), " ")
-	}
-	makedeps, err := system.Call("export PKGBUILD;echo $makedepends")
+	buildeps, err := system.EjectShList("PKGBUILD", "makedepends")
 	CheckErr(err)
-	if makedeps != "\n" {
-		deps = append(deps, strings.Split(strings.Trim("\n", makedeps), " ")...)
-	}
 	YellowPrint("Installing with: ", "PKGBUILD")
 	return PkgbuildInfo{
-		PkgbuildExists: true,
-		Dependencies:   deps,
+		Exists: true,
+		Deps:   append(deps, buildeps...),
 	}
 }
 
