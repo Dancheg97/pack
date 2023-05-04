@@ -27,9 +27,12 @@ pack update git.xmpl.sh/pkg
 	Run: Update,
 }
 
+var Updating = false
+
 func Update(cmd *cobra.Command, pkgs []string) {
+	Updating = true
 	if len(pkgs) == 0 {
-		BluePrint("Updating all packages: ", "pacman&pack")
+		BluePrint("Starting pacman update: ", "pacman -Syu")
 		ExecuteCheck("sudo pacman --noconfirm -Syu")
 		for pkg := range ReadMapping() {
 			pkgs = append(pkgs, pkg)

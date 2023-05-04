@@ -158,6 +158,9 @@ func FormPkgInfoFromLink(pkg string) PkgInfo {
 }
 
 func CheckIfInstalled(i PkgInfo) bool {
+	if Updating {
+		return false
+	}
 	mp := ReadMapping()
 	if _, packageExists := mp[i.FullName]; packageExists {
 		return true
