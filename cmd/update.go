@@ -17,7 +17,7 @@ var updateCmd = &cobra.Command{
 You can specify packages with versions, that you need them to update to, or 
 provide provide just links to get latest version from default branch.
 
-If you don't specify any arguements, the whole system will be updated.
+If you don't specify any arguements, all packages will be updated.
 
 Examples:
 pack update
@@ -29,10 +29,11 @@ pack update git.xmpl.sh/pkg
 
 func Update(cmd *cobra.Command, pkgs []string) {
 	if len(pkgs) == 0 {
+		BluePrint("Updating all packages: ", "pacman&pack")
+		ExecuteCheck("sudo pacman --noconfirm -Syu")
 		for pkg := range ReadMapping() {
 			pkgs = append(pkgs, pkg)
 		}
-		ExecuteCheck("sudo pacman -Syu")
 	}
 	Get(cmd, pkgs)
 }
