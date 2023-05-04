@@ -213,13 +213,15 @@ func ReadPkgbuildInfo(pkgdir string) PkgbuildInfo {
 	}
 	deps, err := system.EjectShList("PKGBUILD", "depends")
 	CheckErr(err)
-	if cfg.DebugMode {
-		YellowPrint("Dependencies: ", strings.Join(deps, " "))
-	}
 	buildeps, err := system.EjectShList("PKGBUILD", "makedepends")
 	CheckErr(err)
 	if cfg.DebugMode {
-		YellowPrint("Build dependencies: ", strings.Join(buildeps, " "))
+		if len(deps) >= 0 {
+			YellowPrint("Dependencies "+pkgdir+": ", strings.Join(deps, " "))
+		}
+		if len(buildeps) >= 0 {
+			YellowPrint("Build dependencies "+pkgdir+": ", strings.Join(buildeps, " "))
+		}
 	}
 	YellowPrint("Installing with: ", "PKGBUILD")
 	return PkgbuildInfo{
