@@ -22,4 +22,4 @@ delpack:
 	pack remove fmnx.io/dev/install fmnx.io/dancheg97/flutter-fmnx-package
 
 test:
-	docker run --rm -it -e PACK_ALLOW_AUR=true -e PACK_DEBUG_MODE=true fmnx.io/core/pack get yamux aur.archlinux.org/yay aur.archlinux.org/visual-studio-code-bin
+	docker run --rm -it -e PACK_ALLOW_AUR=true -e PACK_DEBUG_MODE=true fmnx.io/core/pack get cmake clang qemu-desktop edk2-ovmf archiso archinstall aur.archlinux.org/zsh-theme-powerlevel10k-bin-git aur.archlinux.org/zsh-autosuggestions aur.archlinux.org/zsh-syntax-highlighting xdg-user-dirs-gtk aur.archlinux.org/adw-gtk3 aur.archlinux.org/papirus-icon-theme aur.archlinux.org/adw-gtk-theme aur.archlinux.org/gnome-browser-connector aur.archlinux.org/gnome-shell-extension-dash-to-dock aur.archlinux.org/onlyoffice-bin aur.archlinux.org/visual-studio-code-bin aur.archlinux.org/flutter aur.archlinux.org/buf-bin aur.archlinux.org/golangci-lint-bin aur.archlinux.org/protoc-gen-go-grpc aur.archlinux.org/bluez-utils aur.archlinux.org/gnome-shell-extension-dash-to-dock aur.archlinux.org/gnome-shell-extension-gtile aur.archlinux.org/neovim-git aur.archlinux.org/vlang

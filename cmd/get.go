@@ -118,7 +118,7 @@ func Get(cmd *cobra.Command, pkgs []string) {
 			continue
 		}
 		PrepareRepo(info)
-		pkgbuildInfo := ReadPkgbuildInfo()
+		pkgbuildInfo := ReadPkgbuildInfo(info.ShortName)
 		if !pkgbuildInfo.Exists {
 			packyml := ReadPackYml()
 			Get(cmd, append(packyml.RunDeps, packyml.BuildDeps...))
@@ -187,26 +187,26 @@ func ReadMapping() PackMap {
 }
 
 func PrepareRepo(i PkgInfo) {
-	CheckErr(os.Chdir(cfg.RepoCacheDir))
+	Chdir(cfg.RepoCacheDir)
 	BluePrint("Cloning repository: ", i.HttpsLink)
 	out, err := system.SystemCallf("git clone %s", i.HttpsLink)
 	if err != nil && strings.Contains(out, "already exists and is not an empty directory") {
-		CheckErr(os.Chdir(i.ShortName))
+		Chdir(cfg.RepoCacheDir + `/` + i.ShortName)
 		YellowPrint("Repository exists: ", "pulling changes...")
 		ExecuteCheck("git pull")
 		GreenPrint("Changes pulled: ", "success")
 		err = nil
 	}
 	CheckErr(err)
-	CheckErr(os.Chdir(cfg.RepoCacheDir))
 	if i.Version != `latest` {
-		CheckErr(os.Chdir(i.ShortName))
+		Chdir(cfg.RepoCacheDir + `/` + i.ShortName)
 		BluePrint("Switching repo to version: ", i.Version)
 		ExecuteCheck("git checkout " + i.Version)
 	}
 }
 
-func ReadPkgbuildInfo() PkgbuildInfo {
+func ReadPkgbuildInfo(pkgdir string) PkgbuildInfo {
+	Chdir(cfg.RepoCacheDir + `/` + pkgdir)
 	_, err := os.Stat("PKGBUILD")
 	if err != nil {
 		return PkgbuildInfo{Exists: false}
@@ -261,7 +261,7 @@ func ResolvePacmanDeps(pkgs []string) {
 }
 
 func BuildPackage(i PkgInfo, y PackYml) {
-	CheckErr(os.Chdir(cfg.RepoCacheDir + "/" + i.ShortName))
+	Chdir(cfg.RepoCacheDir + "/" + i.ShortName)
 	for _, script := range y.BuildScripts {
 		BluePrint("Executing build script: ", script)
 		ExecuteCheck(script)

@@ -92,6 +92,10 @@ func ExecuteCheck(script string) {
 	}
 }
 
+func Chdir(dir string) {
+	CheckErr(os.Chdir(dir))
+}
+
 func RedPrint(white string, red string) {
 	if cfg.DisablePrettyPrint {
 		fmt.Printf(white + red + "\n")
