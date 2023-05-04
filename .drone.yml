@@ -17,23 +17,11 @@ steps:
     volumes:
       - name: docker
         path: /var/run/docker.sock
-    commands:
-      - docker build -t fmnx.io/core/pack:latest .
-  
-  - name: docker test
-    image: fmnx.io/core/pack:latest
-    commands:
-      - pack get cmake clang bluez-utils qemu-desktop edk2-ovmf archiso archinstall xdg-user-dirs-gtk fmnx.io/pkg/gnome-browser-connector fmnx.io/pkg/zsh-theme-powerlevel10k-bin-git fmnx.io/pkg/zsh-autosuggestions fmnx.io/pkg/zsh-syntax-highlighting-git fmnx.io/pkg/adw-gtk3 fmnx.io/pkg/papirus-icon-theme fmnx.io/pkg/adw-gtk-theme fmnx.io/pkg/gnome-shell-extension-dash-to-dock fmnx.io/pkg/onlyoffice-bin fmnx.io/pkg/visual-studio-code-bin fmnx.io/pkg/flutter fmnx.io/pkg/buf-bin fmnx.io/pkg/golangci-lint-bin fmnx.io/pkg/protoc-gen-go fmnx.io/pkg/protoc-gen-go-grpc fmnx.io/pkg/gnome-shell-extension-dash-to-dock fmnx.io/pkg/gnome-shell-extension-gtile fmnx.io/pkg/neovim-git fmnx.io/pkg/vlang
-
-  - name: docker push
-    image: docker
-    volumes:
-      - name: docker
-        path: /var/run/docker.sock
     environment:
       PASS:
         from_secret: PASS
     commands:
+      - docker build -t fmnx.io/core/pack:latest .
       - docker login -u dancheg97 -p $PASS fmnx.io
       - docker push fmnx.io/core/pack:latest
 
