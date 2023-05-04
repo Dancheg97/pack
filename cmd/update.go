@@ -32,6 +32,7 @@ func Update(cmd *cobra.Command, pkgs []string) {
 		for pkg := range ReadMapping() {
 			pkgs = append(pkgs, pkg)
 		}
+		ExecuteCheck("sudo pacman -Syu")
 	}
 	Get(cmd, pkgs)
 }

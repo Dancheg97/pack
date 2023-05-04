@@ -110,6 +110,5 @@ pack list
 - `gen` - generate `.pack.yml` and update `.gitignore` and `README.md`
 
 <!--
-Add package listing in pack same way as it is in yay.
 Group pacman packages before installation.
 -->
