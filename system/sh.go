@@ -34,7 +34,5 @@ func SplitParams(params string) []string {
 func CleanParameter(param string) string {
 	param = strings.ReplaceAll(param, "'", "")
 	param = strings.ReplaceAll(param, "\"", "")
-	param = strings.Split(param, "=")[0]
-	param = strings.Split(param, ">")[0]
 	return param
 }

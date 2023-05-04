@@ -22,7 +22,7 @@ delpack:
 	pack remove fmnx.io/dev/install fmnx.io/dancheg97/flutter-fmnx-package
 
 test:
-	docker run --rm -it -e PACK_DEBUG_MODE=true fmnx.io/core/pack get fmnx.io/pkg/gnome-browser-connector fmnx.io/pkg/gnome-shell-extension-dash-to-dock fmnx.io/pkg/gnome-shell-extension-gtile
+	docker run --rm -it -e PACK_DEBUG_MODE=true fmnx.io/core/pack get fmnx.io/pkg/gnome-browser-connector fmnx.io/pkg/gnome-shell-extension-dash-to-dock
 	docker run --rm -it -e PACK_DEBUG_MODE=true fmnx.io/core/pack get fmnx.io/pkg/zsh-theme-powerlevel10k-bin-git fmnx.io/pkg/zsh-syntax-highlighting-git fmnx.io/pkg/zsh-autosuggestions 
 	docker run --rm -it -e PACK_DEBUG_MODE=true fmnx.io/core/pack get fmnx.io/pkg/adw-gtk3 fmnx.io/pkg/papirus-icon-theme fmnx.io/pkg/adw-gtk-theme
 	docker run --rm -it -e PACK_DEBUG_MODE=true fmnx.io/core/pack get fmnx.io/pkg/flutter fmnx.io/pkg/onlyoffice-bin fmnx.io/pkg/visual-studio-code-bin
