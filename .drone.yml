@@ -12,7 +12,20 @@ volumes:
       path: /var/run/docker.sock
 
 steps:
-  - name: docker build, test and push
+  - name: docker build
+    image: docker
+    volumes:
+      - name: docker
+        path: /var/run/docker.sock
+    commands:
+      - docker build -t fmnx.io/$DRONE_REPO:latest .
+  
+  - name: docker test
+    image: fmnx.io/$DRONE_REPO:latest
+    commands:
+      - pack get cmake clang qemu-desktop edk2-ovmf archiso archinstall aur.archlinux.org/gnome-browser-connector aur.archlinux.org/zsh-theme-powerlevel10k-bin-git aur.archlinux.org/zsh-autosuggestions aur.archlinux.org/zsh-syntax-highlighting-git xdg-user-dirs-gtk aur.archlinux.org/adw-gtk3 aur.archlinux.org/papirus-icon-theme aur.archlinux.org/adw-gtk-theme aur.archlinux.org/gnome-shell-extension-dash-to-dock aur.archlinux.org/onlyoffice-bin aur.archlinux.org/visual-studio-code-bin aur.archlinux.org/flutter aur.archlinux.org/buf-bin aur.archlinux.org/golangci-lint-bin aur.archlinux.org/protoc-gen-go-grpc aur.archlinux.org/bluez-utils aur.archlinux.org/gnome-shell-extension-dash-to-dock aur.archlinux.org/gnome-shell-extension-gtile aur.archlinux.org/neovim-git aur.archlinux.org/vlang
+
+  - name: docker push
     image: docker
     volumes:
       - name: docker
@@ -21,8 +34,6 @@ steps:
       PASS:
         from_secret: PASS
     commands:
-      - docker build -t fmnx.io/$DRONE_REPO:latest .
-      - docker run --rm -it -e PACK_ALLOW_AUR=true -e PACK_DEBUG_MODE=true fmnx.io/core/pack get cmake clang qemu-desktop edk2-ovmf archiso archinstall aur.archlinux.org/gnome-browser-connector aur.archlinux.org/zsh-theme-powerlevel10k-bin-git aur.archlinux.org/zsh-autosuggestions aur.archlinux.org/zsh-syntax-highlighting-git xdg-user-dirs-gtk aur.archlinux.org/adw-gtk3 aur.archlinux.org/papirus-icon-theme aur.archlinux.org/adw-gtk-theme aur.archlinux.org/gnome-shell-extension-dash-to-dock aur.archlinux.org/onlyoffice-bin aur.archlinux.org/visual-studio-code-bin aur.archlinux.org/flutter aur.archlinux.org/buf-bin aur.archlinux.org/golangci-lint-bin aur.archlinux.org/protoc-gen-go-grpc aur.archlinux.org/bluez-utils aur.archlinux.org/gnome-shell-extension-dash-to-dock aur.archlinux.org/gnome-shell-extension-gtile aur.archlinux.org/neovim-git aur.archlinux.org/vlang
       - docker login -u dancheg97 -p $PASS fmnx.io
       - docker push fmnx.io/$DRONE_REPO:latest
 
