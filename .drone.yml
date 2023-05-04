@@ -18,10 +18,10 @@ steps:
       - name: docker
         path: /var/run/docker.sock
     commands:
-      - docker build -t fmnx.io/$DRONE_REPO:latest .
+      - docker build -t fmnx.io/core/pack:latest .
   
   - name: docker test
-    image: fmnx.io/$DRONE_REPO:latest
+    image: fmnx.io/core/pack:latest
     commands:
       - pack get cmake clang qemu-desktop edk2-ovmf archiso archinstall aur.archlinux.org/gnome-browser-connector aur.archlinux.org/zsh-theme-powerlevel10k-bin-git aur.archlinux.org/zsh-autosuggestions aur.archlinux.org/zsh-syntax-highlighting-git xdg-user-dirs-gtk aur.archlinux.org/adw-gtk3 aur.archlinux.org/papirus-icon-theme aur.archlinux.org/adw-gtk-theme aur.archlinux.org/gnome-shell-extension-dash-to-dock aur.archlinux.org/onlyoffice-bin aur.archlinux.org/visual-studio-code-bin aur.archlinux.org/flutter aur.archlinux.org/buf-bin aur.archlinux.org/golangci-lint-bin aur.archlinux.org/protoc-gen-go-grpc aur.archlinux.org/bluez-utils aur.archlinux.org/gnome-shell-extension-dash-to-dock aur.archlinux.org/gnome-shell-extension-gtile aur.archlinux.org/neovim-git aur.archlinux.org/vlang
 
@@ -35,7 +35,7 @@ steps:
         from_secret: PASS
     commands:
       - docker login -u dancheg97 -p $PASS fmnx.io
-      - docker push fmnx.io/$DRONE_REPO:latest
+      - docker push fmnx.io/core/pack:latest
 
   - name: push github mirror
     image: appleboy/drone-git-push
