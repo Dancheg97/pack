@@ -3,6 +3,8 @@ package system
 import (
 	"bytes"
 	"fmt"
+	"io"
+	"os"
 	"os/exec"
 )
 
@@ -18,11 +20,13 @@ func Call(cmd string) (string, error) {
 	}
 	commad := exec.Command("bash", "-c", cmd)
 	var buf bytes.Buffer
-	commad.Stdout = &buf
-	commad.Stderr = &buf
-	err := commad.Run()
 	if Debug {
-		fmt.Println("Syscall - output: ", buf.String())
+		commad.Stdout = io.MultiWriter(&buf, os.Stdout)
+		commad.Stderr = io.MultiWriter(&buf, os.Stderr)
+	} else {
+		commad.Stdout = &buf
+		commad.Stderr = &buf
 	}
+	err := commad.Run()
 	return buf.String(), err
 }

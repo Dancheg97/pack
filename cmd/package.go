@@ -29,6 +29,10 @@ To double check installation, you can run it inside pack docker.
 
 func Package(cmd *cobra.Command, pkgs []string) {
 	pack := ReadPackYml()
+	for _, script := range pack.BuildScripts {
+		system.Debug = true
+		ExecuteCheck(script)
+	}
 	info := GetCurrentRepositoryInformation()
 	GeneratePkgbuild(info, pack)
 	GreenPrint("file generated: ", "PKGBUILD")
