@@ -28,13 +28,14 @@ var rootCmd = &cobra.Command{
 	Long: `📦 git based arch compatible package manager.
 
 This utility accumulates power of git and pacman to provide decentralized way
-of arch package distribution. Find more info at https://fmnx.io/dev/pack.
+of arch package distribution. Pack config: '~/.pack/config.yml'. Find more 
+information at https://fmnx.io/dev/pack.
 
 Usage:
 pack [command] <package(s)>
 
 Example:
-pack get fmnx.io/dev/ainst`,
+pack get fmnx.io/core/ainst`,
 	SilenceUsage: true,
 	CompletionOptions: cobra.CompletionOptions{
 		DisableDefaultCmd:   true,

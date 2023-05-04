@@ -16,7 +16,7 @@ remove-git-repo: %t
 remove-built-packages: %t
 # Print additional debug information
 debug-mode: %t
-# Always OK to AUR packages
+# Always say yes to AUR packages
 allow-aur: %t
 # Disable colors in output
 pack-disable-prettyprint: %t
