@@ -20,4 +20,4 @@ RUN sudo rm -r /home/$user/go
 RUN sudo pacman --noconfirm -R wget go
 
 ENTRYPOINT ["pack"]
-CMD ["help"]
+CMD ["-h"]
