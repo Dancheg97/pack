@@ -81,6 +81,9 @@ func Get(cmd *cobra.Command, pkgs []string) {
 		err = system.PrepareDir(cfg.PackageCacheDir)
 		CheckErr(err)
 	}
+	// Exclude installed packages
+	// Try to install evrything with pacman, exclude what's installed
+	// Install the rest
 	for _, pkg := range pkgs {
 		info := FormPkgInfoFromLink(pkg)
 		if CheckIfInstalled(info) {
@@ -124,7 +127,7 @@ func Get(cmd *cobra.Command, pkgs []string) {
 		} else {
 			Get(cmd, pkgbuildInfo.Deps)
 		}
-		InstallPackage()
+		InstallPackage(info.FullName)
 		CachePkgTarZst()
 		AddToMapping(info)
 		CleanGitDir(info.ShortName)
@@ -187,15 +190,17 @@ func PrepareRepo(i PkgInfo) {
 	CheckErr(os.Chdir(cfg.RepoCacheDir))
 	BluePrint("Cloning repository: ", i.HttpsLink)
 	out, err := system.SystemCallf("git clone %s", i.HttpsLink)
-	CheckErr(os.Chdir(i.ShortName))
-	if strings.Contains(out, "already exists and is not an empty directory") {
+	if err != nil && strings.Contains(out, "already exists and is not an empty directory") {
+		CheckErr(os.Chdir(i.ShortName))
 		YellowPrint("Repository exists: ", "pulling changes...")
 		ExecuteCheck("git pull")
 		GreenPrint("Changes pulled: ", "success")
 		err = nil
 	}
 	CheckErr(err)
+	CheckErr(os.Chdir(cfg.RepoCacheDir))
 	if i.Version != `latest` {
+		CheckErr(os.Chdir(i.ShortName))
 		BluePrint("Switching repo to version: ", i.Version)
 		ExecuteCheck("git checkout " + i.Version)
 	}
@@ -290,8 +295,8 @@ func FormatInstallSrc(src string, dst string) string {
 	return fmt.Sprintf(`install -Dm755 %s "${pkgdir}%s"`, src, dst)
 }
 
-func InstallPackage() {
-	BluePrint("Building and installing package: ", "makepkg -sfri")
+func InstallPackage(pkg string) {
+	BluePrint("Building and installing package: ", pkg)
 	ExecuteCheck("makepkg --noconfirm -sfri")
 }
 
