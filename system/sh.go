@@ -1,7 +1,6 @@
 package system
 
 import (
-	"fmt"
 	"os"
 	"strings"
 )
@@ -13,7 +12,7 @@ func EjectShList(file string, param string) ([]string, error) {
 	}
 	splitted := strings.Split(string(f), param+"=(")
 	if len(splitted) < 2 {
-		return nil, fmt.Errorf("unable to find parameter")
+		return nil, nil
 	}
 	splitted = strings.Split(splitted[1], ")")
 	dirtyParams := splitted[0]
