@@ -45,7 +45,6 @@ func Remove(cmd *cobra.Command, pkgs []string) {
 			YellowPrint("Package does not exist in pacman: ", pkg)
 		}
 		delete(mp, pkg)
-		RedPrint("Package removed: ", pkg)
 	}
 	WriteMapping(mp)
 }
