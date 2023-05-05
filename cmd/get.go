@@ -28,7 +28,6 @@ need to specify version, you can provide it after @ symbol.
 
 Examples:
 pack get fmnx.io/dev/aist@v0.21
-pack get git.xmpl.sh/pkg
 pack get fmnx.io/dev/ainst github.com/exm/pkg@v1.23 nano`,
 	Run: Get,
 }
@@ -136,7 +135,7 @@ func Get(cmd *cobra.Command, pkgs []string) {
 }
 
 func FormPkgInfoFromLink(pkg string) PkgInfo {
-	if !strings.Contains(pkg, ".") {
+	if !strings.Contains(pkg, ".") || !strings.Contains(pkg, "/") {
 		return PkgInfo{
 			FullName:  pkg,
 			ShortName: pkg,
