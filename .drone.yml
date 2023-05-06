@@ -34,3 +34,13 @@ steps:
       commit: true
       ssh_key:
         from_secret: SSHKEY
+
+  - name: push codeberg mirror
+    image: appleboy/drone-git-push
+    settings:
+      branch: main
+      remote: git@codeberg.org:fmnx/pack.git
+      force: false
+      commit: true
+      ssh_key:
+        from_secret: CBSSHKEY
