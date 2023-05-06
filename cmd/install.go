@@ -17,18 +17,18 @@ func init() {
 }
 
 var getCmd = &cobra.Command{
-	Use:     "get",
-	Example: "pack get fmnx.io/dev/ainst fmnx.io/dev/keks@main",
-	Aliases: []string{"g"},
-	Short:   "📥 get and install new packages",
-	Long: `📥 get and install new packages
+	Use:     "install",
+	Example: "pack install fmnx.io/dev/ainst fmnx.io/dev/keks@main",
+	Aliases: []string{"i", "insall", "get", "g"},
+	Short:   "📥 install new packages",
+	Long: `📥 install new packages
 
 You can mix pacman and pack packages, provoding names and git links. If you 
 need to specify version, you can provide it after @ symbol.
 
 Examples:
-pack get fmnx.io/dev/aist@v0.21
-pack get fmnx.io/dev/ainst github.com/exm/pkg@v1.23 nano`,
+pack install fmnx.io/dev/aist@v0.21
+pack install fmnx.io/dev/ainst github.com/exm/pkg@v1.23 nano`,
 	Run: Get,
 }
 

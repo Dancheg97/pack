@@ -35,7 +35,7 @@ Usage:
 pack [command] <package(s)>
 
 Example:
-pack get fmnx.io/core/ainst`,
+pack install fmnx.io/core/ainst`,
 	SilenceUsage: true,
 	CompletionOptions: cobra.CompletionOptions{
 		DisableDefaultCmd:   true,

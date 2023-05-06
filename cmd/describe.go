@@ -15,15 +15,15 @@ func init() {
 }
 
 var infoCmd = &cobra.Command{
-	Use:     "info",
-	Aliases: []string{"i"},
-	Short:   "🪪  view information about package",
+	Use:     "describe",
+	Aliases: []string{"descr", "d"},
+	Short:   "🪪  describe package",
 	Long: `🪪  view information about package
 
-This tool provides information about package retrieved from pacman.
+This tool provides information about package retrieved from pacman or pack.
 
 Example:
-pack info fmnx.io/dev/ainst`,
+pack describe fmnx.io/dev/ainst`,
 	Run: Info,
 }
 
