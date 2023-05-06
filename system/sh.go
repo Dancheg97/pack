@@ -24,6 +24,7 @@ func EjectShList(file string, param string) ([]string, error) {
 }
 
 func SplitParams(params string) []string {
+	// TODO rework add quotas check
 	params = strings.ReplaceAll(params, "\n", " ")
 	for strings.Contains(params, "  ") {
 		params = strings.ReplaceAll(params, "  ", " ")
