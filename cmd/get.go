@@ -91,7 +91,7 @@ func Get(cmd *cobra.Command, pkgs []string) {
 		}
 		if info.IsPacman {
 			BluePrint("Trying to install with pacman: ", info.FullName)
-			out, err := system.Call("sudo pacman --noconfirm -Sy " + pkg)
+			out, err := system.Call("sudo pacman --noconfirm -S " + pkg)
 			if err != nil {
 				if strings.Contains(out, "target not found") {
 					if cfg.AllowAUR {
