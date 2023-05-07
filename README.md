@@ -113,3 +113,66 @@ pack list
 <!--
 Group pacman packages before installation.
 -->
+
+
+---
+
+### 📦 Install package with [pack](https://fmnx.io/dev/pack):
+
+```
+pack get fmnx.io/core/pack
+```
+
+
+---
+
+### 📦 Install package with [pack](https://fmnx.io/dev/pack):
+
+```
+pack get fmnx.io/core/pack
+```
+
+
+---
+
+### 📦 Install package with [pack](https://fmnx.io/dev/pack):
+
+```
+pack get fmnx.io/core/pack
+```
+
+
+---
+
+### 📦 Install package with [pack](https://fmnx.io/dev/pack):
+
+```
+pack get fmnx.io/core/pack
+```
+
+
+---
+
+### 📦 Install package with [pack](https://fmnx.io/dev/pack):
+
+```
+pack get fmnx.io/core/pack
+```
+
+
+---
+
+### 📦 Install package with [pack](https://fmnx.io/dev/pack):
+
+```
+pack get https://fmnx.io/core/pack
+```
+
+
+---
+
+### 📦 Install package with [pack](https://fmnx.io/dev/pack):
+
+```
+pack get https://fmnx.io/core/pack
+```
