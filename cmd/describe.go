@@ -33,7 +33,7 @@ func Info(cmd *cobra.Command, pkgs []string) {
 			"Please, specify single arguement, provided: ",
 			color.RedString(strings.Join(pkgs, " ")),
 		)
-		lf.Unlock()
+
 		os.Exit(1)
 	}
 	pkg := pkgs[0]

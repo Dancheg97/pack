@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// Allows to eject parameters from PKGBUILD typycally to resolv dependencies.
 func EjectShList(file string, param string) ([]string, error) {
 	f, err := os.ReadFile(file)
 	if err != nil {
@@ -17,13 +18,13 @@ func EjectShList(file string, param string) ([]string, error) {
 	splitted = strings.Split(splitted[1], ")")
 	dirtyParams := splitted[0]
 	var cleanParams []string
-	for _, param := range SplitParams(dirtyParams) {
-		cleanParams = append(cleanParams, CleanParameter(param))
+	for _, param := range splitParams(dirtyParams) {
+		cleanParams = append(cleanParams, cleanParameter(param))
 	}
 	return cleanParams, nil
 }
 
-func SplitParams(params string) []string {
+func splitParams(params string) []string {
 	// TODO rework add quotas check
 	params = strings.ReplaceAll(params, "\n", " ")
 	for strings.Contains(params, "  ") {
@@ -32,7 +33,7 @@ func SplitParams(params string) []string {
 	return strings.Split(strings.Trim(params, " "), " ")
 }
 
-func CleanParameter(param string) string {
+func cleanParameter(param string) string {
 	param = strings.ReplaceAll(param, "'", "")
 	param = strings.ReplaceAll(param, "\"", "")
 	return param

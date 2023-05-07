@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"encoding/json"
-
 	"fmnx.io/dev/pack/system"
 	"github.com/spf13/cobra"
 )
@@ -33,7 +31,6 @@ func Remove(cmd *cobra.Command, pkgs []string) {
 		if !ok {
 			_, err := system.Call("pacman -Q " + pkg)
 			if err != nil {
-				YellowPrint("Package not found, skipping: ", pkg)
 				continue
 			}
 			delete(mp, revmp[pkg])
@@ -42,21 +39,11 @@ func Remove(cmd *cobra.Command, pkgs []string) {
 		}
 		_, err := system.Call("sudo pacman --noconfirm -R " + pacmanpkg)
 		if err != nil {
-			YellowPrint("Package does not exist in pacman: ", pkg)
+			YellowPrint("Pack package was not found in pacman: ", pkg)
 		}
 		delete(mp, pkg)
 	}
 	WriteMapping(mp)
-}
-
-func WriteMapping(m PackMap) {
-	if len(m) == 0 {
-		system.WriteFile(cfg.MapFile, "{}")
-		return
-	}
-	jsonData, err := json.Marshal(&m)
-	CheckErr(err)
-	system.WriteFile(cfg.MapFile, string(jsonData))
 }
 
 func ReverseMapping(in map[string]string) map[string]string {

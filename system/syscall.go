@@ -10,7 +10,7 @@ import (
 
 var Debug = false
 
-func SystemCallf(format string, a ...any) (string, error) {
+func Callf(format string, a ...any) (string, error) {
 	return Call(fmt.Sprintf(format, a...))
 }
 

@@ -100,12 +100,13 @@ func Gen(cmd *cobra.Command, args []string) {
 }
 
 type PackageInfo struct {
-	Name string
-	Link string
+	ShortName string
+	FullName  string
+	Link      string
 }
 
 func GetInstallLink() PackageInfo {
-	link, err := system.SystemCallf("git config --get remote.origin.url")
+	link, err := system.Callf("git config --get remote.origin.url")
 	CheckErr(err)
 	link = strings.Trim(link, "\n")
 	link = strings.ReplaceAll(link, "https://", "")
@@ -114,13 +115,14 @@ func GetInstallLink() PackageInfo {
 	link = strings.ReplaceAll(link, ".git", "")
 	splt := strings.Split(link, "/")
 	return PackageInfo{
-		Name: splt[len(splt)-1],
-		Link: "https://" + link,
+		ShortName: splt[len(splt)-1],
+		FullName:  link,
+		Link:      "https://" + link,
 	}
 }
 
 func WritePackageBuild(i PackageInfo) {
-	tmpl := fmt.Sprintf(pkgbuildTemplate, i.Name, i.Link)
+	tmpl := fmt.Sprintf(pkgbuildTemplate, i.ShortName, i.Link)
 	err := system.WriteFile("PKGBUILD", tmpl)
 	CheckErr(err)
 }

@@ -68,7 +68,7 @@ func init() {
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
-		lf.Unlock()
+
 		os.Exit(1)
 	}
 }
@@ -76,7 +76,7 @@ func Execute() {
 func CheckErr(err error) {
 	if err != nil {
 		RedPrint("Error occured: ", fmt.Sprintf("%+v", err))
-		lf.Unlock()
+
 		os.Exit(1)
 	}
 }
@@ -87,7 +87,7 @@ func ExecuteCheck(script string) {
 		RedPrint("Command did not succed: ", script)
 		fmt.Println("System output: ", out)
 		RedPrint("Error occured: ", fmt.Sprintf("%+v", err))
-		lf.Unlock()
+
 		os.Exit(1)
 	}
 }
