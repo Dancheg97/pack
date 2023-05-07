@@ -1,11 +1,11 @@
 package cmd
 
 import (
-	"os"
+	"fmt"
 	"strings"
 
 	"fmnx.io/dev/pack/system"
-	"github.com/jedib0t/go-pretty/table"
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
@@ -21,16 +21,16 @@ var listCmd = &cobra.Command{
 }
 
 func List(cmd *cobra.Command, args []string) {
-	t := table.NewWriter()
-	t.SetOutputMirror(os.Stdout)
-	t.AppendHeader(table.Row{"pacman package", "version", "pack link"})
 	pkgs := GetPacmanPackages()
 	mp := ReadMapping()
 	revmp := ReverseMapping(mp)
 	for k, v := range pkgs {
-		t.AppendRow(table.Row{k, v, revmp[k]})
+		if cfg.DisablePrettyPrint {
+			fmt.Println(k, v, revmp[k])
+			continue
+		}
+		fmt.Println(k, color.BlueString(v), color.YellowString(revmp[k]))
 	}
-	t.Render()
 }
 
 func GetPacmanPackages() map[string]string {
