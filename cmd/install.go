@@ -37,13 +37,13 @@ func Get(cmd *cobra.Command, upkgs []string) {
 	CheckUnreachablePacmanPackages(pkgs.PacmanPackages)
 	CheckUnreachablePackPackages(pkgs.PackPackages)
 	InstallPacmanPackages(pkgs.PacmanPackages)
-	InstallPackPackages(cmd, pkgs.PackPackages)
+	InstallPackPackages(pkgs.PackPackages)
 }
 
 // Exis if there is no target packages, prepare cache directories.
 func PrepareForInstallation(pkgs []string) {
 	if len(pkgs) == 0 {
-		os.Exit(0)
+		return
 	}
 	CheckCacheDirExist()
 	BluePrint("Installing packages: ", strings.Join(pkgs, " "))
@@ -200,19 +200,31 @@ func CleanAlreadyInstalled(pkgs []string) []string {
 	return uninstalledPkgs
 }
 
-func InstallPackPackages(cmd *cobra.Command, pkgs []string) {
+func InstallPackPackages(pkgs []string) {
 	for _, pkg := range pkgs {
-		InstallPackPackage(cmd, EjectInfoFromPackLink(pkg))
+		if CheckPackPackageInstalled(pkg) {
+			continue
+		}
+		InstallPackPackage(EjectInfoFromPackLink(pkg))
 	}
-	pkglist := strings.Join(pkgs, " ")
-	GreenPrint("Pack packages installed: ", pkglist)
+	if len(pkgs) > 0 {
+		pkglist := strings.Join(pkgs, " ")
+		GreenPrint("Installed: ", pkglist)
+	}
+}
+
+// Checks wetcher pack package installed.
+func CheckPackPackageInstalled(pkg string) bool {
+	mp := ReadMapping()
+	_, ok := mp[pkg]
+	return ok
 }
 
 // Install pack package.
-func InstallPackPackage(cmd *cobra.Command, i PackInfo) {
+func InstallPackPackage(i PackInfo) {
 	SetPackageVersion(i)
 	packDeps := EjectPackDependencies(i.Pkgbuild)
-	Get(cmd, packDeps)
+	Get(nil, packDeps)
 	SwapPackDependencies(i.Pkgbuild, packDeps)
 	InstallPackageWithMakepkg(i)
 	// Put package to pacman cache
@@ -279,6 +291,7 @@ func SwapPackDependencies(pkgbuild string, deps []string) {
 // Install package with makepkg.
 func InstallPackageWithMakepkg(i PackInfo) {
 	Chdir(i.Directory)
+	YellowPrint("Building package: ", i.FullName)
 	out, err := system.Call("makepkg -sfri --noconfirm")
 	if err != nil {
 		RedPrint("Unable to build and install package: ", i.FullName)
