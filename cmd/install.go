@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"strings"
 
@@ -30,15 +31,16 @@ pack install fmnx.io/dev/ainst github.com/exm/pkg@v1.23 nano`,
 	Run: Get,
 }
 
-func Get(cmd *cobra.Command, pkgs []string) {
-	if len(pkgs) == 0 {
+func Get(cmd *cobra.Command, unsortedKkgs []string) {
+	if len(unsortedKkgs) == 0 {
 		return
 	}
 	CheckCacheDirExist()
-	BluePrint("Installing packages: ", strings.Join(pkgs, " "))
-	splittedPkgs := SplitPackages(pkgs)
-	CheckUnreachablePacmanPackages(splittedPkgs.PacmanPackages)
-	CheckUnreachablePackPackages(splittedPkgs.PackPackages)
+	BluePrint("Installing packages: ", strings.Join(unsortedKkgs, " "))
+	pkgs := SplitPackages(unsortedKkgs)
+	CheckUnreachablePacmanPackages(pkgs.PacmanPackages)
+	CheckUnreachablePackPackages(pkgs.PackPackages)
+	InstallPacmanPackages(pkgs.PacmanPackages)
 }
 
 // Prepare cache directories for package repositories.
@@ -163,6 +165,25 @@ func EjectInfoFromPackLink(pkg string) PackInfo {
 
 // Install pacman packages.
 func InstallPacmanPackages(pkgs []string) {
-	_, err := system.Callf("sudo pacman -S %s", strings.Join(pkgs, " "))
-	CheckErr(err)
+	uninstalled := CleanAlreadyInstalled(pkgs)
+	joined := strings.Join(uninstalled, " ")
+	o, err := system.Callf("sudo pacman --noconfirm -S %s", joined)
+	if err != nil {
+		RedPrint("Unable to install pacman packages: ", joined)
+		fmt.Println(o)
+		os.Exit(1)
+	}
+	GreenPrint("Pacman packages installed: ", joined)
+}
+
+// Removes pacman packages that are already installed in the system.
+func CleanAlreadyInstalled(pkgs []string) []string {
+	var uninstalledPkgs []string
+	for _, pkg := range pkgs {
+		_, err := system.Callf("pacman -Q %s", pkg)
+		if err != nil {
+			uninstalledPkgs = append(uninstalledPkgs, pkg)
+		}
+	}
+	return uninstalledPkgs
 }
