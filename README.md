@@ -27,7 +27,6 @@ docker run --rm -it fmnx.io/core/pack --help
 
 You can use env variables to configure pack behaviour in docker:
 
-- `PACK_ALLOW_AUR` - automatically try downloading packages from AUR if they are not found in pacman repositories
 - `PACK_REMOVE_GIT_REPOS` - remove git repositories after installation
 - `PACK_REMOVE_BUILT_PACKAGES` - don't cache built `.pkg.tar.zst` packages
 - `PACK_DISABLE_PRETTYPRINT` - disable colors in CLI output
@@ -39,7 +38,7 @@ Also you can modify `pack` configuration in `~/.pack/config.yml`.
 
 ### 🚀 Features:
 
-- Install and update packages using git links (also allows to install AUR packages)
+- Install and update packages using git links (also allows to install AUR packages by explictly using AUR link)
 - Compatability with all arch based distros
 - Simple to write configuration - `.pack.yml`
 
@@ -113,4 +112,3 @@ pack list
 <!--
 Group pacman packages before installation.
 -->
-

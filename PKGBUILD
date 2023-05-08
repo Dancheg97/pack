@@ -14,30 +14,12 @@ makedepends=(
 
 build() {
   cd ..
-  # Edit your build scripts after this line
+  # Edit your build scripts after this line.
   go build -o pack .
 }
 
 package() {
   cd ..
-  # Edit file mapping in end system
-  declare -A filemap=(
-    ["pack"]="/usr/bin/pack"
-  )
-  # Edit directory mapping in end system
-  declare -A dirmap=()
-  
-  # Process of file installation
-  for file in "${!filemap[@]}"
-  do 
-    install -Dm755 $file $pkgdir${filemap[$file]}
-  done
-  
-  # Process of directory installation
-  for dir in "${!dirmap[@]}"
-  do 
-    cd $dir
-    find . -type f -exec install -Dm755 {} $pkgdir${dirmap[$dir]}/{} \;
-    cd $srcdir/..
-  done
+  # Install your files into final systems.
+  install -Dm755 pack $pkgdir/usr/bin/pack
 }

@@ -16,8 +16,6 @@ remove-git-repo: %t
 remove-built-packages: %t
 # Print additional debug information
 debug-mode: %t
-# Always say yes to AUR packages
-allow-aur: %t
 # Disable colors in output
 pack-disable-prettyprint: %t
 # Cache dir for repositories
@@ -30,19 +28,20 @@ map-file: %s/.pack/mapping.json
 lock-file: /tmp/pack.lock
 `
 
+// Pack will try to read this variables when it starts up. They will override
+// default configuration files when it first created.
 type EnvVars struct {
 	RemoveGitRepos      bool `env:"PACK_REMOVE_GIT_REPOS" envDefault:"false"`
 	RemoveBuiltPackages bool `env:"PACK_REMOVE_BUILT_PACKAGES" envDefault:"false"`
 	DebugMode           bool `env:"PACK_DEBUG_MODE" envDefault:"false"`
-	AllowAUR            bool `env:"PACK_ALLOW_AUR" envDefault:"false"`
 	DisablePrettyPrint  bool `env:"PACK_DISABLE_PRETTYPRINT" envDefault:"false"`
 }
 
+// Default template configuration for pack can be found on top.
 type Config struct {
 	RemoveGitRepos      bool   `yaml:"remove-git-repo"`
 	RemoveBuiltPackages bool   `yaml:"remove-built-packages"`
 	DebugMode           bool   `yaml:"debug-mode"`
-	AllowAUR            bool   `yaml:"allow-aur"`
 	DisablePrettyPrint  bool   `yaml:"pack-disable-prettyprint"`
 	RepoCacheDir        string `yaml:"repo-cache-dir"`
 	PackageCacheDir     string `yaml:"package-cache-dir"`
@@ -68,7 +67,6 @@ func GetConfig() (*Config, error) {
 			envs.RemoveBuiltPackages,
 			envs.DebugMode,
 			envs.DisablePrettyPrint,
-			envs.AllowAUR,
 			usr.HomeDir,
 			usr.HomeDir,
 		))
@@ -79,7 +77,6 @@ func GetConfig() (*Config, error) {
 			RemoveGitRepos:      envs.RemoveGitRepos,
 			RemoveBuiltPackages: envs.RemoveBuiltPackages,
 			DebugMode:           envs.DebugMode,
-			AllowAUR:            envs.AllowAUR,
 			DisablePrettyPrint:  envs.DisablePrettyPrint,
 			RepoCacheDir:        usr.HomeDir + "/.pack",
 			PackageCacheDir:     "/var/cache/pacman/pkg",

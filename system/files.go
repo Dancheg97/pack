@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// Simply overwrite file also creating missing directories.
 func WriteFile(file string, content string) error {
 	err := PrepareDir(file)
 	if err != nil {
@@ -17,6 +18,7 @@ func WriteFile(file string, content string) error {
 	return nil
 }
 
+// Prepare directories and all it's subdirs.
 func PrepareDir(filePath string) error {
 	if len(strings.Split(filePath, `/`)) != 1 {
 		splitted := strings.Split(filePath, `/`)
@@ -29,6 +31,7 @@ func PrepareDir(filePath string) error {
 	return nil
 }
 
+// Add text contents to file.
 func AppendToFile(path string, contents string) error {
 	_, err := os.Stat(path)
 	if err != nil {
