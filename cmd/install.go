@@ -37,6 +37,7 @@ func Get(cmd *cobra.Command, upkgs []string) {
 	CheckUnreachablePacmanPackages(pkgs.PacmanPackages)
 	CheckUnreachablePackPackages(pkgs.PackPackages)
 	InstallPacmanPackages(pkgs.PacmanPackages)
+	InstallPackPackages(cmd, pkgs.PackPackages)
 }
 
 // Exis if there is no target packages, prepare cache directories.
@@ -197,6 +198,14 @@ func CleanAlreadyInstalled(pkgs []string) []string {
 		}
 	}
 	return uninstalledPkgs
+}
+
+func InstallPackPackages(cmd *cobra.Command, pkgs []string) {
+	for _, pkg := range pkgs {
+		InstallPackPackage(cmd, EjectInfoFromPackLink(pkg))
+	}
+	pkglist := strings.Join(pkgs, " ")
+	GreenPrint("Pack packages installed: ", pkglist)
 }
 
 // Install pack package.
