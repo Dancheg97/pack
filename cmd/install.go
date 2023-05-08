@@ -227,8 +227,9 @@ func InstallPackPackage(i PackInfo) {
 	Get(nil, packDeps)
 	SwapPackDependencies(i.Pkgbuild, packDeps)
 	InstallPackageWithMakepkg(i)
-	// Put package to pacman cache
-	// Clean git or remove git untracked
+	AddPackageToPackMapping(i)
+	CachePackage(i.Directory)
+	CleanRepository(i)
 }
 
 func SetPackageVersion(i PackInfo) {
@@ -298,4 +299,31 @@ func InstallPackageWithMakepkg(i PackInfo) {
 		fmt.Println(out)
 		os.Exit(1)
 	}
+}
+
+// Move prepared .pkg.tar.zst package into pacman cache.
+func CachePackage(dir string) {
+	if !cfg.RemoveBuiltPackages {
+		_, err := system.Callf("sudo mv %s/*.pkg.tar.zst %s", dir, cfg.PackageCacheDir)
+		CheckErr(err)
+	}
+}
+
+// Add package to mapping file for display.
+func AddPackageToPackMapping(i PackInfo) {
+	mp := ReadMapping()
+	mp[i.FullName] = i.ShortName
+	WriteMapping(mp)
+}
+
+// Clean or remove git directory after installation depending on configuration.
+func CleanRepository(i PackInfo) {
+	if cfg.RemoveGitRepos {
+		CheckErr(os.RemoveAll(i.Directory))
+		return
+	}
+	_, err := system.Callf("git -C %s clean -fd", i.Directory)
+	CheckErr(err)
+	_, err = system.Callf("git -C %s reset --hard", i.Directory)
+	CheckErr(err)
 }
