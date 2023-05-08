@@ -7,6 +7,7 @@ require (
 	github.com/fatih/color v1.13.0
 	github.com/nightlyone/lockfile v1.0.0
 	github.com/spf13/cobra v1.7.0
+	golang.org/x/sync v0.2.0
 	gopkg.in/yaml.v2 v2.2.2
 )
 
