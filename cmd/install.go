@@ -48,7 +48,9 @@ func PrepareForInstallation(pkgs []string) {
 		return
 	}
 	CheckCacheDirExist()
-	print.Blue("Installing packages: ", strings.Join(pkgs, " "))
+	if !Updating {
+		print.Blue("Installing packages: ", strings.Join(pkgs, " "))
+	}
 }
 
 // Prepare cache directories for package repositories.
@@ -183,7 +185,7 @@ func InstallPacmanPackages(pkgs []string) {
 	joined := strings.Join(uninstalled, " ")
 	o, err := system.Callf("sudo pacman --noconfirm -S %s", joined)
 	if err != nil {
-		print.Red("Unable to install pacman packages: ", joined)
+		print.Red("Unable to get pacman packages: ", joined)
 		fmt.Println(o)
 		os.Exit(1)
 	}
@@ -211,7 +213,9 @@ func InstallPackPackages(pkgs []string) {
 	}
 	if len(pkgs) > 0 {
 		pkglist := strings.Join(pkgs, " ")
-		print.Green("Installed: ", pkglist)
+		if !Updating {
+			print.Green("Installed: ", pkglist)
+		}
 	}
 }
 

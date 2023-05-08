@@ -1,42 +1,70 @@
 package cmd
 
-// import (
-// 	"github.com/spf13/cobra"
-// )
+import (
+	"os"
 
-// func init() {
-// 	rootCmd.AddCommand(updateCmd)
-// }
+	"fmnx.io/core/pack/print"
+	"fmnx.io/core/pack/system"
+	"github.com/spf13/cobra"
+)
 
-// var updateCmd = &cobra.Command{
-// 	Use:     "update",
-// 	Aliases: []string{"upd", "u"},
-// 	Short:   "🗳️  update packages",
-// 	Long: `🗳️  update packages
+func init() {
+	rootCmd.AddCommand(updateCmd)
+}
 
-// You can specify packages with versions, that you need them to update to, or
-// provide provide just links to get latest version from default branch.
+var updateCmd = &cobra.Command{
+	Use:     "update",
+	Aliases: []string{"upd", "u"},
+	Short:   "🗳️  update packages",
+	Long: `🗳️  update packages
 
-// If you don't specify any arguements, all packages will be updated.
+You can specify packages with versions, that you need them to update to, or
+provide provide just links to get latest version from default branch.
 
-// Examples:
-// pack update
-// pack update fmnx.io/core/aist@v0.21
-// pack update git.xmpl.sh/pkg
-// `,
-// 	Run: Update,
-// }
+If you don't specify any arguements, all packages will be updated.
 
-// var Updating = false
+Examples:
+pack update
+pack update fmnx.io/core/aist@v0.21
+pack update git.xmpl.sh/pkg
+`,
+	Run: Update,
+}
 
-// func Update(cmd *cobra.Command, pkgs []string) {
-// 	Updating = true
-// 	if len(pkgs) == 0 {
-// 		print.Blue("Starting pacman update: ", "pacman -Syu")
-// 		ExecuteCheck("sudo pacman --noconfirm -Syu")
-// 		for pkg := range ReadMapping() {
-// 			pkgs = append(pkgs, pkg)
-// 		}
-// 	}
-// 	Get(cmd, pkgs)
-// }
+func Update(cmd *cobra.Command, pkgs []string) {
+	Updating = true
+	if len(pkgs) == 0 {
+		FullPacmanUpdate()
+		FullPackUpdate()
+		return
+	}
+
+}
+
+// Perform full pacman update.
+func FullPacmanUpdate() {
+	o, err := system.Call("sudo pacman --noconfirm -Syu")
+	if err != nil {
+		print.Red("Unable to update pacman packages: ", o)
+		os.Exit(1)
+	}
+	print.Green("Pacman update: ", "done")
+}
+
+var Updating bool
+
+// Perform full pack update.
+func FullPackUpdate() {
+	mp := ReadMapping()
+	var pkgs []string
+	for link, _ := range mp {
+		pkgs = append(pkgs, link)
+	}
+	Get(nil, pkgs)
+	print.Green("Pack update: ", "done")
+}
+
+// Verify if all packages are installed.
+func VerifyInstalled(pkgs []string) {
+	
+}
