@@ -138,7 +138,7 @@ func CheckPackPackage(pkg string) error {
 			return err
 		}
 	}
-	_, err = os.Stat(i.Directory + "/PKGBUILD")
+	_, err = os.Stat(i.Pkgbuild)
 	if err != nil {
 		RedPrint("Unable to find PKGBUILD for: ", pkg)
 	}
@@ -151,6 +151,7 @@ type PackInfo struct {
 	FullName  string
 	Directory string
 	Version   string
+	Pkgbuild  string
 	HttpsLink string
 }
 
@@ -166,6 +167,7 @@ func EjectInfoFromPackLink(pkg string) PackInfo {
 	dashsplt := strings.Split(pkg, "/")
 	rez.ShortName = dashsplt[len(dashsplt)-1]
 	rez.Directory = cfg.RepoCacheDir + "/" + rez.ShortName
+	rez.Pkgbuild = rez.Directory + "/PKGBUILD"
 	return rez
 }
 
@@ -198,11 +200,11 @@ func CleanAlreadyInstalled(pkgs []string) []string {
 }
 
 // Install pack package.
-func InstallPackPackage(i PackInfo) {
+func InstallPackPackage(cmd *cobra.Command, i PackInfo) {
 	SetPackageVersion(i)
-	// Eject pack dependencies
-	// Resolve pack dependencies
-	// Swap pack dependencies
+	packDeps := EjectPackDependencies(i.Pkgbuild)
+	Get(cmd, packDeps)
+	SwapPackDependencies(i.Pkgbuild, packDeps)
 	// Install packge with makepkg
 	// Put package to pacman cache
 	// Clean git or remove git untracked
@@ -239,4 +241,29 @@ func EjectDefaultGitBranchFromRemoteInfo(rawInfo string) string {
 	return strings.Split(rawInfo, "\n")[0]
 }
 
-//
+// Get dependencies and make dependencies related to pack from PKGBUILD file.
+func EjectPackDependencies(pkgbuild string) []string {
+	deps, err := system.EjectShList(pkgbuild, "depends")
+	CheckErr(err)
+	makedeps, err := system.EjectShList(pkgbuild, "makedepends")
+	CheckErr(err)
+	alldeps := append(deps, makedeps...)
+	groups := SplitPackages(alldeps)
+	return groups.PackPackages
+}
+
+// Temporarily swap pack dependencies in PKGBUILD to pacman package name for
+// installation process.
+func SwapPackDependencies(pkgbuild string, deps []string) {
+	b, err := os.ReadFile(pkgbuild)
+	CheckErr(err)
+	var rez = string(b)
+	for _, dep := range deps {
+		dashsplt := strings.Split(dep, "/")
+		shortname := dashsplt[len(dashsplt)-1]
+		rez = strings.ReplaceAll(rez, dep, shortname)
+	}
+	err = os.WriteFile(pkgbuild, []byte(rez), 0o600)
+	CheckErr(err)
+}
+
