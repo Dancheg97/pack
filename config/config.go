@@ -5,7 +5,6 @@ import (
 	"os"
 	"os/user"
 
-	"fmnx.io/core/pack/system"
 	"gopkg.in/yaml.v2"
 )
 
@@ -38,7 +37,7 @@ func init() {
 	checkErr(err)
 	cfg, err := os.Stat(usr.HomeDir + "/.pack/config.yml")
 	if err != nil || cfg.IsDir() {
-		err = system.WriteFile(usr.HomeDir+"/.pack/config.yml", fmt.Sprintf(
+		cfgString := fmt.Sprintf(
 			defaultConfig,
 			getBoolEnv(`PACK_REMOVE_GIT_REPOS`),
 			getBoolEnv(`PACK_REMOVE_BUILT_PACKAGES`),
@@ -46,7 +45,8 @@ func init() {
 			getBoolEnv(`PACK_DISABLE_PRETTYPRINT`),
 			usr.HomeDir,
 			usr.HomeDir,
-		))
+		)
+		err = os.WriteFile(usr.HomeDir+"/.pack/config.yml", []byte(cfgString), 0o600)
 		checkErr(err)
 		RemoveGitRepos = getBoolEnv(`PACK_REMOVE_GIT_REPOS`)
 		RemoveBuiltPackages = getBoolEnv(`PACK_REMOVE_BUILT_PACKAGES`)
