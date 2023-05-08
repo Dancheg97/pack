@@ -31,10 +31,10 @@ pack install fmnx.io/dev/ainst github.com/exm/pkg@v1.23 nano`,
 	Run: Get,
 }
 
-func Get(cmd *cobra.Command, unsortedKkgs []string) {
-	PrepareForInstallation(unsortedKkgs)
-	BluePrint("Installing packages: ", strings.Join(unsortedKkgs, " "))
-	pkgs := SplitPackages(unsortedKkgs)
+func Get(cmd *cobra.Command, upkgs []string) {
+	PrepareForInstallation(upkgs)
+	BluePrint("Installing packages: ", strings.Join(upkgs, " "))
+	pkgs := SplitPackages(upkgs)
 	CheckUnreachablePacmanPackages(pkgs.PacmanPackages)
 	CheckUnreachablePackPackages(pkgs.PackPackages)
 	InstallPacmanPackages(pkgs.PacmanPackages)
@@ -94,8 +94,8 @@ func CheckUnreachablePacmanPackages(pkgs []string) {
 	}
 }
 
-// Fill struct that shows which packages could be resolved with pacman (packages
-// that you can load from pacman servers).
+// Fill struct that shows which packages could be resolved with pacman
+// (packages that you can load from pacman servers).
 func GetDependeciesResolvableByPacman() map[string]struct{} {
 	o, err := system.Call("pacman -Ssq")
 	CheckErr(err)
