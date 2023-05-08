@@ -6,7 +6,6 @@ import (
 	"os/user"
 
 	"fmnx.io/core/pack/system"
-	"github.com/caarlos0/env/v8"
 	"gopkg.in/yaml.v2"
 )
 
@@ -28,15 +27,6 @@ map-file: %s/.pack/mapping.json
 lock-file: /tmp/pack.lock
 `
 
-// Pack will try to read this variables when it starts up. They will override
-// default configuration files when it first created.
-type EnvVars struct {
-	RemoveGitRepos      bool `env:"PACK_REMOVE_GIT_REPOS" envDefault:"false"`
-	RemoveBuiltPackages bool `env:"PACK_REMOVE_BUILT_PACKAGES" envDefault:"false"`
-	DebugMode           bool `env:"PACK_DEBUG_MODE" envDefault:"false"`
-	DisablePrettyPrint  bool `env:"PACK_DISABLE_PRETTYPRINT" envDefault:"false"`
-}
-
 // Default template configuration for pack can be found on top.
 type Config struct {
 	RemoveGitRepos      bool   `yaml:"remove-git-repo"`
@@ -56,17 +46,12 @@ func GetConfig() (*Config, error) {
 	}
 	cfg, err := os.Stat(usr.HomeDir + "/.pack/config.yml")
 	if err != nil || cfg.IsDir() {
-		envs := EnvVars{}
-		err = env.Parse(&envs)
-		if err != nil {
-			return nil, err
-		}
 		err = system.WriteFile(usr.HomeDir+"/.pack/config.yml", fmt.Sprintf(
 			DefaultConfig,
-			envs.RemoveGitRepos,
-			envs.RemoveBuiltPackages,
-			envs.DebugMode,
-			envs.DisablePrettyPrint,
+			GetBoolEnv(`PACK_REMOVE_GIT_REPOS`),
+			GetBoolEnv(`PACK_REMOVE_BUILT_PACKAGES`),
+			GetBoolEnv(`PACK_DEBUG_MODE`),
+			GetBoolEnv(`PACK_DISABLE_PRETTYPRINT`),
 			usr.HomeDir,
 			usr.HomeDir,
 		))
@@ -74,10 +59,10 @@ func GetConfig() (*Config, error) {
 			return nil, err
 		}
 		return &Config{
-			RemoveGitRepos:      envs.RemoveGitRepos,
-			RemoveBuiltPackages: envs.RemoveBuiltPackages,
-			DebugMode:           envs.DebugMode,
-			DisablePrettyPrint:  envs.DisablePrettyPrint,
+			RemoveGitRepos:      GetBoolEnv(`PACK_REMOVE_GIT_REPOS`),
+			RemoveBuiltPackages: GetBoolEnv(`PACK_REMOVE_BUILT_PACKAGES`),
+			DebugMode:           GetBoolEnv(`PACK_DEBUG_MODE`),
+			DisablePrettyPrint:  GetBoolEnv(`PACK_DISABLE_PRETTYPRINT`),
 			RepoCacheDir:        usr.HomeDir + "/.pack",
 			PackageCacheDir:     "/var/cache/pacman/pkg",
 			MapFile:             usr.HomeDir + "/.pack/mapping.json",
@@ -94,4 +79,9 @@ func GetConfig() (*Config, error) {
 		return nil, err
 	}
 	return &conf, nil
+}
+
+// Function that is made to reduce amount of dependencies.
+func GetBoolEnv(v string) bool {
+	return os.Getenv(v) == `true`
 }

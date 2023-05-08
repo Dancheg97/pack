@@ -30,7 +30,7 @@ pack i example.com/package@v0.21
 - verify package installation inside docker container
 
 ```sh
-docker run --rm -it -v ${PWD}:/home/pack -w /home/pack fmnx.io/core/pack package
+docker run --rm -it fmnx.io/core/pack i aur.archlinux.org/yay
 ```
 
 - generate `PKGBUILD` template with example of file and directory mapping to end system

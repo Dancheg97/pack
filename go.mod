@@ -3,7 +3,6 @@ module fmnx.io/core/pack
 go 1.20
 
 require (
-	github.com/caarlos0/env/v8 v8.0.0
 	github.com/fatih/color v1.13.0
 	github.com/nightlyone/lockfile v1.0.0
 	github.com/spf13/cobra v1.7.0
