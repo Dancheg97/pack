@@ -30,8 +30,6 @@ docker run --rm -it fmnx.io/core/pack i example.com/package
 	Run: Package,
 }
 
-type PackMap map[string]string
-
 func Package(cmd *cobra.Command, pkgs []string) {
 	print.Blue("Preparing package: ", "makepkg -sfri --noconfirm")
 	out, err := system.Call("makepkg -sfri --noconfirm")
@@ -45,12 +43,16 @@ func Package(cmd *cobra.Command, pkgs []string) {
 	print.Green("Package prepared and installed: ", i.FullName)
 }
 
+// Function writes package to pack mapping file.
 func AddToPackMapping(i RepositoryInfo) {
 	mp := ReadMapping()
 	mp[i.FullName] = i.ShortName
 	WriteMapping(mp)
 }
 
+type PackMap map[string]string
+
+// Function reads pack mapping file. Packages are mapped from pack to pacman.
 func ReadMapping() PackMap {
 	_, err := os.Stat(config.MapFile)
 	if err != nil {
@@ -65,6 +67,7 @@ func ReadMapping() PackMap {
 	return mapping
 }
 
+// Function writes pack mapping file.
 func WriteMapping(m PackMap) {
 	if len(m) == 0 {
 		system.WriteFile(config.MapFile, "{}")
