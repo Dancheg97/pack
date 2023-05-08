@@ -123,18 +123,46 @@ func CheckUnreachablePackPackages(pkgs []string) {
 
 // Validate pack package to be reachable via network.
 func CheckPackPackage(pkg string) error {
-	splt := strings.Split(pkg, "/")
-	dir := cfg.RepoCacheDir + "/" + splt[len(splt)-1]
-	out, err := system.Callf("git clone https://%s %s", pkg, dir)
+	i := EjectInfoFromPackLink(pkg)
+	out, err := system.Callf("git clone %s %s", i.HttpsLink, i.Directory)
 	if err != nil {
 		if !strings.Contains(out, "already exists and is not an empty dir") {
 			RedPrint("Unable to reach git for: ", pkg)
 			return err
 		}
 	}
-	_, err = os.Stat(dir + "/PKGBUILD")
+	_, err = os.Stat(i.Directory + "/PKGBUILD")
 	if err != nil {
 		RedPrint("Unable to find PKGBUILD for: ", pkg)
 	}
 	return err
+}
+
+type PackInfo struct {
+	ShortName string
+	FullName  string
+	Directory string
+	Version   string
+	HttpsLink string
+}
+
+// Eject pack information for provided pack link.
+func EjectInfoFromPackLink(pkg string) PackInfo {
+	rez := PackInfo{}
+	versplt := strings.Split(pkg, "@")
+	rez.FullName = versplt[0]
+	rez.HttpsLink = "https://" + versplt[0]
+	if len(versplt) > 1 {
+		rez.Version = versplt[1]
+	}
+	dashsplt := strings.Split(pkg, "/")
+	rez.ShortName = dashsplt[len(dashsplt)-1]
+	rez.Directory = cfg.RepoCacheDir + "/" + rez.ShortName
+	return rez
+}
+
+// Install pacman packages.
+func InstallPacmanPackages(pkgs []string) {
+	_, err := system.Callf("sudo pacman -S %s", strings.Join(pkgs, " "))
+	CheckErr(err)
 }
