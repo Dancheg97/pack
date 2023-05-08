@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"os"
 	"strings"
 
 	"fmnx.io/core/pack/print"
@@ -28,40 +29,21 @@ pack rm fmnx.io/core/ainst`,
 
 func Remove(cmd *cobra.Command, pkgs []string) {
 	mp := ReadMapping()
-	// revmp := ReverseMapping(mp)
 	groups := SplitPackages(pkgs)
 	rmtargets := GetRemoveTargetPackages(groups, mp)
 	TryRemove(rmtargets)
-	// // TODO make so that for each target result is printed.
-	// for _, pkg := range pkgs {
-	// 	pacmanpkg, ok := mp[pkg]
-	// 	if !ok {
-	// 		_, err := system.Call("pacman -Q " + pkg)
-	// 		if err != nil {
-	// 			continue
-	// 		}
-	// 		delete(mp, revmp[pkg])
-	// 		_, err = system.Call("sudo pacman --noconfirm -R " + pkg)
-	// 		CheckErr(err)
-	// 		continue
-	// 	}
-	// 	_, err := system.Call("sudo pacman --noconfirm -R " + pacmanpkg)
-	// 	if err != nil {
-	// 		print.Yellow("Pack package was not found in pacman: ", pkg)
-	// 	}
-	// 	delete(mp, pkg)
-	// }
-	// WriteMapping(mp)
+	WriteNewMapping(mp, rmtargets)
 }
 
 // Try to remove all packages at once.
 func TryRemove(pkgs []string) {
-	o, err := system.Callf("sudo pacman -R %s", strings.Join(pkgs, " "))
+	pkgsStr := strings.Join(pkgs, " ")
+	o, err := system.Callf("sudo pacman --noconfirm -R %s", pkgsStr)
 	if err != nil {
 		PrintNotFoundPackages(o)
-		return
+		os.Exit(1)
 	}
-	print.Green("Packages removed: ", strings.Join(pkgs, " "))
+	print.Yellow("Packages removed: ", pkgsStr)
 }
 
 // Get pacman packages from parsed removal command.
@@ -77,6 +59,15 @@ func GetRemoveTargetPackages(groups PackageGroups, mp PackMap) []string {
 		groups.PacmanPackages = append(groups.PacmanPackages, mp[pkg])
 	}
 	return groups.PacmanPackages
+}
+
+// This function will form new package mapping and write it.
+func WriteNewMapping(mp PackMap, pkgs []string) {
+	revmp := ReverseMapping(mp)
+	for _, pkg := range pkgs {
+		delete(revmp, pkg)
+	}
+	WriteMapping(ReverseMapping(revmp))
 }
 
 // Returns mapping from pacman package to pack package.
