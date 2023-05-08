@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"fmnx.io/core/pack/config"
+	"fmnx.io/core/pack/print"
 	"fmnx.io/core/pack/system"
 	"github.com/spf13/cobra"
 	"golang.org/x/sync/errgroup"
@@ -47,7 +48,7 @@ func PrepareForInstallation(pkgs []string) {
 		return
 	}
 	CheckCacheDirExist()
-	BluePrint("Installing packages: ", strings.Join(pkgs, " "))
+	print.Blue("Installing packages: ", strings.Join(pkgs, " "))
 }
 
 // Prepare cache directories for package repositories.
@@ -91,7 +92,7 @@ func CheckUnreachablePacmanPackages(pkgs []string) {
 	}
 	if len(unreachable) != 0 {
 		pkgs := strings.Join(unreachable, " ")
-		RedPrint("Unable to resolve those pacman packages: ", pkgs)
+		print.Red("Unable to resolve those pacman packages: ", pkgs)
 		os.Exit(1)
 	}
 }
@@ -125,7 +126,7 @@ func CheckUnreachablePackPackages(pkgs []string) {
 	err := g.Wait()
 	if err != nil {
 		out := strings.Join(unreachable, " ")
-		RedPrint("Some pack packages are unreachable: ", out)
+		print.Red("Some pack packages are unreachable: ", out)
 		os.Exit(1)
 	}
 }
@@ -136,13 +137,13 @@ func CheckPackPackage(pkg string) error {
 	out, err := system.Callf("git clone %s %s", i.HttpsLink, i.Directory)
 	if err != nil {
 		if !strings.Contains(out, "already exists and is not an empty dir") {
-			RedPrint("Unable to reach git for: ", pkg)
+			print.Red("Unable to reach git for: ", pkg)
 			return err
 		}
 	}
 	_, err = os.Stat(i.Pkgbuild)
 	if err != nil {
-		RedPrint("Unable to find PKGBUILD for: ", pkg)
+		print.Red("Unable to find PKGBUILD for: ", pkg)
 	}
 	return err
 }
@@ -182,11 +183,11 @@ func InstallPacmanPackages(pkgs []string) {
 	joined := strings.Join(uninstalled, " ")
 	o, err := system.Callf("sudo pacman --noconfirm -S %s", joined)
 	if err != nil {
-		RedPrint("Unable to install pacman packages: ", joined)
+		print.Red("Unable to install pacman packages: ", joined)
 		fmt.Println(o)
 		os.Exit(1)
 	}
-	GreenPrint("Pacman packages installed: ", joined)
+	print.Green("Pacman packages installed: ", joined)
 }
 
 // Removes pacman packages that are already installed in the system.
@@ -210,7 +211,7 @@ func InstallPackPackages(pkgs []string) {
 	}
 	if len(pkgs) > 0 {
 		pkglist := strings.Join(pkgs, " ")
-		GreenPrint("Installed: ", pkglist)
+		print.Green("Installed: ", pkglist)
 	}
 }
 
@@ -240,7 +241,7 @@ func SetPackageVersion(i PackInfo) {
 	o, err := system.Callf("git -C %s checkout %s", i.Directory, i.Version)
 	if err != nil {
 		if !strings.HasPrefix(o, "Already on ") {
-			RedPrint("Unable to set pack version for: ", i.FullName)
+			print.Red("Unable to set pack version for: ", i.FullName)
 			fmt.Println(o)
 			os.Exit(1)
 		}
@@ -293,10 +294,10 @@ func SwapPackDependencies(pkgbuild string, deps []string) {
 // Install package with makepkg.
 func InstallPackageWithMakepkg(i PackInfo) {
 	Chdir(i.Directory)
-	YellowPrint("Building package: ", i.FullName)
+	print.Yellow("Building package: ", i.FullName)
 	out, err := system.Call("makepkg -sfri --noconfirm")
 	if err != nil {
-		RedPrint("Unable to build and install package: ", i.FullName)
+		print.Red("Unable to build and install package: ", i.FullName)
 		fmt.Println(out)
 		os.Exit(1)
 	}

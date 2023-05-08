@@ -32,7 +32,7 @@ package cmd
 // func Update(cmd *cobra.Command, pkgs []string) {
 // 	Updating = true
 // 	if len(pkgs) == 0 {
-// 		BluePrint("Starting pacman update: ", "pacman -Syu")
+// 		print.Blue("Starting pacman update: ", "pacman -Syu")
 // 		ExecuteCheck("sudo pacman --noconfirm -Syu")
 // 		for pkg := range ReadMapping() {
 // 			pkgs = append(pkgs, pkg)

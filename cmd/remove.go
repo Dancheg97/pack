@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmnx.io/core/pack/print"
 	"fmnx.io/core/pack/system"
 	"github.com/spf13/cobra"
 )
@@ -24,6 +25,7 @@ pack rm fmnx.io/core/ainst`,
 }
 
 func Remove(cmd *cobra.Command, pkgs []string) {
+	// TODO make so that for each target result is printed.
 	mp := ReadMapping()
 	revmp := ReverseMapping(mp)
 	for _, pkg := range pkgs {
@@ -39,7 +41,7 @@ func Remove(cmd *cobra.Command, pkgs []string) {
 		}
 		_, err := system.Call("sudo pacman --noconfirm -R " + pacmanpkg)
 		if err != nil {
-			YellowPrint("Pack package was not found in pacman: ", pkg)
+			print.Yellow("Pack package was not found in pacman: ", pkg)
 		}
 		delete(mp, pkg)
 	}

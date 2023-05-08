@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"fmnx.io/core/pack/config"
+	"fmnx.io/core/pack/print"
 	"fmnx.io/core/pack/system"
 	"github.com/spf13/cobra"
 )
@@ -32,16 +33,16 @@ docker run --rm -it ${pwd}:/src -v /src fmnx.io/core/pack package
 type PackMap map[string]string
 
 func Package(cmd *cobra.Command, pkgs []string) {
-	BluePrint("Preparing package: ", "makepkg -sfri --noconfirm")
+	print.Blue("Preparing package: ", "makepkg -sfri --noconfirm")
 	out, err := system.Call("makepkg -sfri --noconfirm")
 	if err != nil {
-		RedPrint("Unable to execute: ", "makepkg")
+		print.Red("Unable to execute: ", "makepkg")
 		fmt.Println(out)
 		os.Exit(1)
 	}
 	i := GetInstallLink()
 	AddToPackMapping(i)
-	GreenPrint("Package prepared and installed: ", i.FullName)
+	print.Green("Package prepared and installed: ", i.FullName)
 }
 
 func AddToPackMapping(i RepositoryInfo) {

@@ -5,22 +5,11 @@ import (
 	"os"
 
 	"fmnx.io/core/pack/config"
+	"fmnx.io/core/pack/print"
 	"fmnx.io/core/pack/system"
-	"github.com/fatih/color"
 	"github.com/nightlyone/lockfile"
 	"github.com/spf13/cobra"
 )
-
-const descrTmpl = `{{if gt (len .Aliases) 0}}Aliases:
-{{.NameAndAliases}}{{end}}{{if .HasAvailableSubCommands}}{{$cmds := .Commands}}{{if eq (len .Groups) 0}}Available Commands:{{range $cmds}}{{if (or .IsAvailableCommand (eq .Name "help"))}}
-{{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}{{else}}{{range $group := .Groups}}
-
-{{.Title}}{{range $cmds}}{{if (and (eq .GroupID $group.ID) (or .IsAvailableCommand (eq .Name "help")))}}
-{{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}{{end}}{{if not .AllChildCommandsHaveGroup}}
-
-Additional Commands:{{range $cmds}}{{if (and (eq .GroupID "") (or .IsAvailableCommand (eq .Name "help")))}}
-{{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}{{end}}{{end}}{{end}}{{if .HasAvailableLocalFlags}}{{end}}
-`
 
 var rootCmd = &cobra.Command{
 	Use:   "pack",
@@ -48,7 +37,6 @@ pack install fmnx.io/core/ainst`,
 func init() {
 	rootCmd.SetHelpCommand(&cobra.Command{})
 	rootCmd.SetUsageTemplate(descrTmpl)
-
 	lock, err := lockfile.New(config.LockFile)
 	CheckErr(err)
 	err = lock.TryLock()
@@ -64,7 +52,7 @@ func Execute() {
 
 func CheckErr(err error) {
 	if err != nil {
-		RedPrint("Error occured: ", fmt.Sprintf("%+v", err))
+		print.Red("Error occured: ", fmt.Sprintf("%+v", err))
 		os.Exit(1)
 	}
 }
@@ -72,9 +60,9 @@ func CheckErr(err error) {
 func ExecuteCheck(script string) {
 	out, err := system.Call(script)
 	if err != nil {
-		RedPrint("Command did not succed: ", script)
+		print.Red("Command did not succed: ", script)
 		fmt.Println("System output: ", out)
-		RedPrint("Error occured: ", fmt.Sprintf("%+v", err))
+		print.Red("Error occured: ", fmt.Sprintf("%+v", err))
 		os.Exit(1)
 	}
 }
@@ -83,34 +71,13 @@ func Chdir(dir string) {
 	CheckErr(os.Chdir(dir))
 }
 
-func RedPrint(white string, red string) {
-	if config.DisablePrettyPrint {
-		fmt.Printf(white + red + "\n")
-		return
-	}
-	fmt.Printf(white + color.RedString(red) + "\n")
-}
+const descrTmpl = `{{if gt (len .Aliases) 0}}Aliases:
+{{.NameAndAliases}}{{end}}{{if .HasAvailableSubCommands}}{{$cmds := .Commands}}{{if eq (len .Groups) 0}}Available Commands:{{range $cmds}}{{if (or .IsAvailableCommand (eq .Name "help"))}}
+{{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}{{else}}{{range $group := .Groups}}
 
-func BluePrint(white string, blue string) {
-	if config.DisablePrettyPrint {
-		fmt.Printf(white + blue + "\n")
-		return
-	}
-	fmt.Printf(white + color.BlueString(blue) + "\n")
-}
+{{.Title}}{{range $cmds}}{{if (and (eq .GroupID $group.ID) (or .IsAvailableCommand (eq .Name "help")))}}
+{{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}{{end}}{{if not .AllChildCommandsHaveGroup}}
 
-func GreenPrint(white string, green string) {
-	if config.DisablePrettyPrint {
-		fmt.Printf(white + green + "\n")
-		return
-	}
-	fmt.Printf(white + color.GreenString(green) + "\n")
-}
-
-func YellowPrint(white string, yellow string) {
-	if config.DisablePrettyPrint {
-		fmt.Printf(white + yellow + "\n")
-		return
-	}
-	fmt.Printf(white + color.YellowString(yellow) + "\n")
-}
+Additional Commands:{{range $cmds}}{{if (and (eq .GroupID "") (or .IsAvailableCommand (eq .Name "help")))}}
+{{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}{{end}}{{end}}{{end}}{{if .HasAvailableLocalFlags}}{{end}}
+`

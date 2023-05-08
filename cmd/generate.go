@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"fmnx.io/core/pack/print"
 	"fmnx.io/core/pack/system"
 	"github.com/spf13/cobra"
 )
@@ -27,7 +28,7 @@ func Generate(cmd *cobra.Command, args []string) {
 	info := GetInstallLink()
 	WritePackageBuild(info)
 	ModifyReadmeFile(info.Link)
-	GreenPrint("Updated files: ", "PKGBUILD README.md")
+	print.Green("Updated files: ", "PKGBUILD README.md")
 }
 
 // Some basic info about repository.

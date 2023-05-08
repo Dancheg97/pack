@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	"fmnx.io/core/pack/print"
 	"fmnx.io/core/pack/system"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -29,7 +30,7 @@ pack describe fmnx.io/core/ainst`,
 
 func Describe(cmd *cobra.Command, pkgs []string) {
 	if len(pkgs) != 1 {
-		RedPrint(
+		print.Red(
 			"Please, specify single arguement, provided: ",
 			color.RedString(strings.Join(pkgs, " ")),
 		)
@@ -44,7 +45,7 @@ func Describe(cmd *cobra.Command, pkgs []string) {
 	}
 	info, err := system.Call("pacman -Qi " + pacmanpkg)
 	if err != nil {
-		RedPrint("Error: ", strings.ReplaceAll(info, "error: ", ""))
+		print.Red("Error: ", strings.ReplaceAll(info, "error: ", ""))
 		os.Exit(1)
 	}
 	fmt.Println(info)
