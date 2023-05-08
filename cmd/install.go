@@ -32,15 +32,20 @@ pack install fmnx.io/dev/ainst github.com/exm/pkg@v1.23 nano`,
 }
 
 func Get(cmd *cobra.Command, unsortedKkgs []string) {
-	if len(unsortedKkgs) == 0 {
-		return
-	}
-	CheckCacheDirExist()
+	PrepareForInstallation(unsortedKkgs)
 	BluePrint("Installing packages: ", strings.Join(unsortedKkgs, " "))
 	pkgs := SplitPackages(unsortedKkgs)
 	CheckUnreachablePacmanPackages(pkgs.PacmanPackages)
 	CheckUnreachablePackPackages(pkgs.PackPackages)
 	InstallPacmanPackages(pkgs.PacmanPackages)
+}
+
+// Exis if there is no target packages, prepare cache directories.
+func PrepareForInstallation(pkgs []string) {
+	if len(pkgs) == 0 {
+		os.Exit(0)
+	}
+	CheckCacheDirExist()
 }
 
 // Prepare cache directories for package repositories.
