@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"fmnx.io/dev/pack/system"
+	"fmnx.io/core/pack/system"
 	"github.com/spf13/cobra"
 )
 
@@ -64,7 +64,7 @@ package() {
 
 ---
 
-### 📦 Install package with [pack](https://fmnx.io/dev/pack):
+### 📦 Install package with [pack](https://fmnx.io/core/pack):
 
 %s
 pack get %s

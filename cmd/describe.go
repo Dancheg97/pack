@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"fmnx.io/dev/pack/system"
+	"fmnx.io/core/pack/system"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
@@ -23,7 +23,7 @@ var infoCmd = &cobra.Command{
 This tool provides information about package retrieved from pacman or pack.
 
 Example:
-pack describe fmnx.io/dev/ainst`,
+pack describe fmnx.io/core/ainst`,
 	Run: Info,
 }
 

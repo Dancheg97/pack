@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"fmnx.io/dev/pack/config"
-	"fmnx.io/dev/pack/system"
+	"fmnx.io/core/pack/config"
+	"fmnx.io/core/pack/system"
 	"github.com/fatih/color"
 	"github.com/nightlyone/lockfile"
 	"github.com/spf13/cobra"

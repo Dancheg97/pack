@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"fmnx.io/dev/pack/system"
+	"fmnx.io/core/pack/system"
 	"github.com/spf13/cobra"
 )
 
@@ -19,7 +19,7 @@ Use this command to remove packages from system. You can specify both pacman
 packages and pack links.
 
 Example:
-pack rm fmnx.io/dev/ainst`,
+pack rm fmnx.io/core/ainst`,
 	Run: Remove,
 }
 

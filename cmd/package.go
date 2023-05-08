@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"fmnx.io/dev/pack/system"
+	"fmnx.io/core/pack/system"
 	"github.com/spf13/cobra"
 )
 

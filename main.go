@@ -1,6 +1,6 @@
 package main
 
-import "fmnx.io/dev/pack/cmd"
+import "fmnx.io/core/pack/cmd"
 
 func main() {
 	cmd.Execute()

@@ -19,7 +19,7 @@ delpacman:
 	sudo pacman -R install flutter-fmnx-package
 
 delpack:
-	pack remove fmnx.io/dev/install fmnx.io/dancheg97/flutter-fmnx-package
+	pack remove fmnx.io/core/install fmnx.io/dancheg97/flutter-fmnx-package
 
 test:
 	docker run --rm -it -e PACK_DEBUG_MODE=true fmnx.io/core/pack get fmnx.io/pkg/gnome-browser-connector fmnx.io/pkg/gnome-shell-extension-dash-to-dock

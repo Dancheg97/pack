@@ -5,7 +5,7 @@ import (
 	"os"
 	"os/user"
 
-	"fmnx.io/dev/pack/system"
+	"fmnx.io/core/pack/system"
 	"github.com/caarlos0/env/v8"
 	"gopkg.in/yaml.v2"
 )

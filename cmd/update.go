@@ -21,7 +21,7 @@ package cmd
 
 // Examples:
 // pack update
-// pack update fmnx.io/dev/aist@v0.21
+// pack update fmnx.io/core/aist@v0.21
 // pack update git.xmpl.sh/pkg
 // `,
 // 	Run: Update,

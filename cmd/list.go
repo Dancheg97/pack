@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"fmnx.io/dev/pack/system"
+	"fmnx.io/core/pack/system"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
