@@ -1,6 +1,6 @@
 FROM archlinux/archlinux:base-devel
 
-LABEL maintainer="dancheg97 <dancheg97@fmnx.io>"
+LABEL maintainer="dancheg97 <dangdancheg@gmail.com>"
 LABEL source="https://fmnx.io/core/pack"
 
 RUN pacman -Syu --needed --noconfirm git pacman-contrib wget go
@@ -13,7 +13,7 @@ WORKDIR /home/$user
 
 COPY . /home/$user/pack
 RUN sudo chmod a+rwx -R /home/$user/pack
-RUN cd /home/$user/pack && makepkg --noconfirm -sfri
+RUN cd pack && makepkg --noconfirm -sfri
 RUN sudo mv /home/$user/pack/*.pkg.tar.zst /var/cache/pacman/pkg
 RUN sudo rm -r /home/$user/pack
 RUN sudo rm -r /home/$user/go

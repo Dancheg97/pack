@@ -29,7 +29,7 @@ var rootCmd = &cobra.Command{
 
 This utility accumulates power of git and pacman to provide decentralized way
 of arch package distribution. Pack config: '~/.pack/config.yml'. Find more 
-information at https://fmnx.io/dev/pack.
+information at https://fmnx.io/core/pack.
 
 Usage:
 pack [command] <package(s)>

@@ -15,7 +15,7 @@ makedepends=(
 build() {
   cd ..
   # Edit your build scripts after this line.
-  go build -o pack .
+  go build -buildvcs=false -o pack .
 }
 
 package() {
