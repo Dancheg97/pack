@@ -13,7 +13,7 @@ WORKDIR /home/$user
 
 COPY . /home/$user/pack
 RUN sudo chmod a+rwx -R /home/$user/pack
-RUN cd pack && makepkg --noconfirm -sfri
+RUN cd /home/$user/pack && makepkg --noconfirm -sfri
 RUN sudo mv /home/$user/pack/*.pkg.tar.zst /var/cache/pacman/pkg
 RUN sudo rm -r /home/$user/pack
 RUN sudo rm -r /home/$user/go
