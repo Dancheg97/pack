@@ -33,7 +33,6 @@ pack install fmnx.io/dev/ainst github.com/exm/pkg@v1.23 nano`,
 
 func Get(cmd *cobra.Command, upkgs []string) {
 	PrepareForInstallation(upkgs)
-	BluePrint("Installing packages: ", strings.Join(upkgs, " "))
 	pkgs := SplitPackages(upkgs)
 	CheckUnreachablePacmanPackages(pkgs.PacmanPackages)
 	CheckUnreachablePackPackages(pkgs.PackPackages)
@@ -46,6 +45,7 @@ func PrepareForInstallation(pkgs []string) {
 		os.Exit(0)
 	}
 	CheckCacheDirExist()
+	BluePrint("Installing packages: ", strings.Join(pkgs, " "))
 }
 
 // Prepare cache directories for package repositories.
@@ -145,6 +145,7 @@ func CheckPackPackage(pkg string) error {
 	return err
 }
 
+// Info formed from pack link about all information related to that package.
 type PackInfo struct {
 	ShortName string
 	FullName  string
@@ -171,6 +172,9 @@ func EjectInfoFromPackLink(pkg string) PackInfo {
 // Install pacman packages.
 func InstallPacmanPackages(pkgs []string) {
 	uninstalled := CleanAlreadyInstalled(pkgs)
+	if len(uninstalled) == 0 {
+		return
+	}
 	joined := strings.Join(uninstalled, " ")
 	o, err := system.Callf("sudo pacman --noconfirm -S %s", joined)
 	if err != nil {
@@ -192,3 +196,47 @@ func CleanAlreadyInstalled(pkgs []string) []string {
 	}
 	return uninstalledPkgs
 }
+
+// Install pack package.
+func InstallPackPackage(i PackInfo) {
+	SetPackageVersion(i)
+	// Eject pack dependencies
+	// Resolve pack dependencies
+	// Swap pack dependencies
+	// Install packge with makepkg
+	// Put package to pacman cache
+	// Clean git or remove git untracked
+}
+
+func SetPackageVersion(i PackInfo) {
+	if i.Version == `` {
+		i.Version = GetDefaultGitBranch(i.Directory)
+	}
+	o, err := system.Callf("git -C %s checkout %s", i.Directory, i.Version)
+	if err != nil {
+		if !strings.HasPrefix(o, "Already on ") {
+			RedPrint("Unable to set pack version for: ", i.FullName)
+			fmt.Println(o)
+			os.Exit(1)
+		}
+	}
+}
+
+// Returns default branch for git repository located in some directory.
+func GetDefaultGitBranch(dir string) string {
+	origin, err := system.Callf("git -C %s remote show", dir)
+	CheckErr(err)
+	origin = strings.Trim(origin, "\n")
+	remoteInfo, err := system.Callf("git -C %s remote show %s", dir, origin)
+	CheckErr(err)
+	return EjectDefaultGitBranchFromRemoteInfo(remoteInfo)
+}
+
+// Function that parses information about git remote and returns it's default
+// branch.
+func EjectDefaultGitBranchFromRemoteInfo(rawInfo string) string {
+	rawInfo = strings.Split(rawInfo, "HEAD branch: ")[1]
+	return strings.Split(rawInfo, "\n")[0]
+}
+
+//
