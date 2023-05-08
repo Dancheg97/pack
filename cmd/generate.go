@@ -14,7 +14,7 @@ func init() {
 
 var genCmd = &cobra.Command{
 	Use:     "generate",
-	Aliases: []string{"gen"},
+	Aliases: []string{"gen", "g"},
 	Short:   "📋 generate PKGBUILD template for your repository",
 	Long: `📋 generate .pack.yml and update README.md
 

@@ -18,7 +18,7 @@ func init() {
 var getCmd = &cobra.Command{
 	Use:     "install",
 	Example: "pack install fmnx.io/core/ainst fmnx.io/core/keks@main",
-	Aliases: []string{"i", "insall", "get", "g"},
+	Aliases: []string{"i"},
 	Short:   "📥 install new packages",
 	Long: `📥 install new packages
 

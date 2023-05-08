@@ -34,7 +34,7 @@ func Package(cmd *cobra.Command, pkgs []string) {
 	BluePrint("Preparing package: ", "makepkg -sfri --noconfirm")
 	out, err := system.Call("makepkg -sfri --noconfirm")
 	if err != nil {
-		RedPrint("Unable to execute:", "makepkg")
+		RedPrint("Unable to execute: ", "makepkg")
 		fmt.Println(out)
 		os.Exit(1)
 	}
