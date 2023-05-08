@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"fmnx.io/core/pack/config"
 	"fmnx.io/core/pack/system"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -25,7 +26,7 @@ func List(cmd *cobra.Command, args []string) {
 	mp := ReadMapping()
 	revmp := ReverseMapping(mp)
 	for k, v := range pkgs {
-		if cfg.DisablePrettyPrint {
+		if config.DisablePrettyPrint {
 			fmt.Println(k, v, revmp[k])
 			continue
 		}

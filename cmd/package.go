@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"fmnx.io/core/pack/config"
 	"fmnx.io/core/pack/system"
 	"github.com/spf13/cobra"
 )
@@ -43,19 +44,19 @@ func Package(cmd *cobra.Command, pkgs []string) {
 	GreenPrint("Package prepared and installed: ", i.FullName)
 }
 
-func AddToPackMapping(i PackageInfo) {
+func AddToPackMapping(i RepositoryInfo) {
 	mp := ReadMapping()
 	mp[i.FullName] = i.ShortName
 	WriteMapping(mp)
 }
 
 func ReadMapping() PackMap {
-	_, err := os.Stat(cfg.MapFile)
+	_, err := os.Stat(config.MapFile)
 	if err != nil {
-		system.AppendToFile(cfg.MapFile, "{}")
+		system.AppendToFile(config.MapFile, "{}")
 		return PackMap{}
 	}
-	b, err := os.ReadFile(cfg.MapFile)
+	b, err := os.ReadFile(config.MapFile)
 	CheckErr(err)
 	var mapping PackMap
 	err = json.Unmarshal(b, &mapping)
@@ -65,10 +66,10 @@ func ReadMapping() PackMap {
 
 func WriteMapping(m PackMap) {
 	if len(m) == 0 {
-		system.WriteFile(cfg.MapFile, "{}")
+		system.WriteFile(config.MapFile, "{}")
 		return
 	}
 	jsonData, err := json.Marshal(&m)
 	CheckErr(err)
-	system.WriteFile(cfg.MapFile, string(jsonData))
+	system.WriteFile(config.MapFile, string(jsonData))
 }

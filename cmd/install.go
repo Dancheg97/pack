@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 
+	"fmnx.io/core/pack/config"
 	"fmnx.io/core/pack/system"
 	"github.com/spf13/cobra"
 	"golang.org/x/sync/errgroup"
@@ -51,9 +52,9 @@ func PrepareForInstallation(pkgs []string) {
 
 // Prepare cache directories for package repositories.
 func CheckCacheDirExist() {
-	err := system.PrepareDir(cfg.RepoCacheDir)
+	err := system.PrepareDir(config.RepoCacheDir)
 	CheckErr(err)
-	err = system.PrepareDir(cfg.PackageCacheDir)
+	err = system.PrepareDir(config.PackageCacheDir)
 	CheckErr(err)
 }
 
@@ -167,7 +168,7 @@ func EjectInfoFromPackLink(pkg string) PackInfo {
 	}
 	dashsplt := strings.Split(pkg, "/")
 	rez.ShortName = dashsplt[len(dashsplt)-1]
-	rez.Directory = cfg.RepoCacheDir + "/" + rez.ShortName
+	rez.Directory = config.RepoCacheDir + "/" + rez.ShortName
 	rez.Pkgbuild = rez.Directory + "/PKGBUILD"
 	return rez
 }
@@ -303,8 +304,8 @@ func InstallPackageWithMakepkg(i PackInfo) {
 
 // Move prepared .pkg.tar.zst package into pacman cache.
 func CachePackage(dir string) {
-	if !cfg.RemoveBuiltPackages {
-		_, err := system.Callf("sudo mv %s/*.pkg.tar.zst %s", dir, cfg.PackageCacheDir)
+	if !config.RemoveBuiltPackages {
+		_, err := system.Callf("sudo mv %s/*.pkg.tar.zst %s", dir, config.PackageCacheDir)
 		CheckErr(err)
 	}
 }
@@ -318,7 +319,7 @@ func AddPackageToPackMapping(i PackInfo) {
 
 // Clean or remove git directory after installation depending on configuration.
 func CleanRepository(i PackInfo) {
-	if cfg.RemoveGitRepos {
+	if config.RemoveGitRepos {
 		CheckErr(os.RemoveAll(i.Directory))
 		return
 	}

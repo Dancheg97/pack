@@ -9,18 +9,62 @@ import (
 )
 
 func init() {
-	rootCmd.AddCommand(genCmd)
+	rootCmd.AddCommand(generateCmd)
 }
 
-var genCmd = &cobra.Command{
+var generateCmd = &cobra.Command{
 	Use:     "generate",
 	Aliases: []string{"gen", "g"},
 	Short:   "📋 generate PKGBUILD template for your repository",
-	Long: `📋 generate .pack.yml and update README.md
+	Long: `📋 generate PKGBUILD template for your repository
 
 This command will generate .pack.yml template and add some lines to README.md
 to provide information about installation with pack.`,
-	Run: Gen,
+	Run: Generate,
+}
+
+func Generate(cmd *cobra.Command, args []string) {
+	info := GetInstallLink()
+	WritePackageBuild(info)
+	ModifyReadmeFile(info.Link)
+	GreenPrint("Updated files: ", "PKGBUILD README.md")
+}
+
+// Some basic info about repository.
+type RepositoryInfo struct {
+	ShortName string
+	FullName  string
+	Link      string
+}
+
+// Get information about repository located in current directory.
+func GetInstallLink() RepositoryInfo {
+	link, err := system.Callf("git config --get remote.origin.url")
+	CheckErr(err)
+	link = strings.Trim(link, "\n")
+	link = strings.ReplaceAll(link, "https://", "")
+	link = strings.ReplaceAll(link, "git@", "")
+	link = strings.ReplaceAll(link, ":", "/")
+	link = strings.ReplaceAll(link, ".git", "")
+	splt := strings.Split(link, "/")
+	return RepositoryInfo{
+		ShortName: splt[len(splt)-1],
+		FullName:  link,
+		Link:      "https://" + link,
+	}
+}
+
+// Owerwrite current PKGBUILD file.
+func WritePackageBuild(i RepositoryInfo) {
+	tmpl := fmt.Sprintf(pkgbuildTemplate, i.ShortName, i.Link)
+	err := system.WriteFile("PKGBUILD", tmpl)
+	CheckErr(err)
+}
+
+// Append some lines to README.md file.
+func ModifyReadmeFile(link string) {
+	insatllMd := fmt.Sprintf(readmeTemplate, "```", link, "```")
+	system.AppendToFile("README.md", insatllMd)
 }
 
 const (
@@ -71,43 +115,3 @@ pack get %s
 %s
 `
 )
-
-func Gen(cmd *cobra.Command, args []string) {
-	info := GetInstallLink()
-	WritePackageBuild(info)
-	ModifyReadmeFile(info.Link)
-	GreenPrint("Updated files: ", "PKGBUILD README.md")
-}
-
-type PackageInfo struct {
-	ShortName string
-	FullName  string
-	Link      string
-}
-
-func GetInstallLink() PackageInfo {
-	link, err := system.Callf("git config --get remote.origin.url")
-	CheckErr(err)
-	link = strings.Trim(link, "\n")
-	link = strings.ReplaceAll(link, "https://", "")
-	link = strings.ReplaceAll(link, "git@", "")
-	link = strings.ReplaceAll(link, ":", "/")
-	link = strings.ReplaceAll(link, ".git", "")
-	splt := strings.Split(link, "/")
-	return PackageInfo{
-		ShortName: splt[len(splt)-1],
-		FullName:  link,
-		Link:      "https://" + link,
-	}
-}
-
-func WritePackageBuild(i PackageInfo) {
-	tmpl := fmt.Sprintf(pkgbuildTemplate, i.ShortName, i.Link)
-	err := system.WriteFile("PKGBUILD", tmpl)
-	CheckErr(err)
-}
-
-func ModifyReadmeFile(link string) {
-	insatllMd := fmt.Sprintf(readmeTemplate, "```", link, "```")
-	system.AppendToFile("README.md", insatllMd)
-}

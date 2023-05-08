@@ -45,23 +45,13 @@ pack install fmnx.io/core/ainst`,
 	},
 }
 
-var (
-	cfg *config.Config
-	lf  *lockfile.Lockfile
-)
-
 func init() {
 	rootCmd.SetHelpCommand(&cobra.Command{})
 	rootCmd.SetUsageTemplate(descrTmpl)
 
-	conf, err := config.GetConfig()
+	lock, err := lockfile.New(config.LockFile)
 	CheckErr(err)
-	system.Debug = conf.DebugMode
-	cfg = conf
-	lock, err := lockfile.New(conf.LockFile)
-	CheckErr(err)
-	lf = &lock
-	err = lf.TryLock()
+	err = lock.TryLock()
 	CheckErr(err)
 }
 
@@ -94,7 +84,7 @@ func Chdir(dir string) {
 }
 
 func RedPrint(white string, red string) {
-	if cfg.DisablePrettyPrint {
+	if config.DisablePrettyPrint {
 		fmt.Printf(white + red + "\n")
 		return
 	}
@@ -102,7 +92,7 @@ func RedPrint(white string, red string) {
 }
 
 func BluePrint(white string, blue string) {
-	if cfg.DisablePrettyPrint {
+	if config.DisablePrettyPrint {
 		fmt.Printf(white + blue + "\n")
 		return
 	}
@@ -110,7 +100,7 @@ func BluePrint(white string, blue string) {
 }
 
 func GreenPrint(white string, green string) {
-	if cfg.DisablePrettyPrint {
+	if config.DisablePrettyPrint {
 		fmt.Printf(white + green + "\n")
 		return
 	}
@@ -118,7 +108,7 @@ func GreenPrint(white string, green string) {
 }
 
 func YellowPrint(white string, yellow string) {
-	if cfg.DisablePrettyPrint {
+	if config.DisablePrettyPrint {
 		fmt.Printf(white + yellow + "\n")
 		return
 	}

@@ -11,10 +11,10 @@ import (
 )
 
 func init() {
-	rootCmd.AddCommand(infoCmd)
+	rootCmd.AddCommand(describeCmd)
 }
 
-var infoCmd = &cobra.Command{
+var describeCmd = &cobra.Command{
 	Use:     "describe",
 	Aliases: []string{"descr", "d"},
 	Short:   "🪪  describe package",
@@ -24,10 +24,10 @@ This tool provides information about package retrieved from pacman or pack.
 
 Example:
 pack describe fmnx.io/core/ainst`,
-	Run: Info,
+	Run: Describe,
 }
 
-func Info(cmd *cobra.Command, pkgs []string) {
+func Describe(cmd *cobra.Command, pkgs []string) {
 	if len(pkgs) != 1 {
 		RedPrint(
 			"Please, specify single arguement, provided: ",
