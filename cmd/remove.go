@@ -36,7 +36,8 @@ func Remove(cmd *cobra.Command, pkgs []string) {
 				continue
 			}
 			delete(mp, revmp[pkg])
-			ExecuteCheck("sudo pacman --noconfirm -R " + pkg)
+			_, err = system.Call("sudo pacman --noconfirm -R " + pkg)
+			CheckErr(err)
 			continue
 		}
 		_, err := system.Call("sudo pacman --noconfirm -R " + pacmanpkg)

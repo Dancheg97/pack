@@ -1,12 +1,10 @@
 package cmd
 
 import (
-	"fmt"
 	"strings"
 
-	"fmnx.io/core/pack/config"
+	"fmnx.io/core/pack/print"
 	"fmnx.io/core/pack/system"
-	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
@@ -23,17 +21,26 @@ var listCmd = &cobra.Command{
 
 func List(cmd *cobra.Command, args []string) {
 	pkgs := GetPacmanPackages()
-	mp := ReadMapping()
-	revmp := ReverseMapping(mp)
-	for k, v := range pkgs {
-		if config.DisablePrettyPrint {
-			fmt.Println(k, v, revmp[k])
-			continue
-		}
-		fmt.Println(k, color.BlueString(v), color.YellowString(revmp[k]))
+	reversePackMapping := ReverseMapping(ReadMapping())
+	for pkg, version := range pkgs {
+		print.Custom([]print.ColoredMessage{
+			{
+				Message: pkg + " ",
+				Color:   print.WHITE,
+			},
+			{
+				Message: version + " ",
+				Color:   print.BLUE,
+			},
+			{
+				Message: reversePackMapping[pkg],
+				Color:   print.YELLOW,
+			},
+		})
 	}
 }
 
+// Get all installed packages from pacman.
 func GetPacmanPackages() map[string]string {
 	o, err := system.Call("pacman -Q")
 	CheckErr(err)

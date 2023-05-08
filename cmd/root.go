@@ -6,7 +6,6 @@ import (
 
 	"fmnx.io/core/pack/config"
 	"fmnx.io/core/pack/print"
-	"fmnx.io/core/pack/system"
 	"github.com/nightlyone/lockfile"
 	"github.com/spf13/cobra"
 )
@@ -55,20 +54,6 @@ func CheckErr(err error) {
 		print.Red("Error occured: ", fmt.Sprintf("%+v", err))
 		os.Exit(1)
 	}
-}
-
-func ExecuteCheck(script string) {
-	out, err := system.Call(script)
-	if err != nil {
-		print.Red("Command did not succed: ", script)
-		fmt.Println("System output: ", out)
-		print.Red("Error occured: ", fmt.Sprintf("%+v", err))
-		os.Exit(1)
-	}
-}
-
-func Chdir(dir string) {
-	CheckErr(os.Chdir(dir))
 }
 
 const descrTmpl = `{{if gt (len .Aliases) 0}}Aliases:

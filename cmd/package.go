@@ -25,7 +25,7 @@ This script will read prepare .pkg.tar.zst package. You can use it to test
 PKGBUILD template for project or validate installation for pack.
 
 To double check installation, you can test it inside pack docker container:
-docker run --rm -it ${pwd}:/src -v /src fmnx.io/core/pack package
+docker run --rm -it fmnx.io/core/pack i example.com/package
 `,
 	Run: Package,
 }

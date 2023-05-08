@@ -293,7 +293,7 @@ func SwapPackDependencies(pkgbuild string, deps []string) {
 
 // Install package with makepkg.
 func InstallPackageWithMakepkg(i PackInfo) {
-	Chdir(i.Directory)
+	CheckErr(os.Chdir(i.Directory))
 	print.Yellow("Building package: ", i.FullName)
 	out, err := system.Call("makepkg -sfri --noconfirm")
 	if err != nil {

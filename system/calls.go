@@ -10,10 +10,12 @@ import (
 	"fmnx.io/core/pack/config"
 )
 
+// Execute external command with fmt like formatting.
 func Callf(format string, a ...any) (string, error) {
 	return Call(fmt.Sprintf(format, a...))
 }
 
+// Execute external command call in bash.
 func Call(cmd string) (string, error) {
 	if config.DebugMode {
 		fmt.Println("Syscall - executing: ", cmd)

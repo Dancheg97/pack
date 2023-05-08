@@ -7,7 +7,6 @@ import (
 
 	"fmnx.io/core/pack/print"
 	"fmnx.io/core/pack/system"
-	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
@@ -30,11 +29,7 @@ pack describe fmnx.io/core/ainst`,
 
 func Describe(cmd *cobra.Command, pkgs []string) {
 	if len(pkgs) != 1 {
-		print.Red(
-			"Please, specify single arguement, provided: ",
-			color.RedString(strings.Join(pkgs, " ")),
-		)
-
+		print.Red("Specify single arguement: ", strings.Join(pkgs, " "))
 		os.Exit(1)
 	}
 	pkg := pkgs[0]
