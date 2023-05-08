@@ -205,7 +205,7 @@ func InstallPackPackage(cmd *cobra.Command, i PackInfo) {
 	packDeps := EjectPackDependencies(i.Pkgbuild)
 	Get(cmd, packDeps)
 	SwapPackDependencies(i.Pkgbuild, packDeps)
-	// Install packge with makepkg
+	InstallPackageWithMakepkg(i)
 	// Put package to pacman cache
 	// Clean git or remove git untracked
 }
@@ -243,9 +243,9 @@ func EjectDefaultGitBranchFromRemoteInfo(rawInfo string) string {
 
 // Get dependencies and make dependencies related to pack from PKGBUILD file.
 func EjectPackDependencies(pkgbuild string) []string {
-	deps, err := system.EjectShList(pkgbuild, "depends")
+	deps, err := system.EjectShellList(pkgbuild, "depends")
 	CheckErr(err)
-	makedeps, err := system.EjectShList(pkgbuild, "makedepends")
+	makedeps, err := system.EjectShellList(pkgbuild, "makedepends")
 	CheckErr(err)
 	alldeps := append(deps, makedeps...)
 	groups := SplitPackages(alldeps)
@@ -267,3 +267,13 @@ func SwapPackDependencies(pkgbuild string, deps []string) {
 	CheckErr(err)
 }
 
+// Install package with makepkg.
+func InstallPackageWithMakepkg(i PackInfo) {
+	Chdir(i.Directory)
+	out, err := system.Call("makepkg -sfri --noconfirm")
+	if err != nil {
+		RedPrint("Unable to build and install package: ", i.FullName)
+		fmt.Println(out)
+		os.Exit(1)
+	}
+}

@@ -5,8 +5,8 @@ import (
 	"strings"
 )
 
-// Allows to eject parameters from PKGBUILD typycally to resolv dependencies.
-func EjectShList(file string, param string) ([]string, error) {
+// Allows to eject parameters from PKGBUILD typycally to resolve dependencies.
+func EjectShellList(file string, param string) ([]string, error) {
 	f, err := os.ReadFile(file)
 	if err != nil {
 		return nil, err
