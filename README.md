@@ -35,6 +35,12 @@ docker run --rm -it fmnx.io/core/pack i fmnx.io/pkg/package
 
 - generate `PKGBUILD` template with example of file and directory mapping to end system
 
+```sh
+pack generate
+```
+
+---
+
 You can find all commands and description by running `pack -h`.
 
 💿 Single line installation script (for all arch based distributions):
@@ -103,3 +109,7 @@ package() {
   cd build/linux/x64/release/bundle && find . -type f -exec install -Dm755 {} $pkgdir/usr/share/example/{} \; && cd $srcdir/..
 }
 ```
+
+<!--
+Clean git dir before each package installation.
+-->

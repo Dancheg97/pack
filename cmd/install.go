@@ -245,6 +245,7 @@ func SetPackageVersion(i PackInfo) {
 		}
 	}
 	CheckErr(system.SwapShellParameter(i.Pkgbuild, "pkgver", i.Version))
+	CheckErr(system.SwapShellParameter(i.Pkgbuild, "url", i.HttpsLink))
 }
 
 // Returns default branch for git repository located in git directory.
