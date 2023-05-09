@@ -18,7 +18,7 @@ Core features:
 - install packages using git links
 
 ```sh
-pack i aur.archlinux.org/package
+pack i fmnx.io/pkg/package
 ```
 
 - use git tags/branches to switch package to some version
@@ -30,7 +30,7 @@ pack i example.com/package@v0.21
 - verify package installation inside docker container
 
 ```sh
-docker run --rm -it fmnx.io/core/pack i aur.archlinux.org/yay
+docker run --rm -it fmnx.io/core/pack i fmnx.io/pkg/package
 ```
 
 - generate `PKGBUILD` template with example of file and directory mapping to end system
@@ -60,7 +60,9 @@ You can use env variables to configure pack behaviour in docker:
 - `PACK_DISABLE_PRETTYPRINT` - disable colors in CLI output
 - `PACK_DEBUG_MODE` - watch every system call execution
 
-Also you can modify `pack` configuration in `~/.pack/config.yml` or mount to container.
+Alternatively, modify `pack` configuration in `~/.pack/config.yml` and mount it to container.
+
+You can use this container to easily create your CI-CD image with all required tooling or as base image for package build checks.
 
 ---
 
