@@ -230,6 +230,7 @@ func InstallPackPackage(i PackInfo) {
 	CleanRepository(i)
 }
 
+// Checkout repository with pack package to some version.
 func SetPackageVersion(i PackInfo) {
 	if i.Version == `` {
 		i.Version = GetDefaultGitBranch(i.Directory)
