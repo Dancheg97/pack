@@ -104,6 +104,9 @@ func GetPackOutdated() []OutdatedPackage {
 	for pack, pacman := range mp {
 		branch, currversion := GetPackVerInfo(pacman)
 		lastversion := GetRemoteVersionForBranch("https://"+pack, branch)
+		if lastversion == currversion {
+			continue
+		}
 		rez = append(rez, OutdatedPackage{
 			Name:        pack,
 			CurrVersion: currversion,
