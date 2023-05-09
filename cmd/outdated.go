@@ -108,10 +108,9 @@ func GetPackOutdated() []OutdatedPackage {
 	var rez []OutdatedPackage
 	for pack, pacman := range mp {
 		spack, spacman := pack, pacman
-		var curr, last, branch string
 		g.Go(func() error {
-			branch, curr = GetPackVerInfo(spacman)
-			last = GetRemoteVersionForBranch("https://"+spack, branch)
+			branch, curr := GetPackVerInfo(spacman)
+			last := GetRemoteVersionForBranch("https://"+spack, branch)
 			if curr == last {
 				return nil
 			}
