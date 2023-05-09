@@ -17,8 +17,8 @@ func init() {
 var describeCmd = &cobra.Command{
 	Use:     "describe",
 	Aliases: []string{"descr", "d"},
-	Short:   "🪪  describe package",
-	Long: `🪪  view information about package
+	Short:   "🪪  describe packages",
+	Long: `🪪  view information about packages
 
 This tool provides information about package retrieved from pacman or pack.
 
@@ -29,20 +29,17 @@ pack describe fmnx.io/core/ainst`,
 
 // Cli command giving package description.
 func Describe(cmd *cobra.Command, pkgs []string) {
-	if len(pkgs) != 1 {
-		print.Red("Specify single arguement: ", strings.Join(pkgs, " "))
-		os.Exit(1)
+	for _, pkg := range pkgs {
+		packageMapping := ReadMapping()
+		pacmanpkg, ok := packageMapping[pkg]
+		if !ok {
+			pacmanpkg = pkg
+		}
+		info, err := system.Call("pacman -Qi " + pacmanpkg)
+		if err != nil {
+			print.Red("Error: ", strings.ReplaceAll(info, "error: ", ""))
+			os.Exit(1)
+		}
+		fmt.Println(info)
 	}
-	pkg := pkgs[0]
-	packageMapping := ReadMapping()
-	pacmanpkg, ok := packageMapping[pkg]
-	if !ok {
-		pacmanpkg = pkg
-	}
-	info, err := system.Call("pacman -Qi " + pacmanpkg)
-	if err != nil {
-		print.Red("Error: ", strings.ReplaceAll(info, "error: ", ""))
-		os.Exit(1)
-	}
-	fmt.Println(info)
 }
