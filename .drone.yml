@@ -21,7 +21,7 @@ steps:
       PASS:
         from_secret: PASS
     commands:
-      - docker build -t fmnx.io/core/pack:latest .
+      - docker build --no-cache -t fmnx.io/core/pack:latest .
       - docker login -u dancheg97 -p $PASS fmnx.io
       - docker push fmnx.io/core/pack:latest
 

@@ -6,7 +6,7 @@ docker:
 	sudo rm -f *.pkg.tar.zst
 	docker build -t fmnx.io/core/pack:latest .
 	docker run --rm -it fmnx.io/core/pack --help
-	docker run --rm -it fmnx.io/core/pack info pack
+	docker run --rm -it fmnx.io/core/pack d pack
 
 clean:
 	sudo rm -rf pkg
