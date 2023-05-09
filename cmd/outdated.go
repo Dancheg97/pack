@@ -1,13 +1,16 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strings"
+	"sync"
 
 	"fmnx.io/core/pack/print"
 	"fmnx.io/core/pack/system"
 	"github.com/spf13/cobra"
+	"golang.org/x/sync/errgroup"
 )
 
 func init() {
@@ -100,19 +103,29 @@ func GetCurrentVersion(pkg string) string {
 // Get pack outdated packages.
 func GetPackOutdated() []OutdatedPackage {
 	mp := ReadMapping()
+	g, _ := errgroup.WithContext(context.Background())
+	var mu sync.Mutex
 	var rez []OutdatedPackage
 	for pack, pacman := range mp {
-		branch, currversion := GetPackVerInfo(pacman)
-		lastversion := GetRemoteVersionForBranch("https://"+pack, branch)
-		if lastversion == currversion {
-			continue
-		}
-		rez = append(rez, OutdatedPackage{
-			Name:        pack,
-			CurrVersion: currversion,
-			NewVersion:  lastversion,
+		spack, spacman := pack, pacman
+		var curr, last, branch string
+		g.Go(func() error {
+			branch, curr = GetPackVerInfo(spacman)
+			last = GetRemoteVersionForBranch("https://"+spack, branch)
+			if curr == last {
+				return nil
+			}
+			mu.Lock()
+			rez = append(rez, OutdatedPackage{
+				Name:        spack,
+				CurrVersion: curr,
+				NewVersion:  last,
+			})
+			mu.Unlock()
+			return nil
 		})
 	}
+	g.Wait()
 	return rez
 }
 
