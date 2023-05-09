@@ -48,7 +48,10 @@ func init() {
 			usr.HomeDir,
 			usr.HomeDir,
 		)
-		err = os.WriteFile(usr.HomeDir+"/.pack/config.yml", []byte(cfgString), 0o600)
+		err = os.WriteFile(
+			usr.HomeDir+"/.pack/config.yml",
+			[]byte(cfgString), 0o600,
+		)
 		checkErr(err)
 		RemoveGitRepos = getBoolEnv(`PACK_REMOVE_GIT_REPOS`)
 		RemoveBuiltPackages = getBoolEnv(`PACK_REMOVE_BUILT_PACKAGES`)

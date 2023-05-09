@@ -6,20 +6,20 @@ pkgver="1"
 pkgrel="1"
 arch=('i686' 'pentium4' 'x86_64' 'arm' 'armv7h' 'armv6h' 'aarch64' 'riscv64')
 url="https://fmnx.io/core/pack"
-
-# Edit build dependencies
+depends=(
+  "git"
+  "pacman"
+)
 makedepends=(
   "go"
 )
 
 build() {
   cd ..
-  # Edit your build scripts after this line.
   go build -buildvcs=false -o pack .
 }
 
 package() {
   cd ..
-  # Install your files into final systems.
   install -Dm755 pack $pkgdir/usr/bin/pack
 }
