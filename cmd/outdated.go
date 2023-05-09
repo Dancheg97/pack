@@ -18,13 +18,36 @@ var outdatedCmd = &cobra.Command{
 	Use:     "outdated",
 	Aliases: []string{"out", "o"},
 	Short:   "📌 show outdated packages",
-	Run:     Outdated,
+	Long: `📌 show outdated packages
+
+This command will make a call to pacman servers and collect information about
+all remote repos for packages installed with pack. Then it will print a list
+of packages that require update displaying current and new available version.
+`,
+	Run: Outdated,
 }
 
 // Cli command listing installed packages and their status.
 func Outdated(cmd *cobra.Command, args []string) {
-	outdatedPkgs := GetOutdated()
-	fmt.Println(outdatedPkgs)
+	pacmanOutdated := GetPacmanOutdated()
+	packoutdated := GetPackOutdated()
+	allOutdated := append(pacmanOutdated, packoutdated...)
+	for i, op := range allOutdated {
+		print.Custom([]print.ColoredMessage{
+			{
+				Message: fmt.Sprintf("%d - %s ", i+1, op.Name),
+				Color:   print.WHITE,
+			},
+			{
+				Message: op.CurrVersion + " ",
+				Color:   print.YELLOW,
+			},
+			{
+				Message: op.NewVersion,
+				Color:   print.BLUE,
+			},
+		})
+	}
 }
 
 type OutdatedPackage struct {
@@ -34,33 +57,85 @@ type OutdatedPackage struct {
 }
 
 // Get outdated packages and their versions.
-func GetOutdated() []OutdatedPackage {
-	o, err := system.Call("sudo pacman -Syup")
-	if err != nil {
-		print.Red("Unable to connect to pacman servers: ", "network error")
-		os.Exit(1)
-	}
-	splt := strings.Split(o, "is up to date\n")
-	pkgsLinksString := splt[len(splt)-1]
+func GetPacmanOutdated() []OutdatedPackage {
+	links := GetUpdateLinks()
 	var out []OutdatedPackage
-	for _, link := range strings.Split(pkgsLinksString, "\n") {
-		splt = strings.Split(link, "/")
-		file := splt[len(splt)-1]
-		splt = strings.Split(file, "-")
-		curr := GetCurrentVersion(splt[0])
+	for _, link := range links {
+		linkSplit := strings.Split(link, "/")
+		file := linkSplit[len(linkSplit)-1]
+		fileSplit := strings.Split(file, "-")
+		ver := GetCurrentVersion(fileSplit[0])
 		out = append(out, OutdatedPackage{
-			Name:        splt[0],
-			CurrVersion: curr,
-			NewVersion:  splt[1],
+			Name:        fileSplit[0],
+			CurrVersion: ver,
+			NewVersion:  fileSplit[1],
 		})
 	}
 	return out
 }
 
+// Get found update links for pacman packges.
+func GetUpdateLinks() []string {
+	o, err := system.Call("sudo pacman -Syup")
+	if err != nil {
+		print.Red("Unable to connect to pacman servers: ", "network error")
+		os.Exit(1)
+	}
+	if !strings.Contains(o, "https://") {
+		return nil
+	}
+	splt := strings.Split(o, "downloading...\n")
+	pkgsLinksString := strings.Trim(splt[len(splt)-1], "\n")
+	return strings.Split(pkgsLinksString, "\n")
+}
+
 // Get current package version.
 func GetCurrentVersion(pkg string) string {
 	o, err := system.Callf("pacman -Q %s", pkg)
-	fmt.Println(o)
 	CheckErr(err)
-	return strings.Trim(strings.Split(o, " ")[1], "\n")
+	verAndRel := strings.Split(o, " ")[1]
+	return strings.Trim(strings.Split(verAndRel, "-")[0], "\n")
+}
+
+// Get pack outdated packages.
+func GetPackOutdated() []OutdatedPackage {
+	mp := ReadMapping()
+	var rez []OutdatedPackage
+	for pack, pacman := range mp {
+		branch, currversion := GetPackVerInfo(pacman)
+		lastversion := GetRemoteVersionForBranch("https://"+pack, branch)
+		rez = append(rez, OutdatedPackage{
+			Name:        pack,
+			CurrVersion: currversion,
+			NewVersion:  lastversion,
+		})
+	}
+	return rez
+}
+
+// Get branch and git commit hash of pack package. (branch, hash)
+func GetPackVerInfo(pkg string) (string, string) {
+	o, err := system.Callf("pacman -Qi %s", pkg)
+	CheckErr(err)
+	const versionField = "Version         : "
+	rawver := strings.Split(strings.Split(o, versionField)[1], "\n")[0]
+	rawverSplit := strings.Split(rawver, ".")
+	branch := rawverSplit[0]
+	hash := strings.Split(rawverSplit[1], "-")[0]
+	return branch, hash
+}
+
+// Get remote version for specific branch of git repository.
+func GetRemoteVersionForBranch(link string, branch string) string {
+	o, err := system.Callf("git ls-remote -h %s", link)
+	if err != nil {
+		return "unable to connect"
+	}
+	refs := strings.Split(strings.Trim(o, "\n"), "\n")
+	for _, ref := range refs {
+		if strings.HasSuffix(ref, branch) {
+			return strings.Split(ref, " ")[0]
+		}
+	}
+	return "unable to find branch in remote repo"
 }

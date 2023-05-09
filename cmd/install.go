@@ -220,6 +220,7 @@ func CheckPackPackageInstalled(pkg string) bool {
 
 // Install pack package.
 func InstallPackPackage(i PackInfo) {
+	CleanRepository(i)
 	SetPackageVersion(i)
 	packDeps := EjectPackDependencies(i.Pkgbuild)
 	Get(nil, packDeps)
@@ -244,7 +245,8 @@ func SetPackageVersion(i PackInfo) {
 			os.Exit(1)
 		}
 	}
-	CheckErr(system.SwapShellParameter(i.Pkgbuild, "pkgver", i.Version))
+	displayVersion := fmt.Sprintf("%s.%s", branch, i.Version)
+	CheckErr(system.SwapShellParameter(i.Pkgbuild, "pkgver", displayVersion))
 	CheckErr(system.SwapShellParameter(i.Pkgbuild, "url", i.HttpsLink))
 }
 
@@ -312,7 +314,8 @@ func InstallPackageWithMakepkg(i PackInfo) {
 // Move prepared .pkg.tar.zst package into pacman cache.
 func CachePackage(dir string) {
 	if !config.RemoveBuiltPackages {
-		_, err := system.Callf("sudo mv %s/*.pkg.tar.zst %s", dir, config.PackageCacheDir)
+		const command = "sudo mv %s/*.pkg.tar.zst %s"
+		_, err := system.Callf(command, dir, config.PackageCacheDir)
 		CheckErr(err)
 	}
 }
