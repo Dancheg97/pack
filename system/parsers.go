@@ -1,12 +1,30 @@
 package system
 
 import (
+	"fmt"
 	"os"
 	"strings"
 )
 
-// Allows to eject parameters from PKGBUILD typycally to resolve dependencies.
-func EjectShellList(file string, param string) ([]string, error) {
+// Swap some variable parameter in shell file and create substitute.
+// Works only when it is single parameter declaration in shell file.
+func SwapShellParameter(file string, param string, newval string) error {
+	b, err := os.ReadFile(file)
+	if err != nil {
+		return err
+	}
+	splt1 := strings.Split(string(b), fmt.Sprintf("\n%s=", param))
+	splt2 := strings.Split(splt1[1], "\n")
+	join1 := strings.Join(splt2[1:], "\n")
+	swp := fmt.Sprintf("\nswap%s=%s\n", param, splt2[0])
+	rez := fmt.Sprintf("%s\n%s=%s%s%s", splt1[0], param, newval, swp, join1)
+	rez = strings.ReplaceAll(rez, "$"+param, "$swap"+param)
+	rez = strings.ReplaceAll(rez, "${"+param+"}", "${swap"+param+"}")
+	return WriteFile(file, rez)
+}
+
+// Eject list parameters from shell file, typically PKGBUILD.
+func GetShellList(file string, param string) ([]string, error) {
 	f, err := os.ReadFile(file)
 	if err != nil {
 		return nil, err

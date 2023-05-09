@@ -232,8 +232,8 @@ func InstallPackPackage(i PackInfo) {
 
 // Checkout repository with pack package to some version.
 func SetPackageVersion(i PackInfo) {
+	branch := GetDefaultGitBranch(i.Directory)
 	if i.Version == `` {
-		branch := GetDefaultGitBranch(i.Directory)
 		i.Version = GetLastCommitHash(i.Directory, branch)
 	}
 	o, err := system.Callf("git -C %s checkout %s", i.Directory, i.Version)
@@ -244,7 +244,7 @@ func SetPackageVersion(i PackInfo) {
 			os.Exit(1)
 		}
 	}
-	SwapPkgbuildVersion(i.Pkgbuild, i.Version)
+	CheckErr(system.SwapShellParameter(i.Pkgbuild, "pkgver", i.Version))
 }
 
 // Returns default branch for git repository located in git directory.
@@ -270,25 +270,11 @@ func GetLastCommitHash(dir string, branch string) string {
 	return strings.Trim(o, "\n")
 }
 
-// Change version provided in PKGBUILD to the one specified.
-func SwapPkgbuildVersion(pkgbuild string, version string) {
-	b, err := os.ReadFile(pkgbuild)
-	CheckErr(err)
-	splt1 := strings.Split(string(b), "\npkgver=")
-	splt2 := strings.Split(splt1[1], "\n")
-	join1 := strings.Join(splt2[1:], "\n")
-	swapver := fmt.Sprintf("\nswapver=%s\n", splt2[0])
-	rez := fmt.Sprintf("%s\npkgver=%s%s%s", splt1[0], version, swapver, join1)
-	rez = strings.ReplaceAll(rez, "$pkgver", "$swapver")
-	rez = strings.ReplaceAll(rez, "${pkgver}", "${swapver}")
-	system.WriteFile(pkgbuild, rez)
-}
-
 // Get dependencies and make dependencies related to pack from PKGBUILD file.
 func EjectPackDependencies(pkgbuild string) []string {
-	deps, err := system.EjectShellList(pkgbuild, "depends")
+	deps, err := system.GetShellList(pkgbuild, "depends")
 	CheckErr(err)
-	makedeps, err := system.EjectShellList(pkgbuild, "makedepends")
+	makedeps, err := system.GetShellList(pkgbuild, "makedepends")
 	CheckErr(err)
 	alldeps := append(deps, makedeps...)
 	groups := SplitPackages(alldeps)
