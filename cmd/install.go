@@ -53,7 +53,6 @@ func PrepareForInstallation(pkgs []string) {
 	}
 }
 
-
 type PackageGroups struct {
 	PacmanPackages []string
 	PackPackages   []string
@@ -321,7 +320,11 @@ func CleanRepository(i PackInfo) {
 		CheckErr(os.RemoveAll(i.Directory))
 		return
 	}
-	_, err := system.Callf("git -C %s clean -fd", i.Directory)
+	_, err := system.Callf("sudo rm -rf %s/*.tar.gz", i.Directory)
+	CheckErr(err)
+	CheckErr(os.RemoveAll(i.Directory + "/pkg"))
+	CheckErr(os.RemoveAll(i.Directory + "/src"))
+	_, err = system.Callf("git -C %s clean -fd", i.Directory)
 	CheckErr(err)
 	_, err = system.Callf("git -C %s reset --hard", i.Directory)
 	CheckErr(err)
