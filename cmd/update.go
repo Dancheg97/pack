@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
+	"strings"
 
 	"fmnx.io/core/pack/print"
 	"fmnx.io/core/pack/system"
@@ -31,6 +33,7 @@ pack update git.xmpl.sh/pkg
 	Run: Update,
 }
 
+// Cli command performing package update.
 func Update(cmd *cobra.Command, pkgs []string) {
 	Updating = true
 	if len(pkgs) == 0 {
@@ -38,7 +41,11 @@ func Update(cmd *cobra.Command, pkgs []string) {
 		FullPackUpdate()
 		return
 	}
-
+	groups := SplitPackages(pkgs)
+	VerifyPacmanPackages(groups.PacmanPackages)
+	VerifyPackPackages(groups.PackPackages)
+	UpdatePacmanPackages(groups.PacmanPackages)
+	Get(nil, groups.PackPackages)
 }
 
 // Perform full pacman update.
@@ -57,14 +64,57 @@ var Updating bool
 func FullPackUpdate() {
 	mp := ReadMapping()
 	var pkgs []string
-	for link, _ := range mp {
+	for link := range mp {
 		pkgs = append(pkgs, link)
 	}
 	Get(nil, pkgs)
 	print.Green("Pack update: ", "done")
 }
 
-// Verify if all packages are installed.
-func VerifyInstalled(pkgs []string) {
-	
+// Verify pacman packages exist in system.
+func VerifyPacmanPackages(pkgs []string) {
+	o, err := system.Callf("pacman -Q %s", strings.Join(pkgs, " "))
+	var nfpkgs []string
+	if err != nil {
+		for _, line := range strings.Split(strings.Trim(o, "\n"), "\n") {
+			if strings.Contains(line, "was not found") {
+				line = strings.ReplaceAll(line, "error: package '", "")
+				line = strings.ReplaceAll(line, "' was not found", "")
+				nfpkgs = append(nfpkgs, line)
+			}
+		}
+		print.Red("Unable to find: ", strings.Join(nfpkgs, " "))
+		os.Exit(1)
+	}
+}
+
+// Verify pack packages are installed in system.
+func VerifyPackPackages(pkgs []string) {
+	mp := ReadMapping()
+	var nfpkgs []string
+	for _, pkg := range pkgs {
+		pkg = strings.Split(pkg, "@")[0]
+		_, ok := mp[pkg]
+		if !ok {
+			nfpkgs = append(nfpkgs, pkg)
+		}
+	}
+	if len(nfpkgs) > 0 {
+		print.Red("Unable to find: ", strings.Join(nfpkgs, " "))
+		os.Exit(1)
+	}
+}
+
+// Update pacman packages.
+func UpdatePacmanPackages(pkgs []string) {
+	if len(pkgs) == 0 {
+		return
+	}
+	joined := strings.Join(pkgs, " ")
+	o, err := system.Callf("sudo pacman --noconfirm -S %s", joined)
+	if err != nil {
+		print.Red("Unable to update packages: %s", err.Error())
+		fmt.Println(o)
+		os.Exit(1)
+	}
 }

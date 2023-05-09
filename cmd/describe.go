@@ -27,6 +27,7 @@ pack describe fmnx.io/core/ainst`,
 	Run: Describe,
 }
 
+// Cli command giving package description.
 func Describe(cmd *cobra.Command, pkgs []string) {
 	if len(pkgs) != 1 {
 		print.Red("Specify single arguement: ", strings.Join(pkgs, " "))

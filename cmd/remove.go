@@ -27,6 +27,7 @@ pack rm fmnx.io/core/ainst`,
 	Run: Remove,
 }
 
+// Cli command removing packages from system.
 func Remove(cmd *cobra.Command, pkgs []string) {
 	mp := ReadMapping()
 	groups := SplitPackages(pkgs)

@@ -19,6 +19,7 @@ var listCmd = &cobra.Command{
 	Run:     List,
 }
 
+// Cli command listing installed packages and their status.
 func List(cmd *cobra.Command, args []string) {
 	pkgs := GetPacmanPackages()
 	reversePackMapping := ReverseMapping(ReadMapping())

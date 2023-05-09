@@ -24,6 +24,7 @@ to provide information about installation with pack.`,
 	Run: Generate,
 }
 
+// Cli command modifying files in workdir for pack compatability.
 func Generate(cmd *cobra.Command, args []string) {
 	info := GetInstallLink()
 	WritePackageBuild(info)

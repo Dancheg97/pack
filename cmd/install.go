@@ -33,6 +33,7 @@ pack install fmnx.io/core/ainst github.com/exm/pkg@v1.23 nano`,
 	Run: Get,
 }
 
+// Cli command installing packages into system.
 func Get(cmd *cobra.Command, upkgs []string) {
 	PrepareForInstallation(upkgs)
 	pkgs := SplitPackages(upkgs)
