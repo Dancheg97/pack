@@ -18,8 +18,8 @@ func init() {
 var pkgCmd = &cobra.Command{
 	Use:     "package",
 	Aliases: []string{"pkg", "p"},
-	Short:   "📦 prepare .pkg.tar.zst and install it",
-	Long: `📦 prepare .pkg.tar.zst and install it
+	Short:   "📦 prepare and install package",
+	Long: `📦 prepare .pkg.tar.zst in current directory and install it
 
 This script will read prepare .pkg.tar.zst package. You can use it to test 
 PKGBUILD template for project or validate installation for pack.

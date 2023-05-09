@@ -21,8 +21,8 @@ var getCmd = &cobra.Command{
 	Use:     "install",
 	Example: "pack install fmnx.io/core/ainst fmnx.io/core/keks@main",
 	Aliases: []string{"i"},
-	Short:   "📥 install new packages",
-	Long: `📥 install new packages
+	Short:   "📥 install packages",
+	Long: `📥 install packages
 
 You can mix pacman and pack packages, provoding names and git links. If you
 need to specify version, you can provide it after @ symbol.
