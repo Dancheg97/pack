@@ -1,3 +1,7 @@
+// Copyright 2023 FMNX Linux team.
+// This code is covered by GPL license, which can be found in LICENSE file.
+// Additional information could be found here: https://fmnx.io/
+// Email for contacts: help@fmnx.io
 package cmd
 
 import (
@@ -33,6 +37,7 @@ pack install fmnx.io/core/ainst`,
 	},
 }
 
+// Prepare cobra and viper templates.
 func init() {
 	rootCmd.SetHelpCommand(&cobra.Command{})
 	rootCmd.SetUsageTemplate(descrTmpl)
@@ -42,6 +47,7 @@ func init() {
 	CheckErr(err)
 }
 
+// Main execution of cobra command.
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
@@ -49,6 +55,7 @@ func Execute() {
 	}
 }
 
+// Utility to exit on unexpected errors.
 func CheckErr(err error) {
 	if err != nil {
 		print.Red("Error occured: ", fmt.Sprintf("%+v", err))
