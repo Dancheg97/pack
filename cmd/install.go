@@ -233,7 +233,8 @@ func InstallPackPackage(i PackInfo) {
 // Checkout repository with pack package to some version.
 func SetPackageVersion(i PackInfo) {
 	if i.Version == `` {
-		i.Version = GetDefaultGitBranch(i.Directory)
+		branch := GetDefaultGitBranch(i.Directory)
+		i.Version = GetLastCommitHash(i.Directory, branch)
 	}
 	o, err := system.Callf("git -C %s checkout %s", i.Directory, i.Version)
 	if err != nil {
@@ -243,23 +244,44 @@ func SetPackageVersion(i PackInfo) {
 			os.Exit(1)
 		}
 	}
+	SwapPkgbuildVersion(i.Pkgbuild, i.Version)
 }
 
-// Returns default branch for git repository located in some directory.
+// Returns default branch for git repository located in git directory.
 func GetDefaultGitBranch(dir string) string {
 	origin, err := system.Callf("git -C %s remote show", dir)
 	CheckErr(err)
 	origin = strings.Trim(origin, "\n")
 	remoteInfo, err := system.Callf("git -C %s remote show %s", dir, origin)
 	CheckErr(err)
-	return EjectDefaultGitBranchFromRemoteInfo(remoteInfo)
+	rawInfo := strings.Split(remoteInfo, "HEAD branch: ")[1]
+	return strings.Split(rawInfo, "\n")[0]
 }
 
-// Function that parses information about git remote and returns it's default
-// branch.
-func EjectDefaultGitBranchFromRemoteInfo(rawInfo string) string {
-	rawInfo = strings.Split(rawInfo, "HEAD branch: ")[1]
-	return strings.Split(rawInfo, "\n")[0]
+// Get last commit hash for provided git branch in git directory.
+func GetLastCommitHash(dir string, branch string) string {
+	command := `git -C ` + dir + ` log -n 1 --pretty=format:"%H" ` + branch
+	o, err := system.Call(command)
+	if err != nil {
+		print.Red("Unable to get last git commit sha: ", dir)
+		fmt.Println(o)
+		os.Exit(1)
+	}
+	return strings.Trim(o, "\n")
+}
+
+// Change version provided in PKGBUILD to the one specified.
+func SwapPkgbuildVersion(pkgbuild string, version string) {
+	b, err := os.ReadFile(pkgbuild)
+	CheckErr(err)
+	splt1 := strings.Split(string(b), "\npkgver=")
+	splt2 := strings.Split(splt1[1], "\n")
+	join1 := strings.Join(splt2[1:], "\n")
+	swapver := fmt.Sprintf("\nswapver=%s\n", splt2[0])
+	rez := fmt.Sprintf("%s\npkgver=%s%s%s", splt1[0], version, swapver, join1)
+	rez = strings.ReplaceAll(rez, "$pkgver", "$swapver")
+	rez = strings.ReplaceAll(rez, "${pkgver}", "${swapver}")
+	system.WriteFile(pkgbuild, rez)
 }
 
 // Get dependencies and make dependencies related to pack from PKGBUILD file.

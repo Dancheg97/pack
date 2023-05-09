@@ -21,6 +21,8 @@ var listCmd = &cobra.Command{
 
 // Cli command listing installed packages and their status.
 func List(cmd *cobra.Command, args []string) {
+	// Display outdated last.
+	// Display outdated last version.
 	pkgs := GetPacmanPackages()
 	reversePackMapping := ReverseMapping(ReadMapping())
 	for pkg, version := range pkgs {
