@@ -23,7 +23,7 @@ func SwapShellParameter(file string, param string, newval string) error {
 	swp := fmt.Sprintf("\nswap%s=%s\n", param, splt2[0])
 	rez := fmt.Sprintf("%s\n%s=%s%s%s", splt1[0], param, newval, swp, join1)
 	rez = strings.ReplaceAll(rez, "$"+param, "$swap"+param)
-	rez = strings.ReplaceAll(rez, "${"+param+"}", "${swap"+param+"}")
+	rez = strings.ReplaceAll(rez, "${"+param, "${swap"+param)
 	return WriteFile(file, rez)
 }
 
