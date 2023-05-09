@@ -116,6 +116,7 @@ func GetPackOutdated() []OutdatedPackage {
 // Get branch and git commit hash of pack package. (branch, hash)
 func GetPackVerInfo(pkg string) (string, string) {
 	o, err := system.Callf("pacman -Qi %s", pkg)
+	fmt.Println(o)
 	CheckErr(err)
 	const versionField = "Version         : "
 	rawver := strings.Split(strings.Split(o, versionField)[1], "\n")[0]

@@ -161,7 +161,7 @@ func EjectInfoFromPackLink(pkg string) PackInfo {
 	if len(versplt) > 1 {
 		rez.Version = versplt[1]
 	}
-	dashsplt := strings.Split(pkg, "/")
+	dashsplt := strings.Split(rez.FullName, "/")
 	rez.ShortName = dashsplt[len(dashsplt)-1]
 	rez.Directory = config.RepoCacheDir + "/" + rez.ShortName
 	rez.Pkgbuild = rez.Directory + "/PKGBUILD"
