@@ -35,6 +35,8 @@ type config struct {
 func init() {
 	usr, err := user.Current()
 	checkErr(err)
+	err = os.MkdirAll(usr.HomeDir+"/.pack", 0755)
+	checkErr(err)
 	cfg, err := os.Stat(usr.HomeDir + "/.pack/config.yml")
 	if err != nil || cfg.IsDir() {
 		cfgString := fmt.Sprintf(

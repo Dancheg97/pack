@@ -48,19 +48,11 @@ func PrepareForInstallation(pkgs []string) {
 	if len(pkgs) == 0 {
 		return
 	}
-	CheckCacheDirExist()
 	if !Updating {
 		print.Blue("Installing packages: ", strings.Join(pkgs, " "))
 	}
 }
 
-// Prepare cache directories for package repositories.
-func CheckCacheDirExist() {
-	err := system.PrepareDir(config.RepoCacheDir)
-	CheckErr(err)
-	err = system.PrepareDir(config.PackageCacheDir)
-	CheckErr(err)
-}
 
 type PackageGroups struct {
 	PacmanPackages []string
