@@ -116,7 +116,6 @@ func GetPackOutdated() []OutdatedPackage {
 // Get branch and git commit hash of pack package. (branch, hash)
 func GetPackVerInfo(pkg string) (string, string) {
 	o, err := system.Callf("pacman -Qi %s", pkg)
-	fmt.Println(o)
 	CheckErr(err)
 	const versionField = "Version         : "
 	rawver := strings.Split(strings.Split(o, versionField)[1], "\n")[0]
@@ -135,7 +134,7 @@ func GetRemoteVersionForBranch(link string, branch string) string {
 	refs := strings.Split(strings.Trim(o, "\n"), "\n")
 	for _, ref := range refs {
 		if strings.HasSuffix(ref, branch) {
-			return strings.Split(ref, " ")[0]
+			return strings.Split(ref, "	")[0]
 		}
 	}
 	return "unable to find branch in remote repo"

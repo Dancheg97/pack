@@ -62,10 +62,10 @@ var Updating bool
 
 // Perform full pack update.
 func FullPackUpdate() {
-	mp := ReadMapping()
+	outdatedpkgs := GetPackOutdated()
 	var pkgs []string
-	for link := range mp {
-		pkgs = append(pkgs, link)
+	for _, pkg := range outdatedpkgs {
+		pkgs = append(pkgs, fmt.Sprintf("%s@%s", pkg.Name, pkg.NewVersion))
 	}
 	Get(nil, pkgs)
 	print.Green("Pack update: ", "done")
