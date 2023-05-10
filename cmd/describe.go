@@ -23,8 +23,8 @@ func init() {
 var describeCmd = &cobra.Command{
 	Use:     "describe",
 	Aliases: []string{"descr", "d"},
-	Short:   "🪪  describe packages",
-	Long: `🪪  view information about packages
+	Short:   "📝 describe packages",
+	Long: `📝 view information about packages
 
 This tool provides information about package retrieved from pacman or pack.
 
