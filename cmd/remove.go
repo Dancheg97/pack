@@ -39,8 +39,8 @@ func Remove(cmd *cobra.Command, pkgs []string) {
 	restPacmanPkgs := GetPacmanPackagesFromPackNames(groups.PackPackages)
 	groups.PacmanPackages = append(groups.PacmanPackages, restPacmanPkgs...)
 	RemovePacmanPackages(groups.PacmanPackages)
-	for _, pkg := range groups.PackPackages {
-		database.Remove(pkg, database.PACK)
+	for _, pkg := range groups.PacmanPackages {
+		database.Remove(pkg, database.PACMAN)
 	}
 }
 

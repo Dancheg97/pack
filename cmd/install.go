@@ -241,18 +241,12 @@ func InstallPackPackage(i PackInfo) {
 // branch and version for this repo.
 func SetPackageVersion(i PackInfo) (string, string) {
 	branch := GetDefaultGitBranch(i.Directory)
+	GetDirCheckout(i.Directory, branch)
 	GitDirPull(i.Directory)
 	if i.Version == `` {
 		i.Version = GetLastCommitHash(i.Directory, branch)
 	}
-	o, err := system.Callf("git -C %s checkout %s", i.Directory, i.Version)
-	if err != nil {
-		if !strings.HasPrefix(o, "Already on ") {
-			print.Red("Unable to set pack version for: ", i.PackName)
-			fmt.Println(o)
-			os.Exit(1)
-		}
-	}
+	GetDirCheckout(i.Directory, i.Version)
 	CheckErr(system.SwapShellParameter(i.Pkgbuild, "url", i.HttpsLink))
 	return branch, i.Version
 }
@@ -264,6 +258,18 @@ func GitDirPull(dir string) {
 		print.Red("Unable to git pull: ", dir)
 		fmt.Println(o)
 		os.Exit(1)
+	}
+}
+
+// Perform git checkout for specific branch/commit/tag on dir.
+func GetDirCheckout(dir string, branch string) {
+	o, err := system.Callf("git -C %c checkout %s ", dir, branch)
+	if err != nil {
+		if !strings.HasPrefix(o, "Already on ") {
+			print.Red("Unable to set pack version for: ", dir)
+			fmt.Println(o)
+			os.Exit(1)
+		}
 	}
 }
 
