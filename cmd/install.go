@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"fmnx.io/core/pack/config"
+	"fmnx.io/core/pack/database"
 	"fmnx.io/core/pack/print"
 	"fmnx.io/core/pack/system"
 	"github.com/spf13/cobra"
@@ -149,26 +150,26 @@ func CheckPackPackage(pkg string) error {
 
 // Info formed from pack link about all information related to that package.
 type PackInfo struct {
-	ShortName string
-	FullName  string
-	Directory string
-	Version   string
-	Pkgbuild  string
-	HttpsLink string
+	PacmanName string
+	PackName   string
+	Directory  string
+	Version    string
+	Pkgbuild   string
+	HttpsLink  string
 }
 
 // Eject pack information for provided pack link.
 func EjectInfoFromPackLink(pkg string) PackInfo {
 	rez := PackInfo{}
 	versplt := strings.Split(pkg, "@")
-	rez.FullName = versplt[0]
+	rez.PackName = versplt[0]
 	rez.HttpsLink = "https://" + versplt[0]
 	if len(versplt) > 1 {
 		rez.Version = versplt[1]
 	}
-	dashsplt := strings.Split(rez.FullName, "/")
-	rez.ShortName = dashsplt[len(dashsplt)-1]
-	rez.Directory = config.RepoCacheDir + "/" + rez.ShortName
+	dashsplt := strings.Split(rez.PackName, "/")
+	rez.PacmanName = dashsplt[len(dashsplt)-1]
+	rez.Directory = config.RepoCacheDir + "/" + rez.PacmanName
 	rez.Pkgbuild = rez.Directory + "/PKGBUILD"
 	return rez
 }
@@ -201,9 +202,11 @@ func CleanAlreadyInstalled(pkgs []string) []string {
 	return uninstalledPkgs
 }
 
+// Checks if packages are not installed and installing them.
 func InstallPackPackages(pkgs []string) {
 	for _, pkg := range pkgs {
-		if CheckPackPackageInstalled(pkg) {
+		_, err := database.Get(pkg, database.PACK)
+		if err == nil {
 			continue
 		}
 		InstallPackPackage(EjectInfoFromPackLink(pkg))
@@ -219,34 +222,49 @@ func InstallPackPackages(pkgs []string) {
 // Install pack package.
 func InstallPackPackage(i PackInfo) {
 	CleanRepository(i)
-	SetPackageVersion(i)
+	branch := SetPackageVersion(i)
 	packDeps := EjectPackDependencies(i.Pkgbuild)
 	Get(nil, packDeps)
 	SwapPackDependencies(i.Pkgbuild, packDeps)
 	InstallPackageWithMakepkg(i)
-	AddPackageToPackMapping(i)
+	database.Add(database.Package{
+		PacmanName: i.PacmanName,
+		PackName:   i.PackName,
+		Version:    i.Version,
+		Branch:     branch,
+	})
 	CachePackage(i.Directory)
 	CleanRepository(i)
 }
 
-// Checkout repository with pack package to some version.
-func SetPackageVersion(i PackInfo) {
+// Checkout repository with pack package to some version. And return default
+// branch for this repo.
+func SetPackageVersion(i PackInfo) string {
 	branch := GetDefaultGitBranch(i.Directory)
+	GitDirPull(i.Directory)
 	if i.Version == `` {
 		i.Version = GetLastCommitHash(i.Directory, branch)
 	}
 	o, err := system.Callf("git -C %s checkout %s", i.Directory, i.Version)
 	if err != nil {
 		if !strings.HasPrefix(o, "Already on ") {
-			print.Red("Unable to set pack version for: ", i.FullName)
+			print.Red("Unable to set pack version for: ", i.PackName)
 			fmt.Println(o)
 			os.Exit(1)
 		}
 	}
-	displayVersion := fmt.Sprintf("%s.%s", branch, i.Version)
-	// TODO
-	// CheckErr(system.SwapShellParameter(i.Pkgbuild, "pkgver", displayVersion))
 	CheckErr(system.SwapShellParameter(i.Pkgbuild, "url", i.HttpsLink))
+	return branch
+}
+
+// Pull changes for specified directory with git repository.
+func GitDirPull(dir string) {
+	o, err := system.Callf("git -C %s pull", dir)
+	if err != nil {
+		print.Red("Unable to git pull: ", dir)
+		fmt.Println(o)
+		os.Exit(1)
+	}
 }
 
 // Returns default branch for git repository located in git directory.
@@ -301,10 +319,10 @@ func SwapPackDependencies(pkgbuild string, deps []string) {
 // Install package with makepkg.
 func InstallPackageWithMakepkg(i PackInfo) {
 	CheckErr(os.Chdir(i.Directory))
-	print.Yellow("Building package: ", i.FullName)
+	print.Yellow("Building package: ", i.PackName)
 	out, err := system.Call("makepkg -sfri --noconfirm")
 	if err != nil {
-		print.Red("Unable to build and install package: ", i.FullName)
+		print.Red("Unable to build and install package: ", i.PackName)
 		fmt.Println(out)
 		os.Exit(1)
 	}
@@ -317,13 +335,6 @@ func CachePackage(dir string) {
 		_, err := system.Callf(command, dir, config.PackageCacheDir)
 		CheckErr(err)
 	}
-}
-
-// Add package to mapping file for display.
-func AddPackageToPackMapping(i PackInfo) {
-	mp := ReadMapping()
-	mp[i.FullName] = i.ShortName
-	WriteMapping(mp)
 }
 
 // Clean or remove git directory after installation depending on configuration.
