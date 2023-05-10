@@ -37,8 +37,8 @@ func List(cmd *cobra.Command, args []string) {
 					Color:   print.WHITE,
 				},
 				{
-					Message: version + " ",
-					Color:   print.BLUE,
+					Message: version,
+					Color:   print.YELLOW,
 				},
 			})
 			continue
@@ -50,14 +50,14 @@ func List(cmd *cobra.Command, args []string) {
 			},
 			{
 				Message: i.Branch,
-				Color:   print.YELLOW,
+				Color:   print.BLUE,
 			},
 			{
 				Message: "-",
 				Color:   print.WHITE,
 			},
 			{
-				Message: i.Version + " ",
+				Message: i.Version,
 				Color:   print.BLUE,
 			},
 		})
