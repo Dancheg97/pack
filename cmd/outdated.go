@@ -12,6 +12,7 @@ import (
 	"strings"
 	"sync"
 
+	"fmnx.io/core/pack/database"
 	"fmnx.io/core/pack/print"
 	"fmnx.io/core/pack/system"
 	"github.com/spf13/cobra"
@@ -107,22 +108,22 @@ func GetCurrentVersion(pkg string) string {
 
 // Get pack outdated packages.
 func GetPackOutdated() []OutdatedPackage {
-	mp := ReadMapping()
+	pkgs := database.List()
 	g, _ := errgroup.WithContext(context.Background())
 	var mu sync.Mutex
 	var rez []OutdatedPackage
-	for pack, pacman := range mp {
-		spack, spacman := pack, pacman
+	for _, info := range pkgs {
+		sinfo := info
 		g.Go(func() error {
-			branch, curr := GetPackVerInfo(spacman)
-			last := GetRemoteVersionForBranch("https://"+spack, branch)
-			if curr == last {
+			link := "https://" + sinfo.PackName
+			last := GetRemoteVersionForBranch(link, sinfo.Branch)
+			if sinfo.Version == last {
 				return nil
 			}
 			mu.Lock()
 			rez = append(rez, OutdatedPackage{
-				Name:        spack,
-				CurrVersion: curr,
+				Name:        sinfo.PackName,
+				CurrVersion: sinfo.Version,
 				NewVersion:  last,
 			})
 			mu.Unlock()
@@ -131,18 +132,6 @@ func GetPackOutdated() []OutdatedPackage {
 	}
 	g.Wait()
 	return rez
-}
-
-// Get branch and git commit hash of pack package. (branch, hash)
-func GetPackVerInfo(pkg string) (string, string) {
-	o, err := system.Callf("pacman -Qi %s", pkg)
-	CheckErr(err)
-	const versionField = "Version         : "
-	rawver := strings.Split(strings.Split(o, versionField)[1], "\n")[0]
-	rawverSplit := strings.Split(rawver, ".")
-	branch := rawverSplit[0]
-	hash := strings.Split(rawverSplit[1], "-")[0]
-	return branch, hash
 }
 
 // Get remote version for specific branch of git repository.
