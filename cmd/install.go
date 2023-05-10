@@ -263,7 +263,7 @@ func GitDirPull(dir string) {
 
 // Perform git checkout for specific branch/commit/tag on dir.
 func GetDirCheckout(dir string, branch string) {
-	o, err := system.Callf("git -C %c checkout %s ", dir, branch)
+	o, err := system.Callf("git -C %s checkout %s ", dir, branch)
 	if err != nil {
 		if !strings.HasPrefix(o, "Already on ") {
 			print.Red("Unable to set pack version for: ", dir)
