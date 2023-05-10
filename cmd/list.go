@@ -8,6 +8,7 @@ package cmd
 import (
 	"strings"
 
+	"fmnx.io/core/pack/database"
 	"fmnx.io/core/pack/print"
 	"fmnx.io/core/pack/system"
 	"github.com/spf13/cobra"
@@ -27,20 +28,37 @@ var listCmd = &cobra.Command{
 // Cli command listing installed packages and version.
 func List(cmd *cobra.Command, args []string) {
 	pkgs := GetPacmanPackages()
-	reversePackMapping := ReverseMapping(ReadMapping())
 	for pkg, version := range pkgs {
+		i, err := database.Get(pkg, database.PACMAN)
+		if err != nil {
+			print.Custom([]print.ColoredMessage{
+				{
+					Message: pkg + " ",
+					Color:   print.WHITE,
+				},
+				{
+					Message: version + " ",
+					Color:   print.BLUE,
+				},
+			})
+			continue
+		}
 		print.Custom([]print.ColoredMessage{
 			{
-				Message: pkg + " ",
+				Message: i.PackName + " ",
 				Color:   print.WHITE,
 			},
 			{
-				Message: version + " ",
-				Color:   print.BLUE,
+				Message: i.Branch,
+				Color:   print.YELLOW,
 			},
 			{
-				Message: reversePackMapping[pkg],
-				Color:   print.YELLOW,
+				Message: "-",
+				Color:   print.WHITE,
+			},
+			{
+				Message: i.Version + " ",
+				Color:   print.BLUE,
 			},
 		})
 	}
