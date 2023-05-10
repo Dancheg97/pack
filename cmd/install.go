@@ -222,7 +222,7 @@ func InstallPackPackages(pkgs []string) {
 // Install pack package.
 func InstallPackPackage(i PackInfo) {
 	CleanRepository(i)
-	branch := SetPackageVersion(i)
+	branch, version := SetPackageVersion(i)
 	packDeps := EjectPackDependencies(i.Pkgbuild)
 	Get(nil, packDeps)
 	SwapPackDependencies(i.Pkgbuild, packDeps)
@@ -230,16 +230,16 @@ func InstallPackPackage(i PackInfo) {
 	database.Add(database.Package{
 		PacmanName: i.PacmanName,
 		PackName:   i.PackName,
-		Version:    i.Version,
+		Version:    version,
 		Branch:     branch,
 	})
 	CachePackage(i.Directory)
 	CleanRepository(i)
 }
 
-// Checkout repository with pack package to some version. And return default
-// branch for this repo.
-func SetPackageVersion(i PackInfo) string {
+// Checkout repository with pack package to some version. And return applied
+// branch and version for this repo.
+func SetPackageVersion(i PackInfo) (string, string) {
 	branch := GetDefaultGitBranch(i.Directory)
 	GitDirPull(i.Directory)
 	if i.Version == `` {
@@ -254,7 +254,7 @@ func SetPackageVersion(i PackInfo) string {
 		}
 	}
 	CheckErr(system.SwapShellParameter(i.Pkgbuild, "url", i.HttpsLink))
-	return branch
+	return branch, i.Version
 }
 
 // Pull changes for specified directory with git repository.

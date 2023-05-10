@@ -37,6 +37,11 @@ pack describe fmnx.io/core/ainst`,
 func Describe(cmd *cobra.Command, pkgs []string) {
 	groups := SplitPackages(pkgs)
 	for _, pkg := range groups.PacmanPackages {
+		info, err := database.Get(pkg, database.PACMAN)
+		if err == nil {
+			groups.PackPackages = append(groups.PackPackages, info.PackName)
+			continue
+		}
 		descr := GetPacmanDescription(pkg)
 		fmt.Println(descr)
 	}
