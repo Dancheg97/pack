@@ -216,13 +216,6 @@ func InstallPackPackages(pkgs []string) {
 	}
 }
 
-// Checks wetcher pack package installed.
-func CheckPackPackageInstalled(pkg string) bool {
-	mp := ReadMapping()
-	_, ok := mp[pkg]
-	return ok
-}
-
 // Install pack package.
 func InstallPackPackage(i PackInfo) {
 	CleanRepository(i)

@@ -6,6 +6,7 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 	"strings"
 
@@ -34,7 +35,20 @@ pack describe fmnx.io/core/ainst`,
 
 // Cli command giving package description.
 func Describe(cmd *cobra.Command, pkgs []string) {
-	
+	groups := SplitPackages(pkgs)
+	for _, pkg := range groups.PacmanPackages {
+		descr := GetPacmanDescription(pkg)
+		fmt.Println(descr)
+	}
+	for _, pkg := range groups.PackPackages {
+		info, err := database.Get(pkg, database.PACK)
+		if err != nil {
+			print.Yellow("Package not found: ", pkg)
+			continue
+		}
+		descr := GetPacmanDescription(info.PacmanName)
+		fmt.Println(AppendPackParams(descr, info))
+	}
 }
 
 // Get pacman package description.
@@ -48,7 +62,7 @@ func GetPacmanDescription(pkg string) string {
 }
 
 // Append pack information to package description.
-func AppendPackParams(info string, p database.Package) string {
+func AppendPackParams(info string, p *database.Package) string {
 	const (
 		ver    = "Version         : "
 		branch = "DefaultBranch   : "
