@@ -36,8 +36,9 @@ docker run --rm -it fmnx.io/core/pack i example.com/package
 
 // Cli command preparing package in current directory.
 func Package(cmd *cobra.Command, pkgs []string) {
-	print.Blue("Preparing package: ", "makepkg -sfri --noconfirm")
-	out, err := system.Call("makepkg -sfri --noconfirm")
+	dir := GetCurrDir()
+	print.Blue("Preparing package: ", dir)
+	out, err := system.Call("makepkg -sfi --noconfirm")
 	if err != nil {
 		print.Red("Unable to execute: ", "makepkg")
 		fmt.Println(out)
