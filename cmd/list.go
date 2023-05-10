@@ -38,15 +38,19 @@ func List(cmd *cobra.Command, args []string) {
 				},
 				{
 					Message: version,
-					Color:   print.YELLOW,
+					Color:   print.BLUE,
 				},
 			})
 			continue
 		}
 		print.Custom([]print.ColoredMessage{
 			{
-				Message: i.PackName + " ",
+				Message: i.PacmanName + " ",
 				Color:   print.WHITE,
+			},
+			{
+				Message: i.PackName + " ",
+				Color:   print.YELLOW,
 			},
 			{
 				Message: i.Branch,
