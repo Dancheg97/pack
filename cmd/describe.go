@@ -1,4 +1,4 @@
-// Copyright 2023 FMNX Linux team.
+// Copyright 2023 FMNX team.
 // Use of this code is governed by GNU General Public License.
 // Additional information can be found on official web page: https://fmnx.io/
 // Contact email: help@fmnx.io
@@ -6,10 +6,10 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 	"strings"
 
+	"fmnx.io/core/pack/database"
 	"fmnx.io/core/pack/print"
 	"fmnx.io/core/pack/system"
 	"github.com/spf13/cobra"
@@ -34,17 +34,27 @@ pack describe fmnx.io/core/ainst`,
 
 // Cli command giving package description.
 func Describe(cmd *cobra.Command, pkgs []string) {
-	for _, pkg := range pkgs {
-		packageMapping := ReadMapping()
-		pacmanpkg, ok := packageMapping[pkg]
-		if !ok {
-			pacmanpkg = pkg
-		}
-		info, err := system.Call("pacman -Qi " + pacmanpkg)
-		if err != nil {
-			print.Red("Error: ", strings.ReplaceAll(info, "error: ", ""))
-			os.Exit(1)
-		}
-		fmt.Println(info)
+	
+}
+
+// Get pacman package description.
+func GetPacmanDescription(pkg string) string {
+	info, err := system.Call("pacman -Qi " + pkg)
+	if err != nil {
+		print.Red("Error: ", strings.ReplaceAll(info, "error: ", ""))
+		os.Exit(1)
 	}
+	return info
+}
+
+// Append pack information to package description.
+func AppendPackParams(info string, p database.Package) string {
+	const (
+		ver    = "Version         : "
+		branch = "DefaultBranch   : "
+	)
+	splt1 := strings.Split(info, ver)
+	splt2 := strings.Split(splt1[1], "\n")
+	rest := strings.Join(splt2[1:], "\n")
+	return splt1[0] + ver + p.Version + "\n" + branch + p.Branch + "\n" + rest
 }

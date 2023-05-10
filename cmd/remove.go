@@ -1,4 +1,4 @@
-// Copyright 2023 FMNX Linux team.
+// Copyright 2023 FMNX team.
 // Use of this code is governed by GNU General Public License.
 // Additional information can be found on official web page: https://fmnx.io/
 // Contact email: help@fmnx.io
@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 
+	"fmnx.io/core/pack/database"
 	"fmnx.io/core/pack/print"
 	"fmnx.io/core/pack/system"
 	"github.com/spf13/cobra"
@@ -34,15 +35,17 @@ pack rm fmnx.io/core/ainst`,
 
 // Cli command removing packages from system.
 func Remove(cmd *cobra.Command, pkgs []string) {
-	mp := ReadMapping()
 	groups := SplitPackages(pkgs)
-	rmtargets := GetRemoveTargetPackages(groups, mp)
-	TryRemove(rmtargets)
-	WriteNewMapping(mp, rmtargets)
+	restPacmanPkgs := GetPacmanPackagesFromPackNames(groups.PackPackages)
+	groups.PacmanPackages = append(groups.PacmanPackages, restPacmanPkgs...)
+	RemovePacmanPackages(groups.PacmanPackages)
+	for _, pkg := range groups.PackPackages {
+		database.Remove(pkg, database.PACK)
+	}
 }
 
 // Try to remove all packages at once.
-func TryRemove(pkgs []string) {
+func RemovePacmanPackages(pkgs []string) {
 	pkgsStr := strings.Join(pkgs, " ")
 	o, err := system.Callf("sudo pacman --noconfirm -R %s", pkgsStr)
 	if err != nil {
@@ -59,28 +62,16 @@ func PrintNotFoundPackages(o string) {
 	print.Red("Packages not found: ", o)
 }
 
-// Get all packages that would be removed in pacman format.
-func GetRemoveTargetPackages(groups PackageGroups, mp PackMap) []string {
-	for _, pkg := range groups.PackPackages {
-		groups.PacmanPackages = append(groups.PacmanPackages, mp[pkg])
-	}
-	return groups.PacmanPackages
-}
-
-// This function will form new package mapping and write it.
-func WriteNewMapping(mp PackMap, pkgs []string) {
-	revmp := ReverseMapping(mp)
+// Get pacman packages related to pack names.
+func GetPacmanPackagesFromPackNames(pkgs []string) []string {
+	var out []string
 	for _, pkg := range pkgs {
-		delete(revmp, pkg)
+		pkgInfo, err := database.Get(pkg, database.PACK)
+		if err != nil {
+			print.Red("Unable to find package: ", pkg)
+			os.Exit(1)
+		}
+		out = append(out, pkgInfo.PacmanName)
 	}
-	WriteMapping(ReverseMapping(revmp))
-}
-
-// Returns mapping from pacman package to pack package.
-func ReverseMapping(in map[string]string) map[string]string {
-	r := map[string]string{}
-	for k, v := range in {
-		r[v] = k
-	}
-	return r
+	return out
 }

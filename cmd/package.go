@@ -1,4 +1,4 @@
-// Copyright 2023 FMNX Linux team.
+// Copyright 2023 FMNX team.
 // Use of this code is governed by GNU General Public License.
 // Additional information can be found on official web page: https://fmnx.io/
 // Contact email: help@fmnx.io
@@ -6,11 +6,10 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 
-	"fmnx.io/core/pack/config"
+	"fmnx.io/core/pack/database"
 	"fmnx.io/core/pack/print"
 	"fmnx.io/core/pack/system"
 	"github.com/spf13/cobra"
@@ -45,41 +44,29 @@ func Package(cmd *cobra.Command, pkgs []string) {
 		os.Exit(1)
 	}
 	i := GetInstallLink()
-	AddToPackMapping(i)
+	SavePackageInfo(i)
 	print.Green("Package prepared and installed: ", i.FullName)
 }
 
-// Function writes package to pack mapping file.
-func AddToPackMapping(i RepositoryInfo) {
-	mp := ReadMapping()
-	mp[i.FullName] = i.ShortName
-	WriteMapping(mp)
+// Save information about installed package.
+func SavePackageInfo(i RepositoryInfo) {
+	dir := GetCurrDir()
+	branch := GetDefaultGitBranch(dir)
+	version := GetLastCommitHash(dir, branch)
+	database.Add(database.Package{
+		PacmanName: i.ShortName,
+		PackName:   i.FullName,
+		Version:    version,
+		Branch:     branch,
+	})
 }
 
-type PackMap map[string]string
-
-// Function reads pack mapping file. Packages are mapped from pack to pacman.
-func ReadMapping() PackMap {
-	_, err := os.Stat(config.MapFile)
+// Get directory for current process.
+func GetCurrDir() string {
+	dir, err := os.Getwd()
 	if err != nil {
-		system.AppendToFile(config.MapFile, "{}")
-		return PackMap{}
+		fmt.Println("Unable to find curr dir")
+		os.Exit(1)
 	}
-	b, err := os.ReadFile(config.MapFile)
-	CheckErr(err)
-	var mapping PackMap
-	err = json.Unmarshal(b, &mapping)
-	CheckErr(err)
-	return mapping
-}
-
-// Function writes pack mapping file.
-func WriteMapping(m PackMap) {
-	if len(m) == 0 {
-		system.WriteFile(config.MapFile, "{}")
-		return
-	}
-	jsonData, err := json.Marshal(&m)
-	CheckErr(err)
-	system.WriteFile(config.MapFile, string(jsonData))
+	return dir
 }

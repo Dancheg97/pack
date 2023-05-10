@@ -1,4 +1,4 @@
-// Copyright 2023 FMNX Linux team.
+// Copyright 2023 FMNX team.
 // Use of this code is governed by GNU General Public License.
 // Additional information can be found on official web page: https://fmnx.io/
 // Contact email: help@fmnx.io
@@ -251,7 +251,8 @@ func SetPackageVersion(i PackInfo) {
 		}
 	}
 	displayVersion := fmt.Sprintf("%s.%s", branch, i.Version)
-	CheckErr(system.SwapShellParameter(i.Pkgbuild, "pkgver", displayVersion))
+	// TODO
+	// CheckErr(system.SwapShellParameter(i.Pkgbuild, "pkgver", displayVersion))
 	CheckErr(system.SwapShellParameter(i.Pkgbuild, "url", i.HttpsLink))
 }
 

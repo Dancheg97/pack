@@ -1,4 +1,4 @@
-// Copyright 2023 FMNX Linux team.
+// Copyright 2023 FMNX team.
 // Use of this code is governed by GNU General Public License.
 // Additional information can be found on official web page: https://fmnx.io/
 // Contact email: help@fmnx.io
@@ -10,6 +10,7 @@ import (
 	"os"
 	"strings"
 
+	"fmnx.io/core/pack/database"
 	"fmnx.io/core/pack/print"
 	"fmnx.io/core/pack/system"
 	"github.com/spf13/cobra"
@@ -95,12 +96,10 @@ func VerifyPacmanPackages(pkgs []string) {
 
 // Verify pack packages are installed in system.
 func VerifyPackPackages(pkgs []string) {
-	mp := ReadMapping()
 	var nfpkgs []string
 	for _, pkg := range pkgs {
-		pkg = strings.Split(pkg, "@")[0]
-		_, ok := mp[pkg]
-		if !ok {
+		_, err := database.Get(pkg, database.PACK)
+		if err != nil {
 			nfpkgs = append(nfpkgs, pkg)
 		}
 	}
