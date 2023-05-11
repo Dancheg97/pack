@@ -16,7 +16,7 @@ func GetShellList(file string, param string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	splitted := strings.Split(string(f), param+"=(")
+	splitted := strings.Split(string(f), "\n"+param+"=(")
 	if len(splitted) < 2 {
 		return nil, nil
 	}
