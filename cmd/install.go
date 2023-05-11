@@ -35,22 +35,11 @@ var installCmd = &cobra.Command{
 
 // Cli command installing packages into system.
 func Install(cmd *cobra.Command, upkgs []string) {
-	PrepareForInstallation(upkgs)
 	pkgs := SplitPackages(upkgs)
 	CheckUnreachablePacmanPackages(pkgs.PacmanPackages)
 	CheckUnreachablePackPackages(pkgs.PackPackages)
 	InstallPacmanPackages(pkgs.PacmanPackages)
 	InstallPackPackages(pkgs.PackPackages)
-}
-
-// Exis if there is no target packages, prepare cache directories.
-func PrepareForInstallation(pkgs []string) {
-	if len(pkgs) == 0 {
-		return
-	}
-	if !Updating {
-		print.Blue("Installing packages: ", strings.Join(pkgs, " "))
-	}
 }
 
 type PackageGroups struct {
