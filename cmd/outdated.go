@@ -69,7 +69,8 @@ func GetPacmanOutdated() []OutdatedPackage {
 		linkSplit := strings.Split(link, "/")
 		file := linkSplit[len(linkSplit)-1]
 		fileSplit := strings.Split(file, "-")
-		ver := GetCurrentVersion(fileSplit[0])
+		packageName := strings.Join(fileSplit[0:len(fileSplit)-3], "-")
+		ver := GetCurrentVersion(packageName)
 		out = append(out, OutdatedPackage{
 			Name:        fileSplit[0],
 			CurrVersion: ver,
