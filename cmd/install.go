@@ -247,7 +247,6 @@ func SetPackageVersion(i PackInfo) (string, string) {
 		i.Version = GetLastCommitHash(i.Directory, branch)
 	}
 	GetDirCheckout(i.Directory, i.Version)
-	CheckErr(system.SwapShellParameter(i.Pkgbuild, "url", i.HttpsLink))
 	return branch, i.Version
 }
 
