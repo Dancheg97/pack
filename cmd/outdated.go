@@ -7,7 +7,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"strings"
 	"sync"
@@ -37,44 +36,45 @@ func Outdated(cmd *cobra.Command, args []string) {
 	pacmanOutdated := GetPacmanOutdated()
 	packoutdated := GetPackOutdated()
 	allOutdated := append(pacmanOutdated, packoutdated...)
-	for i, op := range allOutdated {
+	for _, info := range allOutdated {
 		print.Custom([]print.ColoredMessage{
 			{
-				Message: fmt.Sprintf("%d - %s ", i+1, op.Name),
+				Message: info.Name + " ",
 				Color:   print.WHITE,
 			},
 			{
-				Message: op.CurrVersion + " ",
+				Message: info.CurrVersion + " ",
 				Color:   print.YELLOW,
 			},
 			{
-				Message: op.NewVersion,
+				Message: info.NewVersion,
 				Color:   print.BLUE,
 			},
 		})
 	}
 }
 
-type OutdatedPackage struct {
+type OutdatedPackageInfo struct {
 	Name        string
 	CurrVersion string
 	NewVersion  string
 }
 
 // Get outdated packages and their versions.
-func GetPacmanOutdated() []OutdatedPackage {
+func GetPacmanOutdated() []OutdatedPackageInfo {
 	links := GetUpdateLinks()
-	var out []OutdatedPackage
+	var out []OutdatedPackageInfo
 	for _, link := range links {
 		linkSplit := strings.Split(link, "/")
 		file := linkSplit[len(linkSplit)-1]
 		fileSplit := strings.Split(file, "-")
 		packageName := strings.Join(fileSplit[0:len(fileSplit)-3], "-")
-		ver := GetCurrentVersion(packageName)
-		out = append(out, OutdatedPackage{
-			Name:        fileSplit[0],
-			CurrVersion: ver,
-			NewVersion:  fileSplit[1],
+		newVersion := fileSplit[len(fileSplit)-3]
+		currVersion := GetCurrentVersion(packageName)
+		out = append(out, OutdatedPackageInfo{
+			Name:        packageName,
+			CurrVersion: currVersion,
+			NewVersion:  newVersion,
 		})
 	}
 	return out
@@ -104,11 +104,11 @@ func GetCurrentVersion(pkg string) string {
 }
 
 // Get pack outdated packages.
-func GetPackOutdated() []OutdatedPackage {
+func GetPackOutdated() []OutdatedPackageInfo {
 	pkgs := database.List()
 	g, _ := errgroup.WithContext(context.Background())
 	var mu sync.Mutex
-	var rez []OutdatedPackage
+	var rez []OutdatedPackageInfo
 	for _, info := range pkgs {
 		sinfo := info
 		g.Go(func() error {
@@ -118,7 +118,7 @@ func GetPackOutdated() []OutdatedPackage {
 				return nil
 			}
 			mu.Lock()
-			rez = append(rez, OutdatedPackage{
+			rez = append(rez, OutdatedPackageInfo{
 				Name:        sinfo.PackName,
 				CurrVersion: sinfo.Version,
 				NewVersion:  last,
