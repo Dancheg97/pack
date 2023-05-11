@@ -5,7 +5,7 @@
 
 package tmpl
 
-// This file contain unspecified string templates.
+// This file contains unspecified string templates.
 
 const Cobra = `{{if gt (len .Aliases) 0}}Aliases:
 {{.NameAndAliases}}{{end}}{{if .HasAvailableSubCommands}}{{$cmds := .Commands}}{{if eq (len .Groups) 0}}Available Commands:{{range $cmds}}{{if (or .IsAvailableCommand (eq .Name "help"))}}

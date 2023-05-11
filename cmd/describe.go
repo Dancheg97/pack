@@ -54,7 +54,7 @@ func Describe(cmd *cobra.Command, pkgs []string) {
 
 // Get pacman package description.
 func GetPacmanDescription(pkg string) string {
-	info, err := system.Call("pacman -Qi " + pkg)
+	info, err := system.Callf("pacman -Qi %s", pkg)
 	if err != nil {
 		print.Red("Error: ", strings.ReplaceAll(info, "error: ", ""))
 		os.Exit(1)
