@@ -12,6 +12,7 @@ import (
 	"sync"
 
 	"fmnx.io/core/pack/database"
+	"fmnx.io/core/pack/git"
 	"fmnx.io/core/pack/print"
 	"fmnx.io/core/pack/system"
 	"fmnx.io/core/pack/tmpl"
@@ -113,7 +114,11 @@ func GetPackOutdated() []OutdatedPackageInfo {
 		sinfo := info
 		g.Go(func() error {
 			link := "https://" + sinfo.PackName
-			last := GetRemoteVersionForBranch(link, sinfo.Branch)
+			last, err := git.LastCommitUrl(link, sinfo.Branch)
+			if err != nil {
+				print.Yellow("Unable to get versoin for: ", link)
+				return nil
+			}
 			if sinfo.Version == last {
 				return nil
 			}

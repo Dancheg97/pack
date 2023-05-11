@@ -10,6 +10,7 @@ import (
 	"os"
 
 	"fmnx.io/core/pack/database"
+	"fmnx.io/core/pack/git"
 	"fmnx.io/core/pack/print"
 	"fmnx.io/core/pack/system"
 	"fmnx.io/core/pack/tmpl"
@@ -46,8 +47,10 @@ func Package(cmd *cobra.Command, pkgs []string) {
 // Save information about installed package.
 func SavePackageInfo(i RepositoryInfo) {
 	dir := GetCurrDir()
-	branch := GetDefaultGitBranch(dir)
-	version := GetLastCommitHash(dir, branch)
+	branch, err := git.DefaultBranch(dir)
+	CheckErr(err)
+	version, err := git.LastCommitDir(dir, branch)
+	CheckErr(err)
 	database.Update(database.Package{
 		PacmanName: i.ShortName,
 		PackName:   i.FullName,

@@ -98,11 +98,11 @@ func CheckUnreachablePackPackages(pkgs []string) {
 	g, _ := errgroup.WithContext(context.Background())
 	var unreachable []string
 	for _, pkg := range pkgs {
-		syncpkg := pkg
+		spkg := pkg
 		g.Go(func() error {
-			err := CheckPackPackage(syncpkg)
+			err := CheckPackPackage(spkg)
 			if err != nil {
-				unreachable = append(unreachable, syncpkg)
+				unreachable = append(unreachable, spkg)
 			}
 			return err
 		})
@@ -122,7 +122,7 @@ type PackInfo struct {
 	Directory  string
 	Version    string
 	Pkgbuild   string
-	HttpsLink  string
+	Url        string
 }
 
 // Eject pack information for provided pack link.
@@ -130,7 +130,7 @@ func EjectInfoFromPackLink(pkg string) PackInfo {
 	rez := PackInfo{}
 	versplt := strings.Split(pkg, "@")
 	rez.PackName = versplt[0]
-	rez.HttpsLink = "https://" + versplt[0]
+	rez.Url = "https://" + versplt[0]
 	if len(versplt) > 1 {
 		rez.Version = versplt[1]
 	}
@@ -188,8 +188,18 @@ func InstallPackPackages(pkgs []string) {
 
 // Install pack package.
 func InstallPackPackage(i PackInfo) {
-	CleanRepository(i)
-	branch, version := SetPackageVersion(i)
+	err := git.Clean(i.Directory)
+	CheckErr(err)
+	err = git.Pull(i.Directory)
+	CheckErr(err)
+	branch, err := git.DefaultBranch(i.Directory)
+	CheckErr(err)
+	if i.Version == `` {
+		i.Version, err = git.LastCommitUrl(i.Url, branch)
+		CheckErr(err)
+	}
+	err = git.Checkout(i.Directory, i.Version)
+	CheckErr(err)
 	packDeps := EjectPackDependencies(i.Pkgbuild)
 	Install(nil, packDeps)
 	SwapPackDependencies(i.Pkgbuild, packDeps)
@@ -197,29 +207,11 @@ func InstallPackPackage(i PackInfo) {
 	database.Update(database.Package{
 		PacmanName: i.PacmanName,
 		PackName:   i.PackName,
-		Version:    version,
+		Version:    i.Version,
 		Branch:     branch,
 	})
 	CachePackage(i.Directory)
-	CleanRepository(i)
-}
-
-// Checkout repository with pack package to some version. And return applied
-// branch and version for this repo.
-func SetPackageVersion(i PackInfo) (string, string) {
-	branch, err := git.DefaultBranch(i.Directory)
-	CheckErr(err)
-	err = git.Checkout(i.Directory, branch)
-	CheckErr(err)
-	err = git.Pull(i.Directory)
-	CheckErr(err)
-	if i.Version == `` {
-		i.Version, err = git.LastCommit(i.Directory, branch)
-		CheckErr(err)
-	}
-	err = git.Checkout(i.Directory, i.Version)
-	CheckErr(err)
-	return branch, i.Version
+	git.Clean(i.Directory)
 }
 
 // Get dependencies and make dependencies related to pack from PKGBUILD file.
