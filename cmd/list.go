@@ -1,4 +1,4 @@
-// Copyright 2023 FMNX team.
+// 2023 FMNX team.
 // Use of this code is governed by GNU General Public License.
 // Additional information can be found on official web page: https://fmnx.io/
 // Contact email: help@fmnx.io
@@ -11,6 +11,7 @@ import (
 	"fmnx.io/core/pack/database"
 	"fmnx.io/core/pack/print"
 	"fmnx.io/core/pack/system"
+	"fmnx.io/core/pack/tmpl"
 	"github.com/spf13/cobra"
 )
 
@@ -21,7 +22,7 @@ func init() {
 var listCmd = &cobra.Command{
 	Use:     "list",
 	Aliases: []string{"l"},
-	Short:   "📄 show installed packages",
+	Short:   tmpl.ListShort,
 	Run:     List,
 }
 

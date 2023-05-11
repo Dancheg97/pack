@@ -1,4 +1,4 @@
-// Copyright 2023 FMNX team.
+// 2023 FMNX team.
 // Use of this code is governed by GNU General Public License.
 // Additional information can be found on official web page: https://fmnx.io/
 // Contact email: help@fmnx.io
@@ -11,24 +11,15 @@ import (
 
 	"fmnx.io/core/pack/config"
 	"fmnx.io/core/pack/print"
+	"fmnx.io/core/pack/tmpl"
 	"github.com/nightlyone/lockfile"
 	"github.com/spf13/cobra"
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "pack",
-	Short: "📦 git based arch compatible package manager.",
-	Long: `📦 git based arch compatible package manager.
-
-This utility accumulates power of git and pacman to provide decentralized way
-of arch package distribution. Pack config: '~/.pack/config.yml'. Find more 
-information at https://fmnx.io/core/pack.
-
-Usage:
-pack [command] <package(s)>
-
-Example:
-pack install fmnx.io/core/ainst`,
+	Use:          "pack",
+	Short:        tmpl.RootShort,
+	Long:         tmpl.RootLong,
 	SilenceUsage: true,
 	CompletionOptions: cobra.CompletionOptions{
 		DisableDefaultCmd:   true,

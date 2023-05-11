@@ -3,10 +3,4 @@
 // Additional information can be found on official web page: https://fmnx.io/
 // Contact email: help@fmnx.io
 
-package main
-
-import "fmnx.io/core/pack/cmd"
-
-func main() {
-	cmd.Execute()
-}
+package tmpl

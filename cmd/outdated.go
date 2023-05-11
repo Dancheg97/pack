@@ -1,4 +1,4 @@
-// Copyright 2023 FMNX team.
+// 2023 FMNX team.
 // Use of this code is governed by GNU General Public License.
 // Additional information can be found on official web page: https://fmnx.io/
 // Contact email: help@fmnx.io
@@ -15,6 +15,7 @@ import (
 	"fmnx.io/core/pack/database"
 	"fmnx.io/core/pack/print"
 	"fmnx.io/core/pack/system"
+	"fmnx.io/core/pack/tmpl"
 	"github.com/spf13/cobra"
 	"golang.org/x/sync/errgroup"
 )
@@ -26,14 +27,9 @@ func init() {
 var outdatedCmd = &cobra.Command{
 	Use:     "outdated",
 	Aliases: []string{"out", "o"},
-	Short:   "📌 show outdated packages",
-	Long: `📌 show outdated packages
-
-This command will make a call to pacman servers and collect information about
-all remote repos for packages installed with pack. Then it will print a list
-of packages that require update displaying current and new available version.
-`,
-	Run: Outdated,
+	Short:   tmpl.OutdatedShort,
+	Long:    tmpl.OutdatedLong,
+	Run:     Outdated,
 }
 
 // Cli command listing installed packages and their status.

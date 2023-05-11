@@ -1,4 +1,4 @@
-// Copyright 2023 FMNX team.
+// 2023 FMNX team.
 // Use of this code is governed by GNU General Public License.
 // Additional information can be found on official web page: https://fmnx.io/
 // Contact email: help@fmnx.io
@@ -68,6 +68,13 @@ type ColoredMessage struct {
 // single string.
 func Custom(msgs []ColoredMessage) {
 	var rez string
+	if config.DisablePrettyPrint {
+		for _, msg := range msgs {
+			rez += msg.Message
+		}
+		fmt.Println(rez)
+		return
+	}
 	for _, msg := range msgs {
 		switch msg.Color {
 		case WHITE:

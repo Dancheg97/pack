@@ -1,4 +1,4 @@
-// Copyright 2023 FMNX team.
+// 2023 FMNX team.
 // Use of this code is governed by GNU General Public License.
 // Additional information can be found on official web page: https://fmnx.io/
 // Contact email: help@fmnx.io
@@ -11,6 +11,7 @@ import (
 
 	"fmnx.io/core/pack/print"
 	"fmnx.io/core/pack/system"
+	"fmnx.io/core/pack/tmpl"
 	"github.com/spf13/cobra"
 )
 
@@ -21,12 +22,9 @@ func init() {
 var generateCmd = &cobra.Command{
 	Use:     "generate",
 	Aliases: []string{"gen", "g"},
-	Short:   "📋 generate PKGBUILD",
-	Long: `📋 generate PKGBUILD and update README.md with installation helper
-
-This command will generate .pack.yml template and add some lines to README.md
-to provide information about installation with pack.`,
-	Run: Generate,
+	Short:   tmpl.GenerateShort,
+	Long:    tmpl.GenerateLong,
+	Run:     Generate,
 }
 
 // Cli command modifying files in workdir for pack compatability.

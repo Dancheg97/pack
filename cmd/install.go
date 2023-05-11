@@ -1,4 +1,4 @@
-// Copyright 2023 FMNX team.
+// 2023 FMNX team.
 // Use of this code is governed by GNU General Public License.
 // Additional information can be found on official web page: https://fmnx.io/
 // Contact email: help@fmnx.io
@@ -15,32 +15,26 @@ import (
 	"fmnx.io/core/pack/database"
 	"fmnx.io/core/pack/print"
 	"fmnx.io/core/pack/system"
+	"fmnx.io/core/pack/tmpl"
 	"github.com/spf13/cobra"
 	"golang.org/x/sync/errgroup"
 )
 
 func init() {
-	rootCmd.AddCommand(getCmd)
+	rootCmd.AddCommand(installCmd)
 }
 
-var getCmd = &cobra.Command{
+var installCmd = &cobra.Command{
 	Use:     "install",
 	Example: "pack install fmnx.io/core/ainst fmnx.io/core/keks@main",
 	Aliases: []string{"i"},
-	Short:   "📥 install packages",
-	Long: `📥 install packages
-
-You can mix pacman and pack packages, provoding names and git links. If you
-need to specify version, you can provide it after @ symbol.
-
-Examples:
-pack install fmnx.io/core/aist@v0.21
-pack install fmnx.io/core/ainst github.com/exm/pkg@v1.23 nano`,
-	Run: Get,
+	Short:   tmpl.InstallShort,
+	Long:    tmpl.InstallLong,
+	Run:     Install,
 }
 
 // Cli command installing packages into system.
-func Get(cmd *cobra.Command, upkgs []string) {
+func Install(cmd *cobra.Command, upkgs []string) {
 	PrepareForInstallation(upkgs)
 	pkgs := SplitPackages(upkgs)
 	CheckUnreachablePacmanPackages(pkgs.PacmanPackages)
@@ -224,7 +218,7 @@ func InstallPackPackage(i PackInfo) {
 	CleanRepository(i)
 	branch, version := SetPackageVersion(i)
 	packDeps := EjectPackDependencies(i.Pkgbuild)
-	Get(nil, packDeps)
+	Install(nil, packDeps)
 	SwapPackDependencies(i.Pkgbuild, packDeps)
 	InstallPackageWithMakepkg(i)
 	database.Add(database.Package{

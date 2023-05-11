@@ -1,4 +1,4 @@
-// Copyright 2023 FMNX team.
+// 2023 FMNX team.
 // Use of this code is governed by GNU General Public License.
 // Additional information can be found on official web page: https://fmnx.io/
 // Contact email: help@fmnx.io
@@ -12,6 +12,7 @@ import (
 	"fmnx.io/core/pack/database"
 	"fmnx.io/core/pack/print"
 	"fmnx.io/core/pack/system"
+	"fmnx.io/core/pack/tmpl"
 	"github.com/spf13/cobra"
 )
 
@@ -22,15 +23,9 @@ func init() {
 var removeCmd = &cobra.Command{
 	Use:     "remove",
 	Aliases: []string{"rm", "r"},
-	Short:   "❌ remove packages",
-	Long: `❌ remove packages
-
-Use this command to remove packages from system. You can specify both pacman 
-packages and pack links.
-
-Example:
-pack rm fmnx.io/core/ainst`,
-	Run: Remove,
+	Short:   tmpl.RemoveShort,
+	Long:    tmpl.RemoveLong,
+	Run:     Remove,
 }
 
 // Cli command removing packages from system.

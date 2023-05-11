@@ -1,4 +1,4 @@
-// Copyright 2023 FMNX team.
+// 2023 FMNX team.
 // Use of this code is governed by GNU General Public License.
 // Additional information can be found on official web page: https://fmnx.io/
 // Contact email: help@fmnx.io
@@ -13,6 +13,7 @@ import (
 	"fmnx.io/core/pack/database"
 	"fmnx.io/core/pack/print"
 	"fmnx.io/core/pack/system"
+	"fmnx.io/core/pack/tmpl"
 	"github.com/spf13/cobra"
 )
 
@@ -23,20 +24,9 @@ func init() {
 var updateCmd = &cobra.Command{
 	Use:     "update",
 	Aliases: []string{"upd", "u"},
-	Short:   "🗳️  update packages",
-	Long: `🗳️  update packages
-
-You can specify packages with versions, that you need them to update to, or
-provide provide just links to get latest version from default branch.
-
-If you don't specify any arguements, all packages will be updated.
-
-Examples:
-pack update
-pack update fmnx.io/core/aist@v0.21
-pack update git.xmpl.sh/pkg
-`,
-	Run: Update,
+	Short:   tmpl.UpdateShort,
+	Long:    tmpl.UpdateLong,
+	Run:     Update,
 }
 
 // Cli command performing package update.
@@ -51,7 +41,7 @@ func Update(cmd *cobra.Command, pkgs []string) {
 	VerifyPacmanPackages(groups.PacmanPackages)
 	VerifyPackPackages(groups.PackPackages)
 	UpdatePacmanPackages(groups.PacmanPackages)
-	Get(nil, groups.PackPackages)
+	Install(nil, groups.PackPackages)
 }
 
 // Perform full pacman update.
@@ -73,7 +63,7 @@ func FullPackUpdate() {
 	for _, pkg := range outdatedpkgs {
 		pkgs = append(pkgs, fmt.Sprintf("%s@%s", pkg.Name, pkg.NewVersion))
 	}
-	Get(nil, pkgs)
+	Install(nil, pkgs)
 	print.Green("Pack update: ", "done")
 }
 
