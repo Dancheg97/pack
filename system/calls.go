@@ -13,6 +13,7 @@ import (
 	"os/exec"
 
 	"fmnx.io/core/pack/config"
+	"fmnx.io/core/pack/print"
 )
 
 // Execute external command with fmt like formatting.
@@ -21,13 +22,11 @@ func Callf(format string, a ...any) (string, error) {
 }
 
 // Execute external command call in bash.
-func Call(cmd string) (string, error) {
-	if config.DebugMode {
-		fmt.Println("Syscall - executing: ", cmd)
-	}
-	commad := exec.Command("bash", "-c", cmd)
+func Call(command string) (string, error) {
+	commad := exec.Command("bash", "-c", command)
 	var buf bytes.Buffer
 	if config.DebugMode {
+		print.Yellow("Executing system call: ", command)
 		commad.Stdout = io.MultiWriter(&buf, os.Stdout)
 		commad.Stderr = io.MultiWriter(&buf, os.Stderr)
 	} else {

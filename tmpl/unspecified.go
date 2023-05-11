@@ -61,6 +61,6 @@ const READMEmd = `
 ### 📦 Install package with [pack](https://fmnx.io/core/pack):
 
 %s
-pack get %s
+pack install %s
 %s
 `
