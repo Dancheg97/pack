@@ -67,31 +67,19 @@ func List() []Package {
 	return packages
 }
 
-// Add new package to pack package database.
-func Add(pkg Package) error {
+// Update package in database, if package does not exist, it will be added.
+func Update(pkg Package) {
 	mu.Lock()
 	defer mu.Unlock()
-	for _, p := range packages {
+	for i, p := range packages {
 		if pkg.PackName == p.PackName {
-			return ErrAlreadyExists
+			packages[i] = pkg
+			savePackages()
+			return
 		}
 	}
 	packages = append(packages, pkg)
 	savePackages()
-	return nil
-}
-
-// Update information about specific package. If you try to update package,
-// that currently does not exist no action will be done.
-func Update(pkg Package) {
-	mu.Lock()
-	defer mu.Unlock()
-	for _, p := range packages {
-		if p.PackName == pkg.PackName {
-			p = pkg
-			savePackages()
-		}
-	}
 }
 
 // Get package by pacman or pack package name.

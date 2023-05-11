@@ -48,7 +48,7 @@ func SavePackageInfo(i RepositoryInfo) {
 	dir := GetCurrDir()
 	branch := GetDefaultGitBranch(dir)
 	version := GetLastCommitHash(dir, branch)
-	database.Add(database.Package{
+	database.Update(database.Package{
 		PacmanName: i.ShortName,
 		PackName:   i.FullName,
 		Version:    version,

@@ -200,7 +200,7 @@ func CleanAlreadyInstalled(pkgs []string) []string {
 func InstallPackPackages(pkgs []string) {
 	for _, pkg := range pkgs {
 		_, err := database.Get(pkg, database.PACK)
-		if err == nil {
+		if err == nil && !Updating {
 			continue
 		}
 		InstallPackPackage(EjectInfoFromPackLink(pkg))
@@ -221,7 +221,7 @@ func InstallPackPackage(i PackInfo) {
 	Install(nil, packDeps)
 	SwapPackDependencies(i.Pkgbuild, packDeps)
 	InstallPackageWithMakepkg(i)
-	database.Add(database.Package{
+	database.Update(database.Package{
 		PacmanName: i.PacmanName,
 		PackName:   i.PackName,
 		Version:    version,
