@@ -32,7 +32,7 @@ var rootCmd = &cobra.Command{
 // Prepare cobra and viper templates.
 func init() {
 	rootCmd.SetHelpCommand(&cobra.Command{})
-	rootCmd.SetUsageTemplate(descrTmpl)
+	rootCmd.SetUsageTemplate(tmpl.Cobra)
 	lock, err := lockfile.New(config.LockFile)
 	CheckErr(err)
 	err = lock.TryLock()
@@ -54,14 +54,3 @@ func CheckErr(err error) {
 		os.Exit(1)
 	}
 }
-
-const descrTmpl = `{{if gt (len .Aliases) 0}}Aliases:
-{{.NameAndAliases}}{{end}}{{if .HasAvailableSubCommands}}{{$cmds := .Commands}}{{if eq (len .Groups) 0}}Available Commands:{{range $cmds}}{{if (or .IsAvailableCommand (eq .Name "help"))}}
-{{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}{{else}}{{range $group := .Groups}}
-
-{{.Title}}{{range $cmds}}{{if (and (eq .GroupID $group.ID) (or .IsAvailableCommand (eq .Name "help")))}}
-{{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}{{end}}{{if not .AllChildCommandsHaveGroup}}
-
-Additional Commands:{{range $cmds}}{{if (and (eq .GroupID "") (or .IsAvailableCommand (eq .Name "help")))}}
-{{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}{{end}}{{end}}{{end}}{{if .HasAvailableLocalFlags}}{{end}}
-`
