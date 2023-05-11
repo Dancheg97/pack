@@ -13,6 +13,7 @@ import (
 
 	"fmnx.io/core/pack/config"
 	"fmnx.io/core/pack/database"
+	"fmnx.io/core/pack/git"
 	"fmnx.io/core/pack/print"
 	"fmnx.io/core/pack/system"
 	"fmnx.io/core/pack/tmpl"
@@ -114,23 +115,6 @@ func CheckUnreachablePackPackages(pkgs []string) {
 	}
 }
 
-// Validate pack package to be reachable via network.
-func CheckPackPackage(pkg string) error {
-	i := EjectInfoFromPackLink(pkg)
-	out, err := system.Callf("git clone %s %s", i.HttpsLink, i.Directory)
-	if err != nil {
-		if !strings.Contains(out, "already exists and is not an empty dir") {
-			print.Red("Unable to reach git for: ", pkg)
-			return err
-		}
-	}
-	_, err = os.Stat(i.Pkgbuild)
-	if err != nil {
-		print.Red("Unable to find PKGBUILD for: ", pkg)
-	}
-	return err
-}
-
 // Info formed from pack link about all information related to that package.
 type PackInfo struct {
 	PacmanName string
@@ -223,59 +207,19 @@ func InstallPackPackage(i PackInfo) {
 // Checkout repository with pack package to some version. And return applied
 // branch and version for this repo.
 func SetPackageVersion(i PackInfo) (string, string) {
-	branch := GetDefaultGitBranch(i.Directory)
-	GetDirCheckout(i.Directory, branch)
-	GitDirPull(i.Directory)
+	branch, err := git.DefaultBranch(i.Directory)
+	CheckErr(err)
+	err = git.Checkout(i.Directory, branch)
+	CheckErr(err)
+	err = git.Pull(i.Directory)
+	CheckErr(err)
 	if i.Version == `` {
-		i.Version = GetLastCommitHash(i.Directory, branch)
+		i.Version, err = git.LastCommit(i.Directory, branch)
+		CheckErr(err)
 	}
-	GetDirCheckout(i.Directory, i.Version)
+	err = git.Checkout(i.Directory, i.Version)
+	CheckErr(err)
 	return branch, i.Version
-}
-
-// Pull changes for specified directory with git repository.
-func GitDirPull(dir string) {
-	o, err := system.Callf("git -C %s pull", dir)
-	if err != nil {
-		print.Red("Unable to git pull: ", dir)
-		fmt.Println(o)
-		os.Exit(1)
-	}
-}
-
-// Perform git checkout for specific branch/commit/tag on dir.
-func GetDirCheckout(dir string, branch string) {
-	o, err := system.Callf("git -C %s checkout %s ", dir, branch)
-	if err != nil {
-		if !strings.HasPrefix(o, "Already on ") {
-			print.Red("Unable to set pack version for: ", dir)
-			fmt.Println(o)
-			os.Exit(1)
-		}
-	}
-}
-
-// Returns default branch for git repository located in git directory.
-func GetDefaultGitBranch(dir string) string {
-	origin, err := system.Callf("git -C %s remote show", dir)
-	CheckErr(err)
-	origin = strings.Trim(origin, "\n")
-	remoteInfo, err := system.Callf("git -C %s remote show %s", dir, origin)
-	CheckErr(err)
-	rawInfo := strings.Split(remoteInfo, "HEAD branch: ")[1]
-	return strings.Split(rawInfo, "\n")[0]
-}
-
-// Get last commit hash for provided git branch in git directory.
-func GetLastCommitHash(dir string, branch string) string {
-	command := `git -C ` + dir + ` log -n 1 --pretty=format:"%H" ` + branch
-	o, err := system.Call(command)
-	if err != nil {
-		print.Red("Unable to get last git commit sha: ", dir)
-		fmt.Println(o)
-		os.Exit(1)
-	}
-	return strings.Trim(o, "\n")
 }
 
 // Get dependencies and make dependencies related to pack from PKGBUILD file.
@@ -323,20 +267,4 @@ func CachePackage(dir string) {
 		_, err := system.Callf(command, dir, config.PackageCacheDir)
 		CheckErr(err)
 	}
-}
-
-// Clean or remove git directory after installation depending on configuration.
-func CleanRepository(i PackInfo) {
-	if config.RemoveGitRepos {
-		CheckErr(os.RemoveAll(i.Directory))
-		return
-	}
-	_, err := system.Callf("sudo rm -rf %s/*.tar.gz", i.Directory)
-	CheckErr(err)
-	CheckErr(os.RemoveAll(i.Directory + "/pkg"))
-	CheckErr(os.RemoveAll(i.Directory + "/src"))
-	_, err = system.Callf("git -C %s clean -fd", i.Directory)
-	CheckErr(err)
-	_, err = system.Callf("git -C %s reset --hard", i.Directory)
-	CheckErr(err)
 }

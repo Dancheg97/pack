@@ -130,18 +130,3 @@ func GetPackOutdated() []OutdatedPackageInfo {
 	g.Wait()
 	return rez
 }
-
-// Get remote version for specific branch of git repository.
-func GetRemoteVersionForBranch(link string, branch string) string {
-	o, err := system.Callf("git ls-remote -h %s", link)
-	if err != nil {
-		return "unable to connect"
-	}
-	refs := strings.Split(strings.Trim(o, "\n"), "\n")
-	for _, ref := range refs {
-		if strings.HasSuffix(ref, branch) {
-			return strings.Split(ref, "	")[0]
-		}
-	}
-	return "unable to find branch in remote repo"
-}
