@@ -2,7 +2,7 @@
 docker:
 	sudo rm -rf pkg
 	sudo rm -rf src
-	sudo rm -f pack
+	sudo rm -f packbin
 	sudo rm -f *.pkg.tar.zst
 	docker build -t fmnx.io/core/pack:latest .
 	docker run --rm -it fmnx.io/core/pack --help
@@ -12,7 +12,7 @@ clean:
 	sudo rm -rf pkg
 	sudo rm -rf src
 	sudo rm -rf ~/.pack
-	sudo rm -f pack
+	sudo rm -f packbin
 	sudo rm -f /tmp/pack.lock
 
 test:

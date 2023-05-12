@@ -204,9 +204,11 @@ func InstallPackPackages(pkgs []string) {
 func InstallPackPackage(i PackInfo) {
 	err := git.Clean(i.Directory)
 	CheckErr(err)
-	err = git.Pull(i.Directory)
-	CheckErr(err)
 	branch, err := git.DefaultBranch(i.Directory)
+	CheckErr(err)
+	err = git.Checkout(i.Directory, branch)
+	CheckErr(err)
+	err = git.Pull(i.Directory)
 	CheckErr(err)
 	if i.Version == `` {
 		i.Version, err = git.LastCommitUrl(i.Url, branch)
@@ -216,7 +218,8 @@ func InstallPackPackage(i PackInfo) {
 	CheckErr(err)
 	packDeps, err := pacman.GetDeps(i.Pkgbuild)
 	CheckErr(err)
-	Install(nil, packDeps)
+	groups := GroupPackages(packDeps)
+	Install(nil, groups.PackPackages)
 	err = pack.SwapDeps(i.Pkgbuild, packDeps)
 	CheckErr(err)
 	err = pacman.Build(i.Directory)
