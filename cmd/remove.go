@@ -9,7 +9,7 @@ import (
 	"os"
 	"strings"
 
-	"fmnx.io/core/pack/database"
+	"fmnx.io/core/pack/packdb"
 	"fmnx.io/core/pack/print"
 	"fmnx.io/core/pack/system"
 	"fmnx.io/core/pack/tmpl"
@@ -35,7 +35,7 @@ func Remove(cmd *cobra.Command, pkgs []string) {
 	groups.PacmanPackages = append(groups.PacmanPackages, restPacmanPkgs...)
 	RemovePacmanPackages(groups.PacmanPackages)
 	for _, pkg := range groups.PacmanPackages {
-		database.Remove(pkg, database.PACMAN)
+		packdb.Remove(pkg, packdb.PACMAN)
 	}
 }
 
@@ -61,7 +61,7 @@ func PrintNotFoundPackages(o string) {
 func GetPacmanPackagesFromPackNames(pkgs []string) []string {
 	var out []string
 	for _, pkg := range pkgs {
-		pkgInfo, err := database.Get(pkg, database.PACK)
+		pkgInfo, err := packdb.Get(pkg, packdb.PACK)
 		if err != nil {
 			print.Red("Unable to find package: ", pkg)
 			os.Exit(1)

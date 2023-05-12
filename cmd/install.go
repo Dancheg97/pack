@@ -12,8 +12,8 @@ import (
 	"strings"
 
 	"fmnx.io/core/pack/config"
-	"fmnx.io/core/pack/database"
 	"fmnx.io/core/pack/git"
+	"fmnx.io/core/pack/packdb"
 	"fmnx.io/core/pack/print"
 	"fmnx.io/core/pack/system"
 	"fmnx.io/core/pack/tmpl"
@@ -100,7 +100,17 @@ func CheckUnreachablePackPackages(pkgs []string) {
 	for _, pkg := range pkgs {
 		spkg := pkg
 		g.Go(func() error {
-			err := CheckPackPackage(spkg)
+			_, err := packdb.Get(spkg, packdb.PACK)
+			if err == nil {
+				return nil
+			}
+			info := EjectInfoFromPackLink(spkg)
+			err = git.Clone(info.Url, info.Directory)
+			if err != nil {
+				unreachable = append(unreachable, spkg)
+				return err
+			}
+			_, err = os.Stat(info.Pkgbuild)
 			if err != nil {
 				unreachable = append(unreachable, spkg)
 			}
@@ -172,7 +182,7 @@ func CleanAlreadyInstalled(pkgs []string) []string {
 // Checks if packages are not installed and installing them.
 func InstallPackPackages(pkgs []string) {
 	for _, pkg := range pkgs {
-		_, err := database.Get(pkg, database.PACK)
+		_, err := packdb.Get(pkg, packdb.PACK)
 		if err == nil && !Updating {
 			continue
 		}
@@ -204,7 +214,7 @@ func InstallPackPackage(i PackInfo) {
 	Install(nil, packDeps)
 	SwapPackDependencies(i.Pkgbuild, packDeps)
 	InstallPackageWithMakepkg(i)
-	database.Update(database.Package{
+	packdb.Update(packdb.Package{
 		PacmanName: i.PacmanName,
 		PackName:   i.PackName,
 		Version:    i.Version,

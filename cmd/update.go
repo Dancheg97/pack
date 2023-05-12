@@ -10,7 +10,7 @@ import (
 	"os"
 	"strings"
 
-	"fmnx.io/core/pack/database"
+	"fmnx.io/core/pack/packdb"
 	"fmnx.io/core/pack/print"
 	"fmnx.io/core/pack/system"
 	"fmnx.io/core/pack/tmpl"
@@ -88,7 +88,7 @@ func VerifyPacmanPackages(pkgs []string) {
 func VerifyPackPackages(pkgs []string) {
 	var nfpkgs []string
 	for _, pkg := range pkgs {
-		_, err := database.Get(pkg, database.PACK)
+		_, err := packdb.Get(pkg, packdb.PACK)
 		if err != nil {
 			nfpkgs = append(nfpkgs, pkg)
 		}

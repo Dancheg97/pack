@@ -10,7 +10,7 @@ import (
 	"os"
 	"strings"
 
-	"fmnx.io/core/pack/database"
+	"fmnx.io/core/pack/packdb"
 	"fmnx.io/core/pack/print"
 	"fmnx.io/core/pack/system"
 	"fmnx.io/core/pack/tmpl"
@@ -33,7 +33,7 @@ var describeCmd = &cobra.Command{
 func Describe(cmd *cobra.Command, pkgs []string) {
 	groups := SplitPackages(pkgs)
 	for _, pkg := range groups.PacmanPackages {
-		info, err := database.Get(pkg, database.PACMAN)
+		info, err := packdb.Get(pkg, packdb.PACMAN)
 		if err == nil {
 			groups.PackPackages = append(groups.PackPackages, info.PackName)
 			continue
@@ -42,7 +42,7 @@ func Describe(cmd *cobra.Command, pkgs []string) {
 		fmt.Println(descr)
 	}
 	for _, pkg := range groups.PackPackages {
-		info, err := database.Get(pkg, database.PACK)
+		info, err := packdb.Get(pkg, packdb.PACK)
 		if err != nil {
 			print.Yellow("Package not found: ", pkg)
 			continue
@@ -63,7 +63,7 @@ func GetPacmanDescription(pkg string) string {
 }
 
 // Append pack information to package description.
-func AppendPackParams(info string, p *database.Package) string {
+func AppendPackParams(info string, p *packdb.Package) string {
 	const (
 		ver    = "Version         : "
 		branch = "DefaultBranch   : "

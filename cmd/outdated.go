@@ -11,8 +11,8 @@ import (
 	"strings"
 	"sync"
 
-	"fmnx.io/core/pack/database"
 	"fmnx.io/core/pack/git"
+	"fmnx.io/core/pack/packdb"
 	"fmnx.io/core/pack/print"
 	"fmnx.io/core/pack/system"
 	"fmnx.io/core/pack/tmpl"
@@ -106,7 +106,7 @@ func GetCurrentVersion(pkg string) string {
 
 // Get pack outdated packages.
 func GetPackOutdated() []OutdatedPackageInfo {
-	pkgs := database.List()
+	pkgs := packdb.List()
 	g, _ := errgroup.WithContext(context.Background())
 	var mu sync.Mutex
 	var rez []OutdatedPackageInfo

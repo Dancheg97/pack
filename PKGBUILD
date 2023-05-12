@@ -2,6 +2,7 @@
 # More info at: https://fmnx.io/core/pack
 
 pkgname="pack"
+pkgdesc=""
 pkgver="1"
 pkgrel="1"
 arch=('i686' 'pentium4' 'x86_64' 'arm' 'armv7h' 'armv6h' 'aarch64' 'riscv64')
