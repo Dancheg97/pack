@@ -190,9 +190,9 @@ func GetDeps(pkgbuild string) ([]string, error) {
 // Try to remove all packages at once.
 func Remove(pkgs []string) error {
 	pkgsStr := strings.Join(pkgs, " ")
-	_, err := system.Callf("sudo pacman --noconfirm -R %s", pkgsStr)
+	o, err := system.Callf("sudo pacman --noconfirm -R %s", pkgsStr)
 	if err != nil {
-		return errors.New("pacman unable to remove")
+		return errors.New(o)
 	}
 	prnt.Yellow("Packages removed: ", pkgsStr)
 	return nil

@@ -173,7 +173,6 @@ func InstallPacmanPackages(pkgs []string) {
 // Removes pacman packages that are already installed in the system.
 func CleanAlreadyInstalled(pkgs []string) []string {
 	var uninstalledPkgs []string
-
 	for _, pkg := range pkgs {
 		_, err := system.Callf("pacman -Q %s", pkg)
 		if err != nil {
@@ -222,7 +221,10 @@ func InstallPackPackage(i PackInfo) {
 	Install(nil, groups.PackPackages)
 	err = pack.SwapDeps(i.Pkgbuild, packDeps)
 	CheckErr(err)
+	prnt.Yellow("Staring build: ", i.PackName)
 	err = pacman.Build(i.Directory)
+	CheckErr(err)
+	err = pacman.Install(i.Directory)
 	CheckErr(err)
 	pack.Update(pack.Package{
 		PacmanName:    i.PacmanName,
@@ -233,4 +235,5 @@ func InstallPackPackage(i PackInfo) {
 	err = system.MvExt(i.Directory, config.PackageCacheDir, ".pkg.tar.zst")
 	CheckErr(err)
 	git.Clean(i.Directory)
+	prnt.Green("Completed build: ", i.PackName)
 }

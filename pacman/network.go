@@ -22,9 +22,9 @@ func Build(dir string) error {
 	if err != nil {
 		return err
 	}
-	_, err = system.Call("makepkg -sf --noconfirm")
+	o, err := system.Call("makepkg -sf --noconfirm")
 	if err != nil {
-		return errors.New("pacman unable to build")
+		return errors.New(o)
 	}
 	return nil
 }
