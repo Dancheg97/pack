@@ -35,26 +35,32 @@ func Generate(dir string, url string) error {
 }
 
 // Some pacman package description fields.
-type PkgInfo struct {
+type Package struct {
 	Name        string `json:"name"`
 	Version     string `json:"version"`
 	Description string `json:"description"`
 	Size        string `json:"size"`
 	Url         string `json:"url"`
+	BuildDate   string `json:"build-date"`
+	DependsOn   string `json:"depends-on"`
+	RequiredBy  string `json:"required-by"`
 }
 
 // Get package description from pacman and parse it.
-func Describe(pkg string) (PkgInfo, error) {
+func Describe(pkg string) (Package, error) {
 	o, err := system.Callf("pacman -Qi %s", pkg)
 	if err != nil {
-		return PkgInfo{}, errors.New("package not found: " + pkg)
+		return Package{}, errors.New("package not found: " + pkg)
 	}
-	return PkgInfo{
+	return Package{
 		Name:        parseDescField(o, "Name            : "),
 		Version:     parseDescField(o, "Version         : "),
 		Description: parseDescField(o, "Description     : "),
 		Size:        parseDescField(o, "Installed Size  : "),
 		Url:         parseDescField(o, "URL             : "),
+		BuildDate:   parseDescField(o, "Build Date      : "),
+		DependsOn:   parseDescField(o, "Depends On      : "),
+		RequiredBy:  parseDescField(o, "Required By     : "),
 	}, nil
 }
 

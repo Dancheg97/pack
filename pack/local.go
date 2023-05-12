@@ -76,25 +76,25 @@ func GetDeps(pkgbuild string) ([]string, error) {
 
 // Pacman description with additional pack fields.
 type PkgInfo struct {
-	pacman.PkgInfo
+	pacman.Package
 	PackName    string `json:"pack-name"`
 	PackVersion string `json:"pack-version"`
 	PackBranch  string `json:"pack-branch"`
 }
 
 // Add pack fields to pacman package description.
-func DescribeAppend(d pacman.PkgInfo) PkgInfo {
+func DescribeAppend(d pacman.Package) PkgInfo {
 	pkg, err := Get(d.Name, PACMAN)
 	if err != nil {
 		return PkgInfo{
-			PkgInfo:     d,
+			Package:     d,
 			PackName:    "None",
 			PackVersion: "None",
 			PackBranch:  "None",
 		}
 	}
 	return PkgInfo{
-		PkgInfo:     d,
+		Package:     d,
 		PackName:    pkg.PackName,
 		PackVersion: pkg.Version,
 		PackBranch:  pkg.Branch,
@@ -110,8 +110,11 @@ func PrintDescription(d PkgInfo) {
 		d.Description,
 		d.Size,
 		d.Url,
+		d.BuildDate,
 		d.PackName,
 		d.PackVersion,
 		d.PackBranch,
+		d.DependsOn,
+		d.RequiredBy,
 	)
 }

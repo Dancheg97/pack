@@ -87,7 +87,10 @@ Version     : %s
 Description : %s
 Size        : %s
 Url         : %s
+BuildDate   : %s
 PackName    : %s
 PackVersion : %s
 PackBranch  : %s
+DependsOn   : %s
+RequiredBy  : %s
 `
