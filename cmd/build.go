@@ -49,7 +49,7 @@ func BuildCurrentDirectory() {
 	CheckErr(err)
 	commit, err := git.CurrentCommitDir(dir)
 	CheckErr(err)
-	name, err := pacman.PkgbuildParam(dir, "pkgname")
+	name, err := pacman.PkgbuildParam(dir+"/PKGBUILD", "pkgname")
 	CheckErr(err)
 	url, err := git.Url(dir)
 	CheckErr(err)

@@ -112,8 +112,8 @@ func Version(pkg string) string {
 }
 
 // Get parameter from PKGBUILD proving path to direcotry.
-func PkgbuildParam(dir string, param string) (string, error) {
-	f, err := os.ReadFile(dir)
+func PkgbuildParam(file string, param string) (string, error) {
+	f, err := os.ReadFile(file)
 	if err != nil {
 		return ``, err
 	}
