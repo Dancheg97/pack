@@ -13,7 +13,7 @@ import (
 
 	"fmnx.io/core/pack/config"
 	"fmnx.io/core/pack/git"
-	"fmnx.io/core/pack/packdb"
+	"fmnx.io/core/pack/pack"
 	"fmnx.io/core/pack/prnt"
 	"fmnx.io/core/pack/system"
 	"fmnx.io/core/pack/tmpl"
@@ -100,7 +100,7 @@ func CheckUnreachablePackPackages(pkgs []string) {
 	for _, pkg := range pkgs {
 		spkg := pkg
 		g.Go(func() error {
-			_, err := packdb.Get(spkg, packdb.PACK)
+			_, err := pack.Get(spkg, pack.PACK)
 			if err == nil {
 				return nil
 			}
@@ -182,7 +182,7 @@ func CleanAlreadyInstalled(pkgs []string) []string {
 // Checks if packages are not installed and installing them.
 func InstallPackPackages(pkgs []string) {
 	for _, pkg := range pkgs {
-		_, err := packdb.Get(pkg, packdb.PACK)
+		_, err := pack.Get(pkg, pack.PACK)
 		if err == nil && !Updating {
 			continue
 		}
@@ -214,7 +214,7 @@ func InstallPackPackage(i PackInfo) {
 	Install(nil, packDeps)
 	SwapPackDependencies(i.Pkgbuild, packDeps)
 	InstallPackageWithMakepkg(i)
-	packdb.Update(packdb.Package{
+	pack.Update(pack.Package{
 		PacmanName: i.PacmanName,
 		PackName:   i.PackName,
 		Version:    i.Version,

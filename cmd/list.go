@@ -6,7 +6,7 @@
 package cmd
 
 import (
-	"fmnx.io/core/pack/packdb"
+	"fmnx.io/core/pack/pack"
 	"fmnx.io/core/pack/pacman"
 	"fmnx.io/core/pack/prnt"
 	"fmnx.io/core/pack/tmpl"
@@ -28,7 +28,7 @@ var listCmd = &cobra.Command{
 func List(cmd *cobra.Command, args []string) {
 	pkgs := pacman.List()
 	for pkg, version := range pkgs {
-		i, err := packdb.Get(pkg, packdb.PACMAN)
+		i, err := pack.Get(pkg, pack.PACMAN)
 		if err != nil {
 			prnt.Custom([]prnt.ColoredMessage{
 				{

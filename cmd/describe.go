@@ -9,7 +9,7 @@ import (
 	"os"
 	"strings"
 
-	"fmnx.io/core/pack/packdb"
+	"fmnx.io/core/pack/pack"
 	"fmnx.io/core/pack/pacman"
 	"fmnx.io/core/pack/prnt"
 	"fmnx.io/core/pack/tmpl"
@@ -33,21 +33,21 @@ func Describe(cmd *cobra.Command, pkgs []string) {
 	groups := SplitPackages(pkgs)
 	var notfound []string
 	for _, pkg := range groups.PackPackages {
-		i, err := packdb.Get(pkg, packdb.PACK)
+		i, err := pack.Get(pkg, pack.PACK)
 		if err != nil {
 			notfound = append(notfound, pkg)
 			continue
 		}
 		groups.PacmanPackages = append(groups.PacmanPackages, i.PacmanName)
 	}
-	var desclist []packdb.Description
+	var desclist []pack.Description
 	for _, pkg := range groups.PacmanPackages {
 		d, err := pacman.Describe(pkg)
 		if err != nil {
 			notfound = append(notfound, pkg)
 			continue
 		}
-		fd := packdb.DescribeAppend(d)
+		fd := pack.DescribeAppend(d)
 		desclist = append(desclist, fd)
 	}
 	if len(notfound) > 0 {

@@ -2,5 +2,4 @@
 pkg/**
 src/**
 **.pkg.tar.zst
-pack
 .vscode

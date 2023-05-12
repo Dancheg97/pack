@@ -92,3 +92,11 @@ func List() map[string]string {
 }
 
 // Get current version of specified package.
+func Version(pkg string) string {
+	o, err := system.Callf("pacman -Q %s", pkg)
+	if err != nil {
+		return ``
+	}
+	verAndRel := strings.Split(o, " ")[1]
+	return strings.Trim(strings.Split(verAndRel, "-")[0], "\n")
+}

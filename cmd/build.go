@@ -10,7 +10,7 @@ import (
 	"os"
 
 	"fmnx.io/core/pack/git"
-	"fmnx.io/core/pack/packdb"
+	"fmnx.io/core/pack/pack"
 	"fmnx.io/core/pack/prnt"
 	"fmnx.io/core/pack/system"
 	"fmnx.io/core/pack/tmpl"
@@ -31,7 +31,7 @@ var buildCmd = &cobra.Command{
 
 // Cli command preparing package in current directory.
 func Build(cmd *cobra.Command, pkgs []string) {
-	dir := GetCurrDir()
+	dir := system.Pwd()
 	prnt.Blue("Preparing package: ", dir)
 	out, err := system.Call("makepkg -sfi --noconfirm")
 	if err != nil {
@@ -51,7 +51,7 @@ func SavePackageInfo(i RepositoryInfo) {
 	CheckErr(err)
 	version, err := git.LastCommitDir(dir, branch)
 	CheckErr(err)
-	packdb.Update(packdb.Package{
+	pack.Update(pack.Package{
 		PacmanName: i.ShortName,
 		PackName:   i.FullName,
 		Version:    version,
