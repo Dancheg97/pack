@@ -5,6 +5,24 @@
 
 package main
 
+// Package description.
+//
+// cmd - commands, each file represents a single command
+//
+// config - CLI configuration
+//
+// git - library for accessing git functionality
+//
+// pacman - library for accessing pacman and makepkg functionality
+//
+// pack - all operations related to pack database and outputs
+//
+// prnt - utility for pretty printing
+//
+// system - library for executing system calls and file operations
+//
+// tmpl - string templates
+
 import "fmnx.io/core/pack/cmd"
 
 func main() {

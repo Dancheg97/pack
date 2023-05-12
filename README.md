@@ -13,15 +13,27 @@
 
 Decentralized package manager based on git and pacman. Accumulates power of both `git` and `pacman` to provide easier way to create arch packages and distribute them using git links.
 
-Core features:
+💿 Single line installation script (for all arch based distributions):
 
-- install packages using git links
+```sh
+git clone https://fmnx.io/core/pack && cd pack && makepkg --noconfirm -sfri
+```
+
+## Features
+
+- install packages from git repositories
 
 ```sh
 pack i fmnx.io/pkg/package
 ```
 
-- use git tags/branches to switch package to some version
+- install packages from files
+
+```
+pack i https://example.com/pkg-1-1-any.pkg.tar.zst
+```
+
+- use git commit hashes/tags/branches for versioning
 
 ```sh
 pack i example.com/package@v0.21
@@ -36,22 +48,14 @@ docker run --rm -it fmnx.io/core/pack i fmnx.io/pkg/package
 - generate `PKGBUILD` template with example of file and directory mapping to end system
 
 ```sh
-pack generate
+pack g
 ```
-
----
 
 You can find all commands and description by running `pack -h`.
 
-💿 Single line installation script (for all arch based distributions):
-
-```sh
-git clone https://fmnx.io/core/pack && cd pack && makepkg --noconfirm -sfri
-```
-
 ---
 
-### 🐋 Pack docker:
+## Pack docker
 
 You can use `pack` with docker:
 
@@ -72,7 +76,7 @@ You can use this container to easily create your CI-CD image with all required t
 
 ---
 
-### 📋 Template example:
+## Template example
 
 Configuration example for flutter project:
 
@@ -83,7 +87,7 @@ Configuration example for flutter project:
 pkgname="example"
 pkgver="1"
 pkgrel="1"
-arch=('i686' 'pentium4' 'x86_64' 'arm' 'armv7h' 'armv6h' 'aarch64' 'riscv64')
+arch=('any')
 url="https://example.com/owner/repo"
 
 # Edit build dependencies
@@ -110,6 +114,10 @@ package() {
 }
 ```
 
-<!--
-Clean git dir before each package installation.
--->
+## Contributing
+
+Each package contains it's description provided under the package name in file. If you want to change existing commands or add something new, you can go to overall package structure overview that is located in `main.go` file.
+
+Issues and pull requests are tracked on [fmnx.io](https://fmnx.io/core/pack), [codeberg.org](https://codeberg.org/fmnx/pack) and [github.com](https://github.com/fmnx-io/pack).
+
+Feel free to ask any questions and offer suggestions.
