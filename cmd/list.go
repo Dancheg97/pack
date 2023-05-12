@@ -6,11 +6,9 @@
 package cmd
 
 import (
-	"strings"
-
 	"fmnx.io/core/pack/packdb"
+	"fmnx.io/core/pack/pacman"
 	"fmnx.io/core/pack/print"
-	"fmnx.io/core/pack/system"
 	"fmnx.io/core/pack/tmpl"
 	"github.com/spf13/cobra"
 )
@@ -28,7 +26,7 @@ var listCmd = &cobra.Command{
 
 // Cli command listing installed packages and version.
 func List(cmd *cobra.Command, args []string) {
-	pkgs := GetPacmanPackages()
+	pkgs := pacman.List()
 	for pkg, version := range pkgs {
 		i, err := packdb.Get(pkg, packdb.PACMAN)
 		if err != nil {
@@ -67,17 +65,4 @@ func List(cmd *cobra.Command, args []string) {
 			},
 		})
 	}
-}
-
-// Get all installed packages from pacman.
-func GetPacmanPackages() map[string]string {
-	o, err := system.Call("pacman -Q")
-	CheckErr(err)
-	o = strings.Trim(o, "\n")
-	pkgs := map[string]string{}
-	for _, pkg := range strings.Split(o, "\n") {
-		spl := strings.Split(pkg, " ")
-		pkgs[spl[0]] = spl[1]
-	}
-	return pkgs
 }

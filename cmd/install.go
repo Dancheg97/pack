@@ -249,24 +249,3 @@ func SwapPackDependencies(pkgbuild string, deps []string) {
 	err = os.WriteFile(pkgbuild, []byte(rez), 0o600)
 	CheckErr(err)
 }
-
-// Install package with makepkg.
-func InstallPackageWithMakepkg(i PackInfo) {
-	CheckErr(os.Chdir(i.Directory))
-	print.Yellow("Building package: ", i.PackName)
-	out, err := system.Call("makepkg -sfi --noconfirm")
-	if err != nil {
-		print.Red("Unable to build and install package: ", i.PackName)
-		fmt.Println(out)
-		os.Exit(1)
-	}
-}
-
-// Move prepared .pkg.tar.zst package into pacman cache.
-func CachePackage(dir string) {
-	if !config.RemoveBuiltPackages {
-		const command = "sudo mv %s/*.pkg.tar.zst %s"
-		_, err := system.Callf(command, dir, config.PackageCacheDir)
-		CheckErr(err)
-	}
-}

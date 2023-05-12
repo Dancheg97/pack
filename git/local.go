@@ -37,11 +37,6 @@ func Clean(dir string) error {
 	return nil
 }
 
-// Get default repo url for git repo.
-func RepoUrl(dir string) (string, error) {
-	return ``, nil
-}
-
 // Get last commit hash for git repo in a branch.
 func LastCommitDir(dir string, branch string) (string, error) {
 	command := `git -C ` + dir + ` log -n 1 --pretty=format:"%H" ` + branch
@@ -50,4 +45,17 @@ func LastCommitDir(dir string, branch string) (string, error) {
 		return ``, errors.New("git unable to log:\n" + o)
 	}
 	return strings.Trim(o, "\n"), nil
+}
+
+// Get git installation url and convert it to https format.
+func Url(dir string) (string, error) {
+	out, err := system.Callf("git -C %s config --get remote.origin.url", dir)
+	if err != nil {
+		return ``, errors.New("git unable to get remote url:\n" + out)
+	}
+	out = strings.Trim(out, "\n")
+	out = strings.Replace(out, "git@", "https://", 1)
+	out = strings.Replace(out, ":", "/", 1)
+	out = strings.Replace(out, ".git", "", 1)
+	return out, nil
 }

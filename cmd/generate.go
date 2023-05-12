@@ -9,6 +9,8 @@ import (
 	"fmt"
 	"strings"
 
+	"fmnx.io/core/pack/git"
+	"fmnx.io/core/pack/pacman"
 	"fmnx.io/core/pack/print"
 	"fmnx.io/core/pack/system"
 	"fmnx.io/core/pack/tmpl"
@@ -29,41 +31,14 @@ var generateCmd = &cobra.Command{
 
 // Cli command modifying files in workdir for pack compatability.
 func Generate(cmd *cobra.Command, args []string) {
-	info := GetInstallLink()
-	WritePackageBuild(info)
-	ModifyReadmeFile(info.Link)
+	dir := system.Pwd()
+	url, err := git.Url(dir)
+	CheckErr(err)
+	splt := strings.Split(url, "/")
+	err = pacman.Generate(dir, splt[len(splt)-1], url)
+	CheckErr(err)
+	ModifyReadmeFile(url)
 	print.Green("Updated files: ", "PKGBUILD README.md")
-}
-
-// Some basic info about repository.
-type RepositoryInfo struct {
-	ShortName string
-	FullName  string
-	Link      string
-}
-
-// Get information about repository located in current directory.
-func GetInstallLink() RepositoryInfo {
-	link, err := system.Callf("git config --get remote.origin.url")
-	CheckErr(err)
-	link = strings.Trim(link, "\n")
-	link = strings.ReplaceAll(link, "https://", "")
-	link = strings.ReplaceAll(link, "git@", "")
-	link = strings.ReplaceAll(link, ":", "/")
-	link = strings.ReplaceAll(link, ".git", "")
-	splt := strings.Split(link, "/")
-	return RepositoryInfo{
-		ShortName: splt[len(splt)-1],
-		FullName:  link,
-		Link:      "https://" + link,
-	}
-}
-
-// Owerwrite current PKGBUILD file.
-func WritePackageBuild(i RepositoryInfo) {
-	tmpl := fmt.Sprintf(tmpl.PKGBUILD, i.ShortName, i.Link)
-	err := system.WriteFile("PKGBUILD", tmpl)
-	CheckErr(err)
 }
 
 // Append some lines to README.md file.

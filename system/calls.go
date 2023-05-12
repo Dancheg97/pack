@@ -14,6 +14,8 @@ import (
 
 	"fmnx.io/core/pack/config"
 	"fmnx.io/core/pack/print"
+	"fmnx.io/core/pack/tmpl"
+	"github.com/fatih/color"
 )
 
 // Execute external command with fmt like formatting.
@@ -22,17 +24,28 @@ func Callf(format string, a ...any) (string, error) {
 }
 
 // Execute external command call in bash.
-func Call(command string) (string, error) {
-	commad := exec.Command("bash", "-c", command)
+func Call(cmd string) (string, error) {
+	execute := exec.Command("bash", "-c", cmd)
 	var buf bytes.Buffer
 	if config.DebugMode {
-		print.Yellow("Executing system call: ", command)
-		commad.Stdout = io.MultiWriter(&buf, os.Stdout)
-		commad.Stderr = io.MultiWriter(&buf, os.Stderr)
+		print.Yellow("Executing system call: ", cmd)
+		execute.Stdout = io.MultiWriter(&buf, os.Stdout)
+		execute.Stderr = io.MultiWriter(&buf, os.Stderr)
 	} else {
-		commad.Stdout = &buf
-		commad.Stderr = &buf
+		execute.Stdout = &buf
+		execute.Stderr = &buf
 	}
-	err := commad.Run()
-	return buf.String(), err
+	err := execute.Run()
+	if err != nil {
+		if config.DisablePrettyPrint {
+			return fmt.Sprintf(tmpl.SysCallErr, cmd, err, buf.String()), err
+		}
+		return fmt.Sprintf(
+			tmpl.SysCallErr,
+			color.RedString(cmd),
+			err,
+			buf.String(),
+		), err
+	}
+	return buf.String(), nil
 }

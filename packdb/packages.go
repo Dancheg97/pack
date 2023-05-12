@@ -12,6 +12,7 @@ import (
 	"sync"
 
 	"fmnx.io/core/pack/config"
+	"fmnx.io/core/pack/pacman"
 	"fmnx.io/core/pack/print"
 )
 
@@ -123,4 +124,23 @@ func Remove(name string, nametype NameType) {
 		}
 	}
 	savePackages()
+}
+
+// Pacman description with additional pack fields.
+type Description struct {
+	pacman.Description
+	PackName    string
+	PackVersion string
+	PackBranch  string
+}
+
+// Add pack description to pacman package.
+func DescribeAppend(d pacman.Description) Description {
+	pkg, _ := Get(d.Name, PACMAN)
+	return Description{
+		Description: d,
+		PackName:    pkg.PackName,
+		PackVersion: pkg.Version,
+		PackBranch:  pkg.Branch,
+	}
 }

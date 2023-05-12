@@ -6,25 +6,14 @@
 package system
 
 import (
+	"errors"
+	"fmt"
 	"os"
 	"strings"
 )
 
-// Simply overwrite file also creating missing directories.
-func WriteFile(file string, content string) error {
-	err := PrepareDir(file)
-	if err != nil {
-		return err
-	}
-	err = os.WriteFile(file, []byte(content), 0o600)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 // Prepare directories and all it's subdirs.
-func PrepareDir(filePath string) error {
+func MkDir(filePath string) error {
 	if len(strings.Split(filePath, `/`)) != 1 {
 		splitted := strings.Split(filePath, `/`)
 		path := strings.Join(splitted[0:len(splitted)-1], `/`)
@@ -32,6 +21,39 @@ func PrepareDir(filePath string) error {
 		if err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+// Get directory for current process.
+func Pwd() string {
+	dir, err := os.Getwd()
+	if err != nil {
+		fmt.Println("Unable to find curr dir")
+		os.Exit(1)
+	}
+	return dir
+}
+
+// Move files with provided extension from one directory to another.
+func MvExt(src string, dst string, ext string) error {
+	const command = "sudo mv %s/*%s %s"
+	o, err := Callf(command, src, ext, dst)
+	if err != nil {
+		return errors.New("unable to move files:\n" + o)
+	}
+	return nil
+}
+
+// Simply overwrite file also creating missing directories.
+func WriteFile(file string, content string) error {
+	err := MkDir(file)
+	if err != nil {
+		return err
+	}
+	err = os.WriteFile(file, []byte(content), 0o600)
+	if err != nil {
+		return err
 	}
 	return nil
 }

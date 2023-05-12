@@ -25,7 +25,7 @@ pkgname="%s"
 pkgdesc="Something awesome"
 pkgver="1"
 pkgrel="1"
-arch=('i686' 'pentium4' 'x86_64' 'arm' 'armv7h' 'armv6h' 'aarch64' 'riscv64')
+arch="any"
 url="%s"
 
 # Edit runtime dependencies
@@ -64,4 +64,27 @@ const READMEmd = `
 %s
 pack install %s
 %s
+`
+const SysCallErr = `
+
+============================
+
+System call failed:
+
+%s
+
+----------------------------
+
+Error occured.
+
+%+v
+
+----------------------------
+
+Output:
+
+%s
+
+============================
+
 `

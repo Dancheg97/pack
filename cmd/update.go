@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"fmnx.io/core/pack/packdb"
+	"fmnx.io/core/pack/pacman"
 	"fmnx.io/core/pack/print"
 	"fmnx.io/core/pack/system"
 	"fmnx.io/core/pack/tmpl"
@@ -40,7 +41,8 @@ func Update(cmd *cobra.Command, pkgs []string) {
 	groups := SplitPackages(pkgs)
 	VerifyPacmanPackages(groups.PacmanPackages)
 	VerifyPackPackages(groups.PackPackages)
-	UpdatePacmanPackages(groups.PacmanPackages)
+	err := pacman.Update(groups.PacmanPackages)
+	CheckErr(err)
 	Install(nil, groups.PackPackages)
 }
 
@@ -95,20 +97,6 @@ func VerifyPackPackages(pkgs []string) {
 	}
 	if len(nfpkgs) > 0 {
 		print.Red("Unable to find: ", strings.Join(nfpkgs, " "))
-		os.Exit(1)
-	}
-}
-
-// Update pacman packages.
-func UpdatePacmanPackages(pkgs []string) {
-	if len(pkgs) == 0 {
-		return
-	}
-	joined := strings.Join(pkgs, " ")
-	o, err := system.Callf("sudo pacman --noconfirm -S %s", joined)
-	if err != nil {
-		print.Red("Unable to update packages: %s", err.Error())
-		fmt.Println(o)
 		os.Exit(1)
 	}
 }

@@ -18,19 +18,19 @@ import (
 )
 
 func init() {
-	rootCmd.AddCommand(pkgCmd)
+	rootCmd.AddCommand(buildCmd)
 }
 
-var pkgCmd = &cobra.Command{
-	Use:     "package",
-	Aliases: []string{"pkg", "p"},
-	Short:   tmpl.PackageShort,
-	Long:    tmpl.PackageLong,
-	Run:     Package,
+var buildCmd = &cobra.Command{
+	Use:     "build",
+	Aliases: []string{"b"},
+	Short:   tmpl.BuildShort,
+	Long:    tmpl.BuildLong,
+	Run:     Build,
 }
 
 // Cli command preparing package in current directory.
-func Package(cmd *cobra.Command, pkgs []string) {
+func Build(cmd *cobra.Command, pkgs []string) {
 	dir := GetCurrDir()
 	print.Blue("Preparing package: ", dir)
 	out, err := system.Call("makepkg -sfi --noconfirm")
@@ -57,14 +57,4 @@ func SavePackageInfo(i RepositoryInfo) {
 		Version:    version,
 		Branch:     branch,
 	})
-}
-
-// Get directory for current process.
-func GetCurrDir() string {
-	dir, err := os.Getwd()
-	if err != nil {
-		fmt.Println("Unable to find curr dir")
-		os.Exit(1)
-	}
-	return dir
 }

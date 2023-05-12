@@ -8,11 +8,10 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"fmnx.io/core/pack/packdb"
+	"fmnx.io/core/pack/pacman"
 	"fmnx.io/core/pack/print"
-	"fmnx.io/core/pack/system"
 	"fmnx.io/core/pack/tmpl"
 	"github.com/spf13/cobra"
 )
@@ -32,44 +31,21 @@ var describeCmd = &cobra.Command{
 // Cli command giving package description.
 func Describe(cmd *cobra.Command, pkgs []string) {
 	groups := SplitPackages(pkgs)
-	for _, pkg := range groups.PacmanPackages {
-		info, err := packdb.Get(pkg, packdb.PACMAN)
-		if err == nil {
-			groups.PackPackages = append(groups.PackPackages, info.PackName)
-			continue
-		}
-		descr := GetPacmanDescription(pkg)
-		fmt.Println(descr)
-	}
 	for _, pkg := range groups.PackPackages {
-		info, err := packdb.Get(pkg, packdb.PACK)
+		i, err := packdb.Get(pkg, packdb.PACK)
 		if err != nil {
-			print.Yellow("Package not found: ", pkg)
-			continue
+			print.Red("unable to find pack package: ", pkg)
+			os.Exit(1)
 		}
-		descr := GetPacmanDescription(info.PacmanName)
-		fmt.Println(AppendPackParams(descr, info))
+		groups.PacmanPackages = append(groups.PacmanPackages, i.PacmanName)
 	}
-}
-
-// Get pacman package description.
-func GetPacmanDescription(pkg string) string {
-	info, err := system.Callf("pacman -Qi %s", pkg)
-	if err != nil {
-		print.Red("Error: ", strings.ReplaceAll(info, "error: ", ""))
-		os.Exit(1)
+	for _, pkg := range groups.PacmanPackages {
+		d, err := pacman.Describe(pkg)
+		if err != nil {
+			print.Red("unable to find pacman package: ", pkg)
+			os.Exit(1)
+		}
+		fd := packdb.DescribeAppend(d)
+		fmt.Println(fd)
 	}
-	return info
-}
-
-// Append pack information to package description.
-func AppendPackParams(info string, p *packdb.Package) string {
-	const (
-		ver    = "Version         : "
-		branch = "DefaultBranch   : "
-	)
-	splt1 := strings.Split(info, ver)
-	splt2 := strings.Split(splt1[1], "\n")
-	rest := strings.Join(splt2[1:], "\n")
-	return splt1[0] + ver + p.Version + "\n" + branch + p.Branch + "\n" + rest
 }

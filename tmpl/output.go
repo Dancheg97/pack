@@ -47,13 +47,15 @@ This command will make a call to pacman servers and collect information about
 all remote repos for packages installed with pack. Then it will print a list
 of packages that require update displaying current and new available version.`
 
-var PackageShort = "📦 prepare and install package"
-var PackageLong = `📦 prepare .pkg.tar.zst in current directory and install it
+var BuildShort = "🛠️ build packages"
+var BuildLong = `🛠️ build packages
 
-This script will read prepare .pkg.tar.zst package. You can use it to test 
-PKGBUILD template for project or validate installation for pack.
+If no arguements provided, this script will build package in current directory.
+If there are some arguements, pack will treat them as pack links, clone 
+repositories, build packages inside and store them in cache, which is defined
+in '~/.pack/config.yml'.
 
-To double check installation, you can test it inside pack docker container:
+To double check build process, you can test it inside pack docker container:
 docker run --rm -it fmnx.io/core/pack i example.com/package`
 
 var RemoveShort = "❌ remove packages"
@@ -97,8 +99,8 @@ func init() {
 		ListShort = strings.ReplaceAll(ListShort, `📄 `, ``)
 		OutdatedShort = strings.ReplaceAll(OutdatedShort, `📌 `, ``)
 		OutdatedLong = strings.ReplaceAll(OutdatedLong, `📌 `, ``)
-		PackageShort = strings.ReplaceAll(PackageShort, `📦 `, ``)
-		PackageLong = strings.ReplaceAll(PackageLong, `📦 `, ``)
+		BuildShort = strings.ReplaceAll(BuildShort, `🛠️ `, ``)
+		BuildLong = strings.ReplaceAll(BuildLong, `🛠️ `, ``)
 		RemoveShort = strings.ReplaceAll(RemoveShort, `❌ `, ``)
 		RemoveLong = strings.ReplaceAll(RemoveLong, `❌ `, ``)
 		RootShort = strings.ReplaceAll(RootShort, `📦 `, ``)
