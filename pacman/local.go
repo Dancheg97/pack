@@ -33,11 +33,11 @@ func Generate(dir string, name string, url string) error {
 
 // Some pacman package description fields.
 type Description struct {
-	Name        string
-	Version     string
-	Description string
-	Size        string
-	Url         string
+	Name        string `json:"name"`
+	Version     string `json:"version"`
+	Description string `json:"description"`
+	Size        string `json:"size"`
+	Url         string `json:"url"`
 }
 
 // Get package description from pacman and parse it.
@@ -90,3 +90,5 @@ func List() map[string]string {
 	listcache = pkgs
 	return pkgs
 }
+
+// Get current version of specified package.

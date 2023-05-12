@@ -12,7 +12,7 @@ import (
 
 	"fmnx.io/core/pack/packdb"
 	"fmnx.io/core/pack/pacman"
-	"fmnx.io/core/pack/print"
+	"fmnx.io/core/pack/prnt"
 	"fmnx.io/core/pack/system"
 	"fmnx.io/core/pack/tmpl"
 	"github.com/spf13/cobra"
@@ -50,10 +50,10 @@ func Update(cmd *cobra.Command, pkgs []string) {
 func FullPacmanUpdate() {
 	o, err := system.Call("sudo pacman --noconfirm -Syu")
 	if err != nil {
-		print.Red("Unable to update pacman packages: ", o)
+		prnt.Red("Unable to update pacman packages: ", o)
 		os.Exit(1)
 	}
-	print.Green("Pacman update: ", "done")
+	prnt.Green("Pacman update: ", "done")
 }
 
 var Updating bool
@@ -66,7 +66,7 @@ func FullPackUpdate() {
 		pkgs = append(pkgs, fmt.Sprintf("%s@%s", pkg.Name, pkg.NewVersion))
 	}
 	Install(nil, pkgs)
-	print.Green("Pack update: ", "done")
+	prnt.Green("Pack update: ", "done")
 }
 
 // Verify pacman packages exist in system.
@@ -81,7 +81,7 @@ func VerifyPacmanPackages(pkgs []string) {
 				nfpkgs = append(nfpkgs, line)
 			}
 		}
-		print.Red("Unable to find: ", strings.Join(nfpkgs, " "))
+		prnt.Red("Unable to find: ", strings.Join(nfpkgs, " "))
 		os.Exit(1)
 	}
 }
@@ -96,7 +96,7 @@ func VerifyPackPackages(pkgs []string) {
 		}
 	}
 	if len(nfpkgs) > 0 {
-		print.Red("Unable to find: ", strings.Join(nfpkgs, " "))
+		prnt.Red("Unable to find: ", strings.Join(nfpkgs, " "))
 		os.Exit(1)
 	}
 }

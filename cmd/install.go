@@ -14,7 +14,7 @@ import (
 	"fmnx.io/core/pack/config"
 	"fmnx.io/core/pack/git"
 	"fmnx.io/core/pack/packdb"
-	"fmnx.io/core/pack/print"
+	"fmnx.io/core/pack/prnt"
 	"fmnx.io/core/pack/system"
 	"fmnx.io/core/pack/tmpl"
 	"github.com/spf13/cobra"
@@ -76,7 +76,7 @@ func CheckUnreachablePacmanPackages(pkgs []string) {
 	}
 	if len(unreachable) != 0 {
 		pkgs := strings.Join(unreachable, " ")
-		print.Red("Unable to resolve those pacman packages: ", pkgs)
+		prnt.Red("Unable to resolve those pacman packages: ", pkgs)
 		os.Exit(1)
 	}
 }
@@ -120,7 +120,7 @@ func CheckUnreachablePackPackages(pkgs []string) {
 	err := g.Wait()
 	if err != nil {
 		out := strings.Join(unreachable, " ")
-		print.Red("Some pack packages are unreachable: ", out)
+		prnt.Red("Some pack packages are unreachable: ", out)
 		os.Exit(1)
 	}
 }
@@ -160,11 +160,11 @@ func InstallPacmanPackages(pkgs []string) {
 	joined := strings.Join(uninstalled, " ")
 	o, err := system.Callf("sudo pacman --noconfirm -S %s", joined)
 	if err != nil {
-		print.Red("Unable to get pacman packages: ", joined)
+		prnt.Red("Unable to get pacman packages: ", joined)
 		fmt.Println(o)
 		os.Exit(1)
 	}
-	print.Green("Pacman packages installed: ", joined)
+	prnt.Green("Pacman packages installed: ", joined)
 }
 
 // Removes pacman packages that are already installed in the system.
@@ -191,7 +191,7 @@ func InstallPackPackages(pkgs []string) {
 	if len(pkgs) > 0 {
 		pkglist := strings.Join(pkgs, " ")
 		if !Updating {
-			print.Green("Installed: ", pkglist)
+			prnt.Green("Installed: ", pkglist)
 		}
 	}
 }

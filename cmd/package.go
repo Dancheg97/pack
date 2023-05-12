@@ -11,7 +11,7 @@ import (
 
 	"fmnx.io/core/pack/git"
 	"fmnx.io/core/pack/packdb"
-	"fmnx.io/core/pack/print"
+	"fmnx.io/core/pack/prnt"
 	"fmnx.io/core/pack/system"
 	"fmnx.io/core/pack/tmpl"
 	"github.com/spf13/cobra"
@@ -32,16 +32,16 @@ var buildCmd = &cobra.Command{
 // Cli command preparing package in current directory.
 func Build(cmd *cobra.Command, pkgs []string) {
 	dir := GetCurrDir()
-	print.Blue("Preparing package: ", dir)
+	prnt.Blue("Preparing package: ", dir)
 	out, err := system.Call("makepkg -sfi --noconfirm")
 	if err != nil {
-		print.Red("Unable to execute: ", "makepkg")
+		prnt.Red("Unable to execute: ", "makepkg")
 		fmt.Println(out)
 		os.Exit(1)
 	}
 	i := GetInstallLink()
 	SavePackageInfo(i)
-	print.Green("Package prepared and installed: ", i.FullName)
+	prnt.Green("Package prepared and installed: ", i.FullName)
 }
 
 // Save information about installed package.

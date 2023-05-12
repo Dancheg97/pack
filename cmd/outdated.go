@@ -13,7 +13,7 @@ import (
 
 	"fmnx.io/core/pack/git"
 	"fmnx.io/core/pack/packdb"
-	"fmnx.io/core/pack/print"
+	"fmnx.io/core/pack/prnt"
 	"fmnx.io/core/pack/system"
 	"fmnx.io/core/pack/tmpl"
 	"github.com/spf13/cobra"
@@ -38,18 +38,18 @@ func Outdated(cmd *cobra.Command, args []string) {
 	packoutdated := GetPackOutdated()
 	allOutdated := append(pacmanOutdated, packoutdated...)
 	for _, info := range allOutdated {
-		print.Custom([]print.ColoredMessage{
+		prnt.Custom([]prnt.ColoredMessage{
 			{
 				Message: info.Name + " ",
-				Color:   print.WHITE,
+				Color:   prnt.WHITE,
 			},
 			{
 				Message: info.CurrVersion + " ",
-				Color:   print.YELLOW,
+				Color:   prnt.YELLOW,
 			},
 			{
 				Message: info.NewVersion,
-				Color:   print.BLUE,
+				Color:   prnt.BLUE,
 			},
 		})
 	}
@@ -85,7 +85,7 @@ func GetPacmanOutdated() []OutdatedPackageInfo {
 func GetUpdateLinks() []string {
 	o, err := system.Call("sudo pacman -Syup")
 	if err != nil {
-		print.Red("Unable to connect to pacman servers: ", "network error")
+		prnt.Red("Unable to connect to pacman servers: ", "network error")
 		os.Exit(1)
 	}
 	if !strings.Contains(o, "https://") {
@@ -116,7 +116,7 @@ func GetPackOutdated() []OutdatedPackageInfo {
 			link := "https://" + sinfo.PackName
 			last, err := git.LastCommitUrl(link, sinfo.Branch)
 			if err != nil {
-				print.Yellow("Unable to get versoin for: ", link)
+				prnt.Yellow("Unable to get versoin for: ", link)
 				return nil
 			}
 			if sinfo.Version == last {

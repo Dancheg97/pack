@@ -13,7 +13,7 @@ import (
 	"os/exec"
 
 	"fmnx.io/core/pack/config"
-	"fmnx.io/core/pack/print"
+	"fmnx.io/core/pack/prnt"
 	"fmnx.io/core/pack/tmpl"
 	"github.com/fatih/color"
 )
@@ -28,7 +28,7 @@ func Call(cmd string) (string, error) {
 	execute := exec.Command("bash", "-c", cmd)
 	var buf bytes.Buffer
 	if config.DebugMode {
-		print.Yellow("Executing system call: ", cmd)
+		prnt.Yellow("Executing system call: ", cmd)
 		execute.Stdout = io.MultiWriter(&buf, os.Stdout)
 		execute.Stderr = io.MultiWriter(&buf, os.Stderr)
 	} else {

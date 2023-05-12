@@ -6,12 +6,12 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
+	"strings"
 
 	"fmnx.io/core/pack/packdb"
 	"fmnx.io/core/pack/pacman"
-	"fmnx.io/core/pack/print"
+	"fmnx.io/core/pack/prnt"
 	"fmnx.io/core/pack/tmpl"
 	"github.com/spf13/cobra"
 )
@@ -31,21 +31,28 @@ var describeCmd = &cobra.Command{
 // Cli command giving package description.
 func Describe(cmd *cobra.Command, pkgs []string) {
 	groups := SplitPackages(pkgs)
+	var notfound []string
 	for _, pkg := range groups.PackPackages {
 		i, err := packdb.Get(pkg, packdb.PACK)
 		if err != nil {
-			print.Red("unable to find pack package: ", pkg)
-			os.Exit(1)
+			notfound = append(notfound, pkg)
+			continue
 		}
 		groups.PacmanPackages = append(groups.PacmanPackages, i.PacmanName)
 	}
+	var desclist []packdb.Description
 	for _, pkg := range groups.PacmanPackages {
 		d, err := pacman.Describe(pkg)
 		if err != nil {
-			print.Red("unable to find pacman package: ", pkg)
-			os.Exit(1)
+			notfound = append(notfound, pkg)
+			continue
 		}
 		fd := packdb.DescribeAppend(d)
-		fmt.Println(fd)
+		desclist = append(desclist, fd)
 	}
+	if len(notfound) > 0 {
+		prnt.Red("unable to find packages: ", strings.Join(notfound, " "))
+		os.Exit(1)
+	}
+
 }

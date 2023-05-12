@@ -8,7 +8,7 @@ package cmd
 import (
 	"fmnx.io/core/pack/packdb"
 	"fmnx.io/core/pack/pacman"
-	"fmnx.io/core/pack/print"
+	"fmnx.io/core/pack/prnt"
 	"fmnx.io/core/pack/tmpl"
 	"github.com/spf13/cobra"
 )
@@ -30,38 +30,38 @@ func List(cmd *cobra.Command, args []string) {
 	for pkg, version := range pkgs {
 		i, err := packdb.Get(pkg, packdb.PACMAN)
 		if err != nil {
-			print.Custom([]print.ColoredMessage{
+			prnt.Custom([]prnt.ColoredMessage{
 				{
 					Message: pkg + " ",
-					Color:   print.WHITE,
+					Color:   prnt.WHITE,
 				},
 				{
 					Message: version,
-					Color:   print.BLUE,
+					Color:   prnt.BLUE,
 				},
 			})
 			continue
 		}
-		print.Custom([]print.ColoredMessage{
+		prnt.Custom([]prnt.ColoredMessage{
 			{
 				Message: i.PacmanName + " ",
-				Color:   print.WHITE,
+				Color:   prnt.WHITE,
 			},
 			{
 				Message: i.PackName + " ",
-				Color:   print.YELLOW,
+				Color:   prnt.YELLOW,
 			},
 			{
 				Message: i.Branch,
-				Color:   print.BLUE,
+				Color:   prnt.BLUE,
 			},
 			{
 				Message: "-",
-				Color:   print.WHITE,
+				Color:   prnt.WHITE,
 			},
 			{
 				Message: i.Version,
-				Color:   print.BLUE,
+				Color:   prnt.BLUE,
 			},
 		})
 	}

@@ -11,7 +11,7 @@ import (
 
 	"fmnx.io/core/pack/git"
 	"fmnx.io/core/pack/pacman"
-	"fmnx.io/core/pack/print"
+	"fmnx.io/core/pack/prnt"
 	"fmnx.io/core/pack/system"
 	"fmnx.io/core/pack/tmpl"
 	"github.com/spf13/cobra"
@@ -38,7 +38,7 @@ func Generate(cmd *cobra.Command, args []string) {
 	err = pacman.Generate(dir, splt[len(splt)-1], url)
 	CheckErr(err)
 	ModifyReadmeFile(url)
-	print.Green("Updated files: ", "PKGBUILD README.md")
+	prnt.Green("Updated files: ", "PKGBUILD README.md")
 }
 
 // Append some lines to README.md file.

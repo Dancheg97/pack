@@ -10,7 +10,7 @@ import (
 	"os"
 
 	"fmnx.io/core/pack/config"
-	"fmnx.io/core/pack/print"
+	"fmnx.io/core/pack/prnt"
 	"fmnx.io/core/pack/tmpl"
 	"github.com/nightlyone/lockfile"
 	"github.com/spf13/cobra"
@@ -50,7 +50,7 @@ func Execute() {
 // Utility to exit on unexpected errors.
 func CheckErr(err error) {
 	if err != nil {
-		print.Red("Error occured: ", fmt.Sprintf("%+v", err))
+		prnt.Red("Error occured: ", fmt.Sprintf("%+v", err))
 		os.Exit(1)
 	}
 }

@@ -3,7 +3,7 @@
 // Additional information can be found on official web page: https://fmnx.io/
 // Contact email: help@fmnx.io
 
-package print
+package prnt
 
 import (
 	"fmt"

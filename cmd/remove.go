@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"fmnx.io/core/pack/packdb"
-	"fmnx.io/core/pack/print"
+	"fmnx.io/core/pack/prnt"
 	"fmnx.io/core/pack/system"
 	"fmnx.io/core/pack/tmpl"
 	"github.com/spf13/cobra"
@@ -47,14 +47,14 @@ func RemovePacmanPackages(pkgs []string) {
 		PrintNotFoundPackages(o)
 		os.Exit(1)
 	}
-	print.Yellow("Packages removed: ", pkgsStr)
+	prnt.Yellow("Packages removed: ", pkgsStr)
 }
 
 // Get pacman packages from parsed removal command.
 func PrintNotFoundPackages(o string) {
 	o = strings.ReplaceAll(o, "\n", " ")
 	o = strings.ReplaceAll(o, `error: target not found: `, "")
-	print.Red("Packages not found: ", o)
+	prnt.Red("Packages not found: ", o)
 }
 
 // Get pacman packages related to pack names.
@@ -63,7 +63,7 @@ func GetPacmanPackagesFromPackNames(pkgs []string) []string {
 	for _, pkg := range pkgs {
 		pkgInfo, err := packdb.Get(pkg, packdb.PACK)
 		if err != nil {
-			print.Red("Unable to find package: ", pkg)
+			prnt.Red("Unable to find package: ", pkg)
 			os.Exit(1)
 		}
 		out = append(out, pkgInfo.PacmanName)

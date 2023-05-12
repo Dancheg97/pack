@@ -13,7 +13,7 @@ import (
 
 	"fmnx.io/core/pack/config"
 	"fmnx.io/core/pack/pacman"
-	"fmnx.io/core/pack/print"
+	"fmnx.io/core/pack/prnt"
 )
 
 var (
@@ -30,7 +30,7 @@ func init() {
 	}
 	err = json.Unmarshal(b, &packages)
 	if err != nil {
-		print.Red("Unable to parse package mapping file: ", config.MapFile)
+		prnt.Red("Unable to parse package mapping file: ", config.MapFile)
 		os.Exit(1)
 	}
 }
@@ -38,12 +38,12 @@ func init() {
 func savePackages() {
 	b, err := json.Marshal(packages)
 	if err != nil {
-		print.Red("Unable to parse packages: ", config.MapFile)
+		prnt.Red("Unable to parse packages: ", config.MapFile)
 		os.Exit(1)
 	}
 	err = os.WriteFile(config.MapFile, b, 0o600)
 	if err != nil {
-		print.Red("Unable to save package mapping file: ", config.MapFile)
+		prnt.Red("Unable to save package mapping file: ", config.MapFile)
 		os.Exit(1)
 	}
 }
@@ -129,12 +129,12 @@ func Remove(name string, nametype NameType) {
 // Pacman description with additional pack fields.
 type Description struct {
 	pacman.Description
-	PackName    string
-	PackVersion string
-	PackBranch  string
+	PackName    string `json:"pack-name"`
+	PackVersion string `json:"pack-version"`
+	PackBranch  string `json:"pack-branch"`
 }
 
-// Add pack description to pacman package.
+// Add pack fields to pacman package description.
 func DescribeAppend(d pacman.Description) Description {
 	pkg, _ := Get(d.Name, PACMAN)
 	return Description{

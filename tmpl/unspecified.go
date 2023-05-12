@@ -55,6 +55,7 @@ package() {
   cd build/bundle && find . -type f -exec install -Dm755 {} $pkgdir/etc/share/example/{} \; && cd $srcdir/..
 }
 `
+
 const READMEmd = `
 
 ---
@@ -65,6 +66,7 @@ const READMEmd = `
 pack install %s
 %s
 `
+
 const SysCallErr = `
 
 ============================
@@ -87,4 +89,15 @@ Output:
 
 ============================
 
+`
+
+const PrettyDesc = `
+Name        : %s
+Version     : %s
+Description : %s
+Size        : %s
+Url         : %s
+PackName    : %s
+PackVersion : %s
+PackBranch  : %s
 `

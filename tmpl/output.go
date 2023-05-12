@@ -11,7 +11,7 @@ import (
 	"fmnx.io/core/pack/config"
 )
 
-// This file contains string templates for utility stdout.
+// This file contains string templates for utility command output.
 // Output might be modified based on configuration - prettyprint.
 
 var DescribeShort = `📝 describe packages`
