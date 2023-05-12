@@ -13,6 +13,7 @@ import (
 	"os"
 	"strings"
 
+	"fmnx.io/core/pack/prnt"
 	"fmnx.io/core/pack/system"
 	"fmnx.io/core/pack/tmpl"
 )
@@ -47,12 +48,12 @@ type Package struct {
 }
 
 // Get package description from pacman and parse it.
-func Describe(pkg string) (Package, error) {
+func Describe(pkg string) (*Package, error) {
 	o, err := system.Callf("pacman -Qi %s", pkg)
 	if err != nil {
-		return Package{}, errors.New("package not found: " + pkg)
+		return nil, errors.New("package not found: " + pkg)
 	}
-	return Package{
+	return &Package{
 		Name:        parseDescField(o, "Name            : "),
 		Version:     parseDescField(o, "Version         : "),
 		Description: parseDescField(o, "Description     : "),
@@ -110,8 +111,24 @@ func Version(pkg string) string {
 	return strings.Trim(strings.Split(verAndRel, "-")[0], "\n")
 }
 
+// Get parameter from PKGBUILD proving path to direcotry.
+func PkgbuildParam(dir string, param string) (string, error) {
+	f, err := os.ReadFile(dir)
+	if err != nil {
+		return ``, err
+	}
+	splitted := strings.Split(string(f), "\n"+param+"=")
+	if len(splitted) < 2 {
+		return ``, nil
+	}
+	value := strings.Split(splitted[1], "\n")[1]
+	value = strings.ReplaceAll(value, "'", "")
+	value = strings.ReplaceAll(value, "\"", "")
+	return value, nil
+}
+
 // Eject list parameters from shell file, typically PKGBUILD.
-func PkgbuildParams(file string, param string) ([]string, error) {
+func PkgbuildParamList(file string, param string) ([]string, error) {
 	f, err := os.ReadFile(file)
 	if err != nil {
 		return nil, err
@@ -142,4 +159,48 @@ func cleanParameter(param string) string {
 	param = strings.ReplaceAll(param, "'", "")
 	param = strings.ReplaceAll(param, "\"", "")
 	return param
+}
+
+// Function that takes a list of packages and returns those that are not
+// installed in the end system.
+func GetUninstalled(pkgs []string) []string {
+	l := List()
+	var out []string
+	for _, pkg := range pkgs {
+		if _, ok := l[pkg]; !ok {
+			out = append(out, pkg)
+		}
+	}
+	return out
+}
+
+// Get dependecies from PKGBUILD file.
+func GetDeps(pkgbuild string) ([]string, error) {
+	deps, err := PkgbuildParamList(pkgbuild, "depends")
+	if err != nil {
+		return nil, err
+	}
+	makedeps, err := PkgbuildParamList(pkgbuild, "makedepends")
+	if err != nil {
+		return nil, err
+	}
+	return append(deps, makedeps...), nil
+}
+
+// Try to remove all packages at once.
+func Remove(pkgs []string) error {
+	pkgsStr := strings.Join(pkgs, " ")
+	o, err := system.Callf("sudo pacman --noconfirm -R %s", pkgsStr)
+	if err != nil {
+		return errors.New("pacman unable to remove:\n" + o)
+	}
+	prnt.Yellow("Packages removed: ", pkgsStr)
+	return nil
+}
+
+// Get pacman packages from parsed removal command.
+func PrintNotFoundPackages(o string) {
+	o = strings.ReplaceAll(o, "\n", " ")
+	o = strings.ReplaceAll(o, `error: target not found: `, "")
+	prnt.Red("Packages not found: ", o)
 }

@@ -6,7 +6,7 @@
 package cmd
 
 // This package contains all CLI commands that might be executed by user.
-// Each file corresponding a single command, including root cmd.
+// Each file contains a single command, including root cmd.
 
 import (
 	"fmnx.io/core/pack/git"
@@ -36,5 +36,5 @@ func Generate(cmd *cobra.Command, args []string) {
 	CheckErr(err)
 	err = pacman.Generate(dir, url)
 	CheckErr(err)
-	prnt.Green("Updated files: ", "PKGBUILD README.md")
+	prnt.Green("Generated file: ", "PKGBUILD")
 }

@@ -6,7 +6,7 @@
 package cmd
 
 // This package contains all CLI commands that might be executed by user.
-// Each file corresponding a single command, including root cmd.
+// Each file contains a single command, including root cmd.
 
 import (
 	"fmnx.io/core/pack/pack"
@@ -31,7 +31,7 @@ var listCmd = &cobra.Command{
 func List(cmd *cobra.Command, args []string) {
 	pkgs := pacman.List()
 	for pkg, version := range pkgs {
-		i, err := pack.Get(pkg, pack.PACMAN)
+		i, err := pack.GetByPacmanName(pkg)
 		if err != nil {
 			prnt.Custom([]prnt.ColoredMessage{
 				{
@@ -55,7 +55,7 @@ func List(cmd *cobra.Command, args []string) {
 				Color:   prnt.COLOR_YELLOW,
 			},
 			{
-				Message: i.Branch,
+				Message: i.DefaultBranch,
 				Color:   prnt.COLOR_BLUE,
 			},
 			{

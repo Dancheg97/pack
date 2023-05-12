@@ -6,15 +6,9 @@
 package cmd
 
 // This package contains all CLI commands that might be executed by user.
-// Each file corresponding a single command, including root cmd.
+// Each file contains a single command, including root cmd.
 
 import (
-	"os"
-	"strings"
-
-	"fmnx.io/core/pack/pack"
-	"fmnx.io/core/pack/pacman"
-	"fmnx.io/core/pack/prnt"
 	"fmnx.io/core/pack/tmpl"
 	"github.com/spf13/cobra"
 )
@@ -33,31 +27,5 @@ var describeCmd = &cobra.Command{
 
 // Cli command giving package description.
 func Describe(cmd *cobra.Command, pkgs []string) {
-	groups := pack.Split(pkgs)
-	var notfound []string
-	for _, pkg := range groups.PackPackages {
-		i, err := pack.Get(pkg, pack.PACK)
-		if err != nil {
-			notfound = append(notfound, pkg)
-			continue
-		}
-		groups.PacmanPackages = append(groups.PacmanPackages, i.PacmanName)
-	}
-	var desclist []pack.PkgInfo
-	for _, pkg := range groups.PacmanPackages {
-		d, err := pacman.Describe(pkg)
-		if err != nil {
-			notfound = append(notfound, pkg)
-			continue
-		}
-		fd := pack.DescribeAppend(d)
-		desclist = append(desclist, fd)
-	}
-	if len(notfound) > 0 {
-		prnt.Red("unable to find packages: ", strings.Join(notfound, " "))
-		os.Exit(1)
-	}
-	for _, d := range desclist {
-		pack.PrintDescription(d)
-	}
+	// TODO ...
 }

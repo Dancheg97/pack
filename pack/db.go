@@ -5,12 +5,8 @@
 
 package pack
 
-// This library is used to perform a set of different operations related to
-// pack packages, corresponding pacman packages and different git operations.
-//
-// While adding new functions, changing pack or pacman packages state, you
-// should assume that this packages acts as wrapper over pacman, so don't
-// forget to change state in both pack and pacman databases.
+// This library contains operations related only to pack json database.
+// All functions are safe for concurrent usage.
 
 import (
 	"encoding/json"
@@ -21,6 +17,14 @@ import (
 	"fmnx.io/core/pack/config"
 	"fmnx.io/core/pack/prnt"
 )
+
+// Data about pack package stored in pack database.
+type Package struct {
+	PackName      string `json:"pack-name"`
+	PacmanName    string `json:"pacman-name"`
+	Version       string `json:"version"`
+	DefaultBranch string `json:"default-branch"`
+}
 
 var (
 	ErrNotFound      = errors.New("package is not stored in pack")
@@ -54,27 +58,13 @@ func savePackages() {
 	}
 }
 
-type Package struct {
-	PacmanName string `json:"pacman"`
-	PackName   string `json:"pack"`
-	Version    string `json:"version"`
-	Branch     string `json:"branch"`
-}
-
-type NameType int
-
-const (
-	PACMAN NameType = iota
-	PACK   NameType = iota
-)
-
-// Get list of packages installed by pack with metadata. This is readonly
-// instance that does not affect database.
+// Get list of pack packages.
 func List() []Package {
 	return packages
 }
 
-// Update package in database, if package does not exist, it will be added.
+// Update package in database, if package does not exist, it will be added. If
+// it exists, new information will be appended.
 func Update(pkg Package) {
 	mu.Lock()
 	defer mu.Unlock()
@@ -89,22 +79,25 @@ func Update(pkg Package) {
 	savePackages()
 }
 
-// Get package by pacman or pack package name.
-func Get(name string, nametype NameType) (*Package, error) {
+// Get package by pack package name.
+func Get(name string) (*Package, error) {
 	mu.Lock()
 	defer mu.Unlock()
-	switch nametype {
-	case PACK:
-		for _, p := range packages {
-			if p.PackName == name {
-				return &p, nil
-			}
+	for _, p := range packages {
+		if p.PackName == name {
+			return &p, nil
 		}
-	case PACMAN:
-		for _, p := range packages {
-			if p.PacmanName == name {
-				return &p, nil
-			}
+	}
+	return nil, ErrNotFound
+}
+
+// Get package by pack package name.
+func GetByPacmanName(name string) (*Package, error) {
+	mu.Lock()
+	defer mu.Unlock()
+	for _, p := range packages {
+		if p.PacmanName == name {
+			return &p, nil
 		}
 	}
 	return nil, ErrNotFound
@@ -112,22 +105,27 @@ func Get(name string, nametype NameType) (*Package, error) {
 
 // Remove package from database. If package does not exist in database no
 // action will be done.
-func Remove(name string, nametype NameType) {
+func Remove(pkgs []string) {
 	mu.Lock()
 	defer mu.Unlock()
-	switch nametype {
-	case PACK:
-		for i, p := range packages {
-			if p.PackName == name {
-				packages = append(packages[:i], packages[i+1:]...)
-			}
-		}
-	case PACMAN:
-		for i, p := range packages {
-			if p.PacmanName == name {
+	for _, target := range pkgs {
+		for i, check := range packages {
+			if check.PackName == target {
 				packages = append(packages[:i], packages[i+1:]...)
 			}
 		}
 	}
 	savePackages()
+}
+
+// Get uninstalled pack packages.
+func GetUninstalled(pkgs []string) []string {
+	var uninstalled []string
+	for _, pkg := range pkgs {
+		_, err := Get(pkg)
+		if err != nil {
+			uninstalled = append(uninstalled, pkg)
+		}
+	}
+	return uninstalled
 }

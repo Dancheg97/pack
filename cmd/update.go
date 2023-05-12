@@ -6,19 +6,23 @@
 package cmd
 
 // This package contains all CLI commands that might be executed by user.
-// Each file corresponding a single command, including root cmd.
+// Each file contains a single command, including root cmd.
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strings"
+	"sync"
 
+	"fmnx.io/core/pack/git"
 	"fmnx.io/core/pack/pack"
 	"fmnx.io/core/pack/pacman"
 	"fmnx.io/core/pack/prnt"
 	"fmnx.io/core/pack/system"
 	"fmnx.io/core/pack/tmpl"
 	"github.com/spf13/cobra"
+	"golang.org/x/sync/errgroup"
 )
 
 func init() {
@@ -41,9 +45,14 @@ func Update(cmd *cobra.Command, pkgs []string) {
 		FullPackUpdate()
 		return
 	}
-	groups := pack.Split(pkgs)
-	VerifyPacmanPackages(groups.PacmanPackages)
-	VerifyPackPackages(groups.PackPackages)
+	groups := GroupPackages(pkgs)
+	nfPacman := pacman.GetUninstalled(groups.PacmanPackages)
+	nfPack := pack.GetUninstalled(groups.PackPackages)
+	if len(nfPack) > 0 || len(nfPacman) > 0 {
+		nfPack = append(nfPack, nfPacman...)
+		prnt.Red("Some packages are not installed", strings.Join(nfPack, " "))
+		os.Exit(1)
+	}
 	err := pacman.Update(groups.PacmanPackages)
 	CheckErr(err)
 	Install(nil, groups.PackPackages)
@@ -63,7 +72,7 @@ var Updating bool
 
 // Perform full pack update.
 func FullPackUpdate() {
-	outdatedpkgs := pack.Outdated()
+	outdatedpkgs := GetPackOutdated()
 	var pkgs []string
 	for _, pkg := range outdatedpkgs {
 		pkgs = append(pkgs, fmt.Sprintf("%s@%s", pkg.Name, pkg.NewVersion))
@@ -72,34 +81,36 @@ func FullPackUpdate() {
 	prnt.Green("Pack update: ", "done")
 }
 
-// Verify pacman packages exist in system.
-func VerifyPacmanPackages(pkgs []string) {
-	o, err := system.Callf("pacman -Q %s", strings.Join(pkgs, " "))
-	var nfpkgs []string
-	if err != nil {
-		for _, line := range strings.Split(strings.Trim(o, "\n"), "\n") {
-			if strings.Contains(line, "was not found") {
-				line = strings.ReplaceAll(line, "error: package '", "")
-				line = strings.ReplaceAll(line, "' was not found", "")
-				nfpkgs = append(nfpkgs, line)
+// Get list of pack outdated packages.
+func GetPackOutdated() []pacman.OutdatedPackage {
+	pkgs := pack.List()
+	g, _ := errgroup.WithContext(context.Background())
+	var mu sync.Mutex
+	var rez []pacman.OutdatedPackage
+	for _, info := range pkgs {
+		sinfo := info
+		g.Go(func() error {
+			link := "https://" + sinfo.PackName
+			last, err := git.LastCommitUrl(link, sinfo.DefaultBranch)
+			if err != nil {
+				mu.Lock()
+				prnt.Yellow("Unable to get versoin for: ", link)
+				mu.Unlock()
+				return nil
 			}
-		}
-		prnt.Red("Unable to find: ", strings.Join(nfpkgs, " "))
-		os.Exit(1)
+			if sinfo.Version == last {
+				return nil
+			}
+			mu.Lock()
+			rez = append(rez, pacman.OutdatedPackage{
+				Name:           sinfo.PackName,
+				CurrentVersion: sinfo.Version,
+				NewVersion:     last,
+			})
+			mu.Unlock()
+			return nil
+		})
 	}
-}
-
-// Verify pack packages are installed in system.
-func VerifyPackPackages(pkgs []string) {
-	var nfpkgs []string
-	for _, pkg := range pkgs {
-		_, err := pack.Get(pkg, pack.PACK)
-		if err != nil {
-			nfpkgs = append(nfpkgs, pkg)
-		}
-	}
-	if len(nfpkgs) > 0 {
-		prnt.Red("Unable to find: ", strings.Join(nfpkgs, " "))
-		os.Exit(1)
-	}
+	g.Wait()
+	return rez
 }

@@ -53,7 +53,8 @@ var BuildLong = `🛠️ build packages
 If no arguements provided, this script will build package in current directory.
 If there are some arguements, pack will treat them as pack links, clone 
 repositories, build packages inside and store them in cache, which is defined
-in '~/.pack/config.yml'.
+in '~/.pack/config.yml'. You can also specify versions of packages that you
+want to build after @, similarly with install.
 
 To double check build process, you can test it inside pack docker container:
 docker run --rm -it fmnx.io/core/pack i example.com/package`

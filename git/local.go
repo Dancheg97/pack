@@ -50,6 +50,15 @@ func LastCommitDir(dir string, branch string) (string, error) {
 	return strings.Trim(o, "\n"), nil
 }
 
+// Get current commit for directory.
+func CurrentCommitDir(dir string) (string, error) {
+	o, err := system.Callf("git -C %s rev-parse --verify HEAD", dir)
+	if err != nil {
+		return ``, errors.New("git unable to get curr commit:\n" + o)
+	}
+	return strings.Trim(o, "\n"), nil
+}
+
 // Get git installation url and convert it to https format.
 func Url(dir string) (string, error) {
 	out, err := system.Callf("git -C %s config --get remote.origin.url", dir)

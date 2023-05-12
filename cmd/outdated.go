@@ -6,14 +6,19 @@
 package cmd
 
 // This package contains all CLI commands that might be executed by user.
-// Each file corresponding a single command, including root cmd.
+// Each file contains a single command, including root cmd.
 
 import (
+	"context"
+	"sync"
+
+	"fmnx.io/core/pack/git"
 	"fmnx.io/core/pack/pack"
 	"fmnx.io/core/pack/pacman"
 	"fmnx.io/core/pack/prnt"
 	"fmnx.io/core/pack/tmpl"
 	"github.com/spf13/cobra"
+	"golang.org/x/sync/errgroup"
 )
 
 func init() {
@@ -32,7 +37,7 @@ var outdatedCmd = &cobra.Command{
 func Outdated(cmd *cobra.Command, args []string) {
 	pacmanOutdated, err := pacman.Outdated()
 	CheckErr(err)
-	packoutdated := pack.Outdated()
+	packoutdated := PackOutdated()
 	allOutdated := append(pacmanOutdated, packoutdated...)
 	for _, info := range allOutdated {
 		prnt.Custom([]prnt.ColoredMessage{
@@ -50,4 +55,38 @@ func Outdated(cmd *cobra.Command, args []string) {
 			},
 		})
 	}
+}
+
+// Get list of pack outdated packages.
+func PackOutdated() []pacman.OutdatedPackage {
+	pkgs := pack.List()
+	g, _ := errgroup.WithContext(context.Background())
+	var mu sync.Mutex
+	var rez []pacman.OutdatedPackage
+	for _, info := range pkgs {
+		sinfo := info
+		g.Go(func() error {
+			link := "https://" + sinfo.PackName
+			last, err := git.LastCommitUrl(link, sinfo.DefaultBranch)
+			if err != nil {
+				mu.Lock()
+				prnt.Yellow("Unable to get versoin for: ", link)
+				mu.Unlock()
+				return nil
+			}
+			if sinfo.Version == last {
+				return nil
+			}
+			mu.Lock()
+			rez = append(rez, pacman.OutdatedPackage{
+				Name:           sinfo.PackName,
+				CurrentVersion: sinfo.Version,
+				NewVersion:     last,
+			})
+			mu.Unlock()
+			return nil
+		})
+	}
+	g.Wait()
+	return rez
 }

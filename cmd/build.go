@@ -6,58 +6,57 @@
 package cmd
 
 // This package contains all CLI commands that might be executed by user.
-// Each file corresponding a single command, including root cmd.
+// Each file contains a single command, including root cmd.
 
-// import (
-// 	"fmt"
-// 	"os"
+import (
+	"strings"
 
-// 	"fmnx.io/core/pack/git"
-// 	"fmnx.io/core/pack/pack"
-// 	"fmnx.io/core/pack/prnt"
-// 	"fmnx.io/core/pack/system"
-// 	"fmnx.io/core/pack/tmpl"
-// 	"github.com/spf13/cobra"
-// )
+	"fmnx.io/core/pack/git"
+	"fmnx.io/core/pack/pack"
+	"fmnx.io/core/pack/pacman"
+	"fmnx.io/core/pack/system"
+	"fmnx.io/core/pack/tmpl"
+	"github.com/spf13/cobra"
+)
 
-// func init() {
-// 	rootCmd.AddCommand(buildCmd)
-// }
+func init() {
+	rootCmd.AddCommand(buildCmd)
+}
 
-// var buildCmd = &cobra.Command{
-// 	Use:     "build",
-// 	Aliases: []string{"b"},
-// 	Short:   tmpl.BuildShort,
-// 	Long:    tmpl.BuildLong,
-// 	Run:     Build,
-// }
+var buildCmd = &cobra.Command{
+	Use:     "build",
+	Aliases: []string{"b"},
+	Short:   tmpl.BuildShort,
+	Long:    tmpl.BuildLong,
+	Run:     Build,
+}
 
-// // Cli command preparing package in current directory.
-// func Build(cmd *cobra.Command, pkgs []string) {
-// 	dir := system.Pwd()
-// 	prnt.Blue("Preparing package: ", dir)
-// 	out, err := system.Call("makepkg -sfi --noconfirm")
-// 	if err != nil {
-// 		prnt.Red("Unable to execute: ", "makepkg")
-// 		fmt.Println(out)
-// 		os.Exit(1)
-// 	}
-// 	i := GetInstallLink()
-// 	SavePackageInfo(i)
-// 	prnt.Green("Package prepared and installed: ", i.FullName)
-// }
+// Cli command preparing package in current directory.
+func Build(cmd *cobra.Command, pkgs []string) {
+	if len(pkgs) == 0 {
+		BuildCurrentDirectory()
+		return
+	}
+	// TODO add functions to build remote repos.
+}
 
-// // Save information about installed package.
-// func SavePackageInfo(i RepositoryInfo) {
-// 	dir := system.Pwd()
-// 	branch, err := git.DefaultBranch(dir)
-// 	CheckErr(err)
-// 	version, err := git.LastCommitDir(dir, branch)
-// 	CheckErr(err)
-// 	pack.Update(pack.Package{
-// 		PacmanName: i.ShortName,
-// 		PackName:   i.FullName,
-// 		Version:    version,
-// 		Branch:     branch,
-// 	})
-// }
+// Build package in current directory.
+func BuildCurrentDirectory() {
+	dir := system.Pwd()
+	err := pacman.Build(dir)
+	CheckErr(err)
+	branch, err := git.DefaultBranch(dir)
+	CheckErr(err)
+	commit, err := git.CurrentCommitDir(dir)
+	CheckErr(err)
+	name, err := pacman.PkgbuildParam(dir, "pkgname")
+	CheckErr(err)
+	url, err := git.Url(dir)
+	CheckErr(err)
+	pack.Update(pack.Package{
+		PackName:      strings.Replace(url, "https://", "", 1),
+		PacmanName:    name,
+		Version:       commit,
+		DefaultBranch: branch,
+	})
+}

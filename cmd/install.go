@@ -6,7 +6,7 @@
 package cmd
 
 // This package contains all CLI commands that might be executed by user.
-// Each file corresponding a single command, including root cmd.
+// Each file contains a single command, including root cmd.
 
 import (
 	"context"
@@ -39,11 +39,33 @@ var installCmd = &cobra.Command{
 
 // Cli command installing packages into system.
 func Install(cmd *cobra.Command, upkgs []string) {
-	pkgs := pack.Split(upkgs)
-	CheckUnreachablePacmanPackages(pkgs.PacmanPackages)
-	CheckUnreachablePackPackages(pkgs.PackPackages)
-	InstallPacmanPackages(pkgs.PacmanPackages)
-	InstallPackPackages(pkgs.PackPackages)
+	groups := GroupPackages(upkgs)
+	CheckUnreachablePacmanPackages(groups.PacmanPackages)
+	CheckUnreachablePackPackages(groups.PackPackages)
+	InstallPacmanPackages(groups.PacmanPackages)
+	InstallPackPackages(groups.PackPackages)
+}
+
+type PackageGroups struct {
+	PacmanPackages []string
+	PackPackages   []string
+}
+
+// Split packages into pacman and pack groups.
+func GroupPackages(pkgs []string) PackageGroups {
+	var pacmanPackages []string
+	var packPackages []string
+	for _, pkg := range pkgs {
+		if strings.Contains(pkg, "/") {
+			packPackages = append(packPackages, pkg)
+			continue
+		}
+		pacmanPackages = append(pacmanPackages, pkg)
+	}
+	return PackageGroups{
+		PacmanPackages: pacmanPackages,
+		PackPackages:   packPackages,
+	}
 }
 
 // Check if some pacman packages could not be installed.
@@ -81,7 +103,7 @@ func CheckUnreachablePackPackages(pkgs []string) {
 	for _, pkg := range pkgs {
 		spkg := pkg
 		g.Go(func() error {
-			_, err := pack.Get(spkg, pack.PACK)
+			_, err := pack.Get(spkg)
 			if err == nil {
 				return nil
 			}
@@ -164,7 +186,7 @@ func CleanAlreadyInstalled(pkgs []string) []string {
 // Checks if packages are not installed and installing them.
 func InstallPackPackages(pkgs []string) {
 	for _, pkg := range pkgs {
-		_, err := pack.Get(pkg, pack.PACK)
+		_, err := pack.Get(pkg)
 		if err == nil && !Updating {
 			continue
 		}
@@ -192,7 +214,7 @@ func InstallPackPackage(i PackInfo) {
 	}
 	err = git.Checkout(i.Directory, i.Version)
 	CheckErr(err)
-	packDeps, err := pack.GetDeps(i.Pkgbuild)
+	packDeps, err := pacman.GetDeps(i.Pkgbuild)
 	CheckErr(err)
 	Install(nil, packDeps)
 	err = pack.SwapDeps(i.Pkgbuild, packDeps)
@@ -200,10 +222,10 @@ func InstallPackPackage(i PackInfo) {
 	err = pacman.Build(i.Directory)
 	CheckErr(err)
 	pack.Update(pack.Package{
-		PacmanName: i.PacmanName,
-		PackName:   i.PackName,
-		Version:    i.Version,
-		Branch:     branch,
+		PacmanName:    i.PacmanName,
+		PackName:      i.PackName,
+		Version:       i.Version,
+		DefaultBranch: branch,
 	})
 	err = system.MvExt(i.Directory, config.PackageCacheDir, ".pkg.tar.zst")
 	CheckErr(err)
