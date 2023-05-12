@@ -17,10 +17,10 @@ makedepends=(
 
 build() {
   cd ..
-  go build -buildvcs=false -o pack .
+  go build -buildvcs=false -o packbin .
 }
 
 package() {
   cd ..
-  install -Dm755 pack $pkgdir/usr/bin/pack
+  install -Dm755 packbin $pkgdir/usr/bin/pack
 }
