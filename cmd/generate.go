@@ -6,9 +6,6 @@
 package cmd
 
 import (
-	"fmt"
-	"strings"
-
 	"fmnx.io/core/pack/git"
 	"fmnx.io/core/pack/pacman"
 	"fmnx.io/core/pack/prnt"
@@ -34,15 +31,7 @@ func Generate(cmd *cobra.Command, args []string) {
 	dir := system.Pwd()
 	url, err := git.Url(dir)
 	CheckErr(err)
-	splt := strings.Split(url, "/")
-	err = pacman.Generate(dir, splt[len(splt)-1], url)
+	err = pacman.Generate(dir, url)
 	CheckErr(err)
-	ModifyReadmeFile(url)
 	prnt.Green("Updated files: ", "PKGBUILD README.md")
-}
-
-// Append some lines to README.md file.
-func ModifyReadmeFile(link string) {
-	insatllMd := fmt.Sprintf(tmpl.READMEmd, "```", link, "```")
-	system.AppendToFile("README.md", insatllMd)
 }

@@ -30,7 +30,7 @@ var describeCmd = &cobra.Command{
 
 // Cli command giving package description.
 func Describe(cmd *cobra.Command, pkgs []string) {
-	groups := SplitPackages(pkgs)
+	groups := pack.Split(pkgs)
 	var notfound []string
 	for _, pkg := range groups.PackPackages {
 		i, err := pack.Get(pkg, pack.PACK)
@@ -54,5 +54,4 @@ func Describe(cmd *cobra.Command, pkgs []string) {
 		prnt.Red("unable to find packages: ", strings.Join(notfound, " "))
 		os.Exit(1)
 	}
-
 }

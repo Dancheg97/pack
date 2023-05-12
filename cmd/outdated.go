@@ -6,16 +6,11 @@
 package cmd
 
 import (
-	"context"
-	"sync"
-
-	"fmnx.io/core/pack/git"
 	"fmnx.io/core/pack/pack"
 	"fmnx.io/core/pack/pacman"
 	"fmnx.io/core/pack/prnt"
 	"fmnx.io/core/pack/tmpl"
 	"github.com/spf13/cobra"
-	"golang.org/x/sync/errgroup"
 )
 
 func init() {
@@ -34,7 +29,7 @@ var outdatedCmd = &cobra.Command{
 func Outdated(cmd *cobra.Command, args []string) {
 	pacmanOutdated, err := pacman.Outdated()
 	CheckErr(err)
-	packoutdated := GetPackOutdated()
+	packoutdated := pack.Outdated()
 	allOutdated := append(pacmanOutdated, packoutdated...)
 	for _, info := range allOutdated {
 		prnt.Custom([]prnt.ColoredMessage{
@@ -52,36 +47,4 @@ func Outdated(cmd *cobra.Command, args []string) {
 			},
 		})
 	}
-}
-
-// Get pack outdated packages.
-func GetPackOutdated() []pacman.OutdatedPackage {
-	pkgs := pack.List()
-	g, _ := errgroup.WithContext(context.Background())
-	var mu sync.Mutex
-	var rez []pacman.OutdatedPackage
-	for _, info := range pkgs {
-		sinfo := info
-		g.Go(func() error {
-			link := "https://" + sinfo.PackName
-			last, err := git.LastCommitUrl(link, sinfo.Branch)
-			if err != nil {
-				prnt.Yellow("Unable to get versoin for: ", link)
-				return nil
-			}
-			if sinfo.Version == last {
-				return nil
-			}
-			mu.Lock()
-			rez = append(rez, pacman.OutdatedPackage{
-				Name:           sinfo.PackName,
-				CurrentVersion: sinfo.Version,
-				NewVersion:     last,
-			})
-			mu.Unlock()
-			return nil
-		})
-	}
-	g.Wait()
-	return rez
 }

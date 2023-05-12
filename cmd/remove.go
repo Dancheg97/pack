@@ -30,7 +30,7 @@ var removeCmd = &cobra.Command{
 
 // Cli command removing packages from system.
 func Remove(cmd *cobra.Command, pkgs []string) {
-	groups := SplitPackages(pkgs)
+	groups := pack.Split(pkgs)
 	restPacmanPkgs := GetPacmanPackagesFromPackNames(groups.PackPackages)
 	groups.PacmanPackages = append(groups.PacmanPackages, restPacmanPkgs...)
 	RemovePacmanPackages(groups.PacmanPackages)

@@ -36,33 +36,11 @@ var installCmd = &cobra.Command{
 
 // Cli command installing packages into system.
 func Install(cmd *cobra.Command, upkgs []string) {
-	pkgs := SplitPackages(upkgs)
+	pkgs := pack.Split(upkgs)
 	CheckUnreachablePacmanPackages(pkgs.PacmanPackages)
 	CheckUnreachablePackPackages(pkgs.PackPackages)
 	InstallPacmanPackages(pkgs.PacmanPackages)
 	InstallPackPackages(pkgs.PackPackages)
-}
-
-type PackageGroups struct {
-	PacmanPackages []string
-	PackPackages   []string
-}
-
-// Split packages into pacman and pack to resolve dependencies differently.
-func SplitPackages(pkgs []string) PackageGroups {
-	var pacmanPackages []string
-	var packPackages []string
-	for _, pkg := range pkgs {
-		if strings.Contains(pkg, "/") {
-			packPackages = append(packPackages, pkg)
-			continue
-		}
-		pacmanPackages = append(pacmanPackages, pkg)
-	}
-	return PackageGroups{
-		PacmanPackages: pacmanPackages,
-		PackPackages:   packPackages,
-	}
 }
 
 // Check if some pacman packages could not be installed.
@@ -210,9 +188,10 @@ func InstallPackPackage(i PackInfo) {
 	}
 	err = git.Checkout(i.Directory, i.Version)
 	CheckErr(err)
-	packDeps := EjectPackDependencies(i.Pkgbuild)
+	packDeps, err := pack.GetDeps(i.Pkgbuild)
+	CheckErr(err)
 	Install(nil, packDeps)
-	SwapPackDependencies(i.Pkgbuild, packDeps)
+	pack.SwapDeps(i.Pkgbuild, packDeps)
 	InstallPackageWithMakepkg(i)
 	pack.Update(pack.Package{
 		PacmanName: i.PacmanName,
@@ -220,32 +199,7 @@ func InstallPackPackage(i PackInfo) {
 		Version:    i.Version,
 		Branch:     branch,
 	})
-	CachePackage(i.Directory)
+	err = system.MvExt(i.Directory, config.PackageCacheDir, ".pkg.tar.zst")
+	CheckErr(err)
 	git.Clean(i.Directory)
-}
-
-// Get dependencies and make dependencies related to pack from PKGBUILD file.
-func EjectPackDependencies(pkgbuild string) []string {
-	deps, err := system.GetShellList(pkgbuild, "depends")
-	CheckErr(err)
-	makedeps, err := system.GetShellList(pkgbuild, "makedepends")
-	CheckErr(err)
-	alldeps := append(deps, makedeps...)
-	groups := SplitPackages(alldeps)
-	return groups.PackPackages
-}
-
-// Temporarily swap pack dependencies in PKGBUILD to pacman package name for
-// installation process.
-func SwapPackDependencies(pkgbuild string, deps []string) {
-	b, err := os.ReadFile(pkgbuild)
-	CheckErr(err)
-	var rez = string(b)
-	for _, dep := range deps {
-		dashsplt := strings.Split(dep, "/")
-		shortname := dashsplt[len(dashsplt)-1]
-		rez = strings.ReplaceAll(rez, dep, shortname)
-	}
-	err = os.WriteFile(pkgbuild, []byte(rez), 0o600)
-	CheckErr(err)
 }

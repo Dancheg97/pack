@@ -22,8 +22,9 @@ func Check(dir string) error {
 }
 
 // Geberate PKGBUILD file template. Provide pacman package name and git url.
-func Generate(dir string, name string, url string) error {
-	content := fmt.Sprintf(tmpl.PKGBUILD, name, url)
+func Generate(dir string, url string) error {
+	splt := strings.Split(url, "/")
+	content := fmt.Sprintf(tmpl.PKGBUILD, splt[len(splt)-1], url)
 	err := os.WriteFile(dir+"/PKGBUILD", []byte(content), 0o600)
 	if err != nil {
 		return errors.New("PKGBUILD generation failed:\n" + err.Error())
@@ -99,4 +100,38 @@ func Version(pkg string) string {
 	}
 	verAndRel := strings.Split(o, " ")[1]
 	return strings.Trim(strings.Split(verAndRel, "-")[0], "\n")
+}
+
+// Eject list parameters from shell file, typically PKGBUILD.
+func PkgbuildParams(file string, param string) ([]string, error) {
+	f, err := os.ReadFile(file)
+	if err != nil {
+		return nil, err
+	}
+	splitted := strings.Split(string(f), "\n"+param+"=(")
+	if len(splitted) < 2 {
+		return nil, nil
+	}
+	splitted = strings.Split(splitted[1], ")")
+	dirtyParams := splitted[0]
+	var cleanParams []string
+	for _, param := range splitParams(dirtyParams) {
+		cleanParams = append(cleanParams, cleanParameter(param))
+	}
+	return cleanParams, nil
+}
+
+func splitParams(params string) []string {
+	// TODO rework add quotas check
+	params = strings.ReplaceAll(params, "\n", " ")
+	for strings.Contains(params, "  ") {
+		params = strings.ReplaceAll(params, "  ", " ")
+	}
+	return strings.Split(strings.Trim(params, " "), " ")
+}
+
+func cleanParameter(param string) string {
+	param = strings.ReplaceAll(param, "'", "")
+	param = strings.ReplaceAll(param, "\"", "")
+	return param
 }

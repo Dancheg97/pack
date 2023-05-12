@@ -38,7 +38,7 @@ func Update(cmd *cobra.Command, pkgs []string) {
 		FullPackUpdate()
 		return
 	}
-	groups := SplitPackages(pkgs)
+	groups := pack.Split(pkgs)
 	VerifyPacmanPackages(groups.PacmanPackages)
 	VerifyPackPackages(groups.PackPackages)
 	err := pacman.Update(groups.PacmanPackages)
@@ -60,7 +60,7 @@ var Updating bool
 
 // Perform full pack update.
 func FullPackUpdate() {
-	outdatedpkgs := GetPackOutdated()
+	outdatedpkgs := pack.Outdated()
 	var pkgs []string
 	for _, pkg := range outdatedpkgs {
 		pkgs = append(pkgs, fmt.Sprintf("%s@%s", pkg.Name, pkg.NewVersion))

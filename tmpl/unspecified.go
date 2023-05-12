@@ -56,17 +56,6 @@ package() {
 }
 `
 
-const READMEmd = `
-
----
-
-### 📦 Install package with [pack](https://fmnx.io/core/pack):
-
-%s
-pack install %s
-%s
-`
-
 const SysCallErr = `
 
 ============================
