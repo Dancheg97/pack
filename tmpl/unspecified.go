@@ -57,30 +57,6 @@ package() {
 }
 `
 
-const SysCallErr = `
-
-============================
-
-System call failed:
-
-%s
-
-----------------------------
-
-Error occured.
-
-%+v
-
-----------------------------
-
-Output:
-
-%s
-
-============================
-
-`
-
 const PrettyDesc = `
 Name        : %s
 Version     : %s

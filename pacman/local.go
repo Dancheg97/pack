@@ -30,7 +30,7 @@ func Generate(dir string, url string) error {
 	content := fmt.Sprintf(tmpl.PKGBUILD, splt[len(splt)-1], url)
 	err := os.WriteFile(dir+"/PKGBUILD", []byte(content), 0o600)
 	if err != nil {
-		return errors.New("PKGBUILD generation failed:\n" + err.Error())
+		return errors.New("PKGBUILD generation failed")
 	}
 	return nil
 }
@@ -72,9 +72,9 @@ func parseDescField(o string, field string) string {
 
 // Install all .pkg.tar.zst files in provided directory.
 func Install(dir string) error {
-	out, err := system.Call("sudo pacman -U " + dir + " *.pkg.tar.zst")
+	_, err := system.Call("sudo pacman -U " + dir + " *.pkg.tar.zst")
 	if err != nil {
-		return errors.New("pacman unable to install:\n" + out)
+		return errors.New("pacman unable to install in dir " + dir)
 	}
 	return nil
 }
@@ -190,9 +190,9 @@ func GetDeps(pkgbuild string) ([]string, error) {
 // Try to remove all packages at once.
 func Remove(pkgs []string) error {
 	pkgsStr := strings.Join(pkgs, " ")
-	o, err := system.Callf("sudo pacman --noconfirm -R %s", pkgsStr)
+	_, err := system.Callf("sudo pacman --noconfirm -R %s", pkgsStr)
 	if err != nil {
-		return errors.New("pacman unable to remove:\n" + o)
+		return errors.New("pacman unable to remove")
 	}
 	prnt.Yellow("Packages removed: ", pkgsStr)
 	return nil

@@ -10,6 +10,7 @@ package system
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -17,8 +18,6 @@ import (
 
 	"fmnx.io/core/pack/config"
 	"fmnx.io/core/pack/prnt"
-	"fmnx.io/core/pack/tmpl"
-	"github.com/fatih/color"
 )
 
 // Execute external command with fmt like formatting.
@@ -40,15 +39,7 @@ func Call(cmd string) (string, error) {
 	}
 	err := execute.Run()
 	if err != nil {
-		if config.DisablePrettyPrint {
-			return fmt.Sprintf(tmpl.SysCallErr, cmd, err, buf.String()), err
-		}
-		return fmt.Sprintf(
-			tmpl.SysCallErr,
-			color.RedString(cmd),
-			err,
-			buf.String(),
-		), err
+		return buf.String(), errors.New(buf.String())
 	}
 	return buf.String(), nil
 }

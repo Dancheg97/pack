@@ -22,9 +22,9 @@ func Build(dir string) error {
 	if err != nil {
 		return err
 	}
-	o, err := system.Call("makepkg -sf --noconfirm")
+	_, err = system.Call("makepkg -sf --noconfirm")
 	if err != nil {
-		return errors.New("pacman unable to build:\n" + o)
+		return errors.New("pacman unable to build")
 	}
 	return nil
 }
@@ -32,9 +32,9 @@ func Build(dir string) error {
 // Update listed pacman packages with sync command.
 func Update(pkgs []string) error {
 	joined := strings.Join(pkgs, " ")
-	o, err := system.Call("sudo pacman --noconfirm -Sy " + joined)
+	_, err := system.Call("sudo pacman --noconfirm -Sy " + joined)
 	if err != nil {
-		return errors.New("pacman unable to update:\n" + o)
+		return errors.New("pacman unable to update")
 	}
 	return nil
 }
@@ -69,7 +69,7 @@ func Outdated() ([]OutdatedPackage, error) {
 func oudatedLinks() ([]string, error) {
 	o, err := system.Call("sudo pacman -Syup")
 	if err != nil {
-		return nil, errors.New("pacman unable to get outdated:\n" + o)
+		return nil, errors.New("pacman unable to get outdated")
 	}
 	if !strings.Contains(o, "https://") {
 		return nil, nil

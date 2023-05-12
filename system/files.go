@@ -41,9 +41,9 @@ func Pwd() string {
 // Move files with provided extension from one directory to another.
 func MvExt(src string, dst string, ext string) error {
 	const command = "sudo mv %s/*%s %s"
-	o, err := Callf(command, src, ext, dst)
+	_, err := Callf(command, src, ext, dst)
 	if err != nil {
-		return errors.New("unable to move files:\n" + o)
+		return errors.New("unable to move files")
 	}
 	return nil
 }

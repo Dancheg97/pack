@@ -20,7 +20,7 @@ func Checkout(dir string, target string) error {
 	o, err := system.Callf("git -C %s checkout %s ", dir, target)
 	if err != nil {
 		if !strings.HasPrefix(o, "Already on ") {
-			return errors.New("git unable to find checkout target:\n" + o)
+			return errors.New("git unable to find checkout target")
 		}
 	}
 	return nil
@@ -29,13 +29,13 @@ func Checkout(dir string, target string) error {
 // Clean git repository - all changes in tracked files, newly created files and
 // files under gitignore.
 func Clean(dir string) error {
-	o, err := system.Callf("git -C %s clean -xdf", dir)
+	_, err := system.Callf("git -C %s clean -xdf", dir)
 	if err != nil {
-		return errors.New("git unable to clean xdf:\n" + o)
+		return errors.New("git unable to clean xdf")
 	}
-	o, err = system.Callf("git -C %s reset --hard", dir)
+	_, err = system.Callf("git -C %s reset --hard", dir)
 	if err != nil {
-		return errors.New("git unable to reset -hard:\n" + o)
+		return errors.New("git unable to reset -hard")
 	}
 	return nil
 }
@@ -45,7 +45,7 @@ func LastCommitDir(dir string, branch string) (string, error) {
 	command := `git -C ` + dir + ` log -n 1 --pretty=format:"%H" ` + branch
 	o, err := system.Call(command)
 	if err != nil {
-		return ``, errors.New("git unable to log:\n" + o)
+		return ``, errors.New("git unable to log")
 	}
 	return strings.Trim(o, "\n"), nil
 }
@@ -54,7 +54,7 @@ func LastCommitDir(dir string, branch string) (string, error) {
 func CurrentCommitDir(dir string) (string, error) {
 	o, err := system.Callf("git -C %s rev-parse --verify HEAD", dir)
 	if err != nil {
-		return ``, errors.New("git unable to get curr commit:\n" + o)
+		return ``, errors.New("git unable to get curr commit")
 	}
 	return strings.Trim(o, "\n"), nil
 }
@@ -63,7 +63,7 @@ func CurrentCommitDir(dir string) (string, error) {
 func Url(dir string) (string, error) {
 	out, err := system.Callf("git -C %s config --get remote.origin.url", dir)
 	if err != nil {
-		return ``, errors.New("git unable to get remote url:\n" + out)
+		return ``, errors.New("git unable to get remote url")
 	}
 	out = strings.Trim(out, "\n")
 	out = strings.Replace(out, "git@", "https://", 1)

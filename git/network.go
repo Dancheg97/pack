@@ -20,7 +20,7 @@ func Clone(url string, dir string) error {
 	out, err := system.Callf("git clone %s %s", url, dir)
 	if err != nil {
 		if !strings.Contains(out, "already exists and is not an empty dir") {
-			return errors.New("git unable to clone: \n" + out)
+			return errors.New("git unable to clone")
 		}
 	}
 	return nil
@@ -58,9 +58,9 @@ func LastCommitUrl(url string, branch string) (string, error) {
 
 // Pull changes for git repo under some branch in specified directory.
 func Pull(dir string) error {
-	o, err := system.Callf("git -C %s pull", dir)
+	_, err := system.Callf("git -C %s pull", dir)
 	if err != nil {
-		return errors.New("git pull error:\n" + o)
+		return errors.New("git pull error")
 	}
 	return nil
 }
