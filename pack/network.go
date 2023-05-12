@@ -5,6 +5,13 @@
 
 package pack
 
+// This library is used to perform a set of different operations related to
+// pack packages, corresponding pacman packages and different git operations.
+//
+// While adding new functions, changing pack or pacman packages state, you
+// should assume that this packages acts as wrapper over pacman, so don't
+// forget to change state in both pack and pacman databases.
+
 import (
 	"context"
 	"sync"

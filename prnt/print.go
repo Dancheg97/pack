@@ -5,6 +5,9 @@
 
 package prnt
 
+// This package contains operations required for pretty output based on
+// configuration.
+
 import (
 	"fmt"
 
@@ -52,11 +55,11 @@ func Yellow(white string, yellow string) {
 type Color int
 
 const (
-	WHITE  Color = iota
-	RED    Color = iota
-	BLUE   Color = iota
-	GREEN  Color = iota
-	YELLOW Color = iota
+	COLOR_WHITE  Color = iota
+	COLOR_RED    Color = iota
+	COLOR_BLUE   Color = iota
+	COLOR_GREEN  Color = iota
+	COLOR_YELLOW Color = iota
 )
 
 type ColoredMessage struct {
@@ -77,15 +80,15 @@ func Custom(msgs []ColoredMessage) {
 	}
 	for _, msg := range msgs {
 		switch msg.Color {
-		case WHITE:
+		case COLOR_WHITE:
 			rez += msg.Message
-		case RED:
+		case COLOR_RED:
 			rez += color.RedString(msg.Message)
-		case BLUE:
+		case COLOR_BLUE:
 			rez += color.BlueString(msg.Message)
-		case GREEN:
+		case COLOR_GREEN:
 			rez += color.GreenString(msg.Message)
-		case YELLOW:
+		case COLOR_YELLOW:
 			rez += color.YellowString(msg.Message)
 		}
 	}

@@ -5,6 +5,8 @@
 
 package pacman
 
+// This package acts as library wrapper over pacman and makepkg.
+
 import (
 	"errors"
 	"os"

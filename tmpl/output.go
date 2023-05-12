@@ -5,14 +5,14 @@
 
 package tmpl
 
+// This package contains string templates for utility command output.
+// Output might be modified based on configuration - prettyprint.
+
 import (
 	"strings"
 
 	"fmnx.io/core/pack/config"
 )
-
-// This file contains string templates for utility command output.
-// Output might be modified based on configuration - prettyprint.
 
 var DescribeShort = `📝 describe packages`
 var DescribeLong = `📝 view information about packages

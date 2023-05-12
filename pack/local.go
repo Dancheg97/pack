@@ -5,6 +5,13 @@
 
 package pack
 
+// This library is used to perform a set of different operations related to
+// pack packages, corresponding pacman packages and different git operations.
+//
+// While adding new functions, changing pack or pacman packages state, you
+// should assume that this packages acts as wrapper over pacman, so don't
+// forget to change state in both pack and pacman databases.
+
 import (
 	"fmt"
 	"os"
@@ -65,6 +72,33 @@ func GetDeps(pkgbuild string) ([]string, error) {
 	alldeps := append(deps, makedeps...)
 	groups := Split(alldeps)
 	return groups.PackPackages, nil
+}
+
+// Pacman description with additional pack fields.
+type PkgInfo struct {
+	pacman.PkgInfo
+	PackName    string `json:"pack-name"`
+	PackVersion string `json:"pack-version"`
+	PackBranch  string `json:"pack-branch"`
+}
+
+// Add pack fields to pacman package description.
+func DescribeAppend(d pacman.PkgInfo) PkgInfo {
+	pkg, err := Get(d.Name, PACMAN)
+	if err != nil {
+		return PkgInfo{
+			PkgInfo:     d,
+			PackName:    "None",
+			PackVersion: "None",
+			PackBranch:  "None",
+		}
+	}
+	return PkgInfo{
+		PkgInfo:     d,
+		PackName:    pkg.PackName,
+		PackVersion: pkg.Version,
+		PackBranch:  pkg.Branch,
+	}
 }
 
 // Print package description.

@@ -5,6 +5,8 @@
 
 package config
 
+// Project runtime configuration.
+
 import (
 	"fmt"
 	"os"
@@ -13,7 +15,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// This variables will be automatically initialized.
+// This variables will be automatically initialized in init().
 var (
 	RemoveGitRepos      bool
 	RemoveBuiltPackages bool

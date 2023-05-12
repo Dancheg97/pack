@@ -5,6 +5,9 @@
 
 package system
 
+// This package contains functions for execution system calls and other
+// utilities for different system IO operations.
+
 import (
 	"bytes"
 	"fmt"

@@ -5,6 +5,9 @@
 
 package cmd
 
+// This package contains all CLI commands that might be executed by user.
+// Each file corresponding a single command, including root cmd.
+
 import (
 	"fmnx.io/core/pack/pack"
 	"fmnx.io/core/pack/pacman"
@@ -35,15 +38,15 @@ func Outdated(cmd *cobra.Command, args []string) {
 		prnt.Custom([]prnt.ColoredMessage{
 			{
 				Message: info.Name + " ",
-				Color:   prnt.WHITE,
+				Color:   prnt.COLOR_WHITE,
 			},
 			{
 				Message: info.CurrentVersion + " ",
-				Color:   prnt.YELLOW,
+				Color:   prnt.COLOR_YELLOW,
 			},
 			{
 				Message: info.NewVersion,
-				Color:   prnt.BLUE,
+				Color:   prnt.COLOR_BLUE,
 			},
 		})
 	}

@@ -5,6 +5,9 @@
 
 package cmd
 
+// This package contains all CLI commands that might be executed by user.
+// Each file corresponding a single command, including root cmd.
+
 import (
 	"fmnx.io/core/pack/git"
 	"fmnx.io/core/pack/pacman"
