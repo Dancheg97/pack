@@ -69,5 +69,5 @@ func Url(dir string) (string, error) {
 	out = strings.Replace(out, "git@", "https://", 1)
 	out = strings.Replace(out, ":", "/", 1)
 	out = strings.Replace(out, ".git", "", 1)
-	return out, nil
+	return strings.Replace(out, "///", "://", 1), nil
 }

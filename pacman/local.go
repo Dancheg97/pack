@@ -121,7 +121,7 @@ func PkgbuildParam(file string, param string) (string, error) {
 	if len(splitted) < 2 {
 		return ``, nil
 	}
-	value := strings.Split(splitted[1], "\n")[1]
+	value := strings.Split(splitted[1], "\n")[0]
 	value = strings.ReplaceAll(value, "'", "")
 	value = strings.ReplaceAll(value, "\"", "")
 	return value, nil
