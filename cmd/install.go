@@ -14,6 +14,7 @@ import (
 	"fmnx.io/core/pack/config"
 	"fmnx.io/core/pack/git"
 	"fmnx.io/core/pack/pack"
+	"fmnx.io/core/pack/pacman"
 	"fmnx.io/core/pack/prnt"
 	"fmnx.io/core/pack/system"
 	"fmnx.io/core/pack/tmpl"
@@ -27,7 +28,6 @@ func init() {
 
 var installCmd = &cobra.Command{
 	Use:     "install",
-	Example: "pack install fmnx.io/core/ainst fmnx.io/core/keks@main",
 	Aliases: []string{"i"},
 	Short:   tmpl.InstallShort,
 	Long:    tmpl.InstallLong,
@@ -148,6 +148,7 @@ func InstallPacmanPackages(pkgs []string) {
 // Removes pacman packages that are already installed in the system.
 func CleanAlreadyInstalled(pkgs []string) []string {
 	var uninstalledPkgs []string
+
 	for _, pkg := range pkgs {
 		_, err := system.Callf("pacman -Q %s", pkg)
 		if err != nil {
@@ -191,8 +192,10 @@ func InstallPackPackage(i PackInfo) {
 	packDeps, err := pack.GetDeps(i.Pkgbuild)
 	CheckErr(err)
 	Install(nil, packDeps)
-	pack.SwapDeps(i.Pkgbuild, packDeps)
-	InstallPackageWithMakepkg(i)
+	err = pack.SwapDeps(i.Pkgbuild, packDeps)
+	CheckErr(err)
+	err = pacman.Build(i.Directory)
+	CheckErr(err)
 	pack.Update(pack.Package{
 		PacmanName: i.PacmanName,
 		PackName:   i.PackName,

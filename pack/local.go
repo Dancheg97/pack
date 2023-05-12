@@ -6,10 +6,12 @@
 package pack
 
 import (
+	"fmt"
 	"os"
 	"strings"
 
 	"fmnx.io/core/pack/pacman"
+	"fmnx.io/core/pack/tmpl"
 )
 
 type PackageGroups struct {
@@ -63,4 +65,19 @@ func GetDeps(pkgbuild string) ([]string, error) {
 	alldeps := append(deps, makedeps...)
 	groups := Split(alldeps)
 	return groups.PackPackages, nil
+}
+
+// Print package description.
+func PrintDescription(d PkgInfo) {
+	fmt.Printf(
+		tmpl.PrettyDesc,
+		d.Name,
+		d.Version,
+		d.Description,
+		d.Size,
+		d.Url,
+		d.PackName,
+		d.PackVersion,
+		d.PackBranch,
+	)
 }

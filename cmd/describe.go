@@ -40,7 +40,7 @@ func Describe(cmd *cobra.Command, pkgs []string) {
 		}
 		groups.PacmanPackages = append(groups.PacmanPackages, i.PacmanName)
 	}
-	var desclist []pack.Description
+	var desclist []pack.PkgInfo
 	for _, pkg := range groups.PacmanPackages {
 		d, err := pacman.Describe(pkg)
 		if err != nil {
@@ -53,5 +53,8 @@ func Describe(cmd *cobra.Command, pkgs []string) {
 	if len(notfound) > 0 {
 		prnt.Red("unable to find packages: ", strings.Join(notfound, " "))
 		os.Exit(1)
+	}
+	for _, d := range desclist {
+		pack.PrintDescription(d)
 	}
 }

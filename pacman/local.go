@@ -15,8 +15,8 @@ import (
 	"fmnx.io/core/pack/tmpl"
 )
 
-// Check directory to exist and contain PKGBUILD.
-func Check(dir string) error {
+// ValidateDir directory to exist and contain PKGBUILD.
+func ValidateDir(dir string) error {
 	_, err := os.Stat(dir + "/PKGBUILD")
 	return err
 }
@@ -33,7 +33,7 @@ func Generate(dir string, url string) error {
 }
 
 // Some pacman package description fields.
-type Description struct {
+type PkgInfo struct {
 	Name        string `json:"name"`
 	Version     string `json:"version"`
 	Description string `json:"description"`
@@ -42,12 +42,12 @@ type Description struct {
 }
 
 // Get package description from pacman and parse it.
-func Describe(pkg string) (Description, error) {
+func Describe(pkg string) (PkgInfo, error) {
 	o, err := system.Callf("pacman -Qi %s", pkg)
 	if err != nil {
-		return Description{}, errors.New("package not found: " + pkg)
+		return PkgInfo{}, errors.New("package not found: " + pkg)
 	}
-	return Description{
+	return PkgInfo{
 		Name:        parseDescField(o, "Name            : "),
 		Version:     parseDescField(o, "Version         : "),
 		Description: parseDescField(o, "Description     : "),

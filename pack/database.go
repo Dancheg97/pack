@@ -127,18 +127,26 @@ func Remove(name string, nametype NameType) {
 }
 
 // Pacman description with additional pack fields.
-type Description struct {
-	pacman.Description
+type PkgInfo struct {
+	pacman.PkgInfo
 	PackName    string `json:"pack-name"`
 	PackVersion string `json:"pack-version"`
 	PackBranch  string `json:"pack-branch"`
 }
 
 // Add pack fields to pacman package description.
-func DescribeAppend(d pacman.Description) Description {
-	pkg, _ := Get(d.Name, PACMAN)
-	return Description{
-		Description: d,
+func DescribeAppend(d pacman.PkgInfo) PkgInfo {
+	pkg, err := Get(d.Name, PACMAN)
+	if err != nil {
+		return PkgInfo{
+			PkgInfo:     d,
+			PackName:    "None",
+			PackVersion: "None",
+			PackBranch:  "None",
+		}
+	}
+	return PkgInfo{
+		PkgInfo:     d,
 		PackName:    pkg.PackName,
 		PackVersion: pkg.Version,
 		PackBranch:  pkg.Branch,
