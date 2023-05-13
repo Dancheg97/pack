@@ -70,30 +70,12 @@ func GroupPackages(pkgs []string) PackageGroups {
 
 // Check if some pacman packages could not be installed.
 func CheckUnreachablePacmanPackages(pkgs []string) {
-	deps := GetDependeciesResolvableByPacman()
-	var unreachable []string
-	for _, pkg := range pkgs {
-		if _, ok := deps[pkg]; !ok {
-			unreachable = append(unreachable, pkg)
-		}
-	}
-	if len(unreachable) != 0 {
+	unreachable := pacman.GetUnreachable(pkgs)
+	if len(unreachable) > 0 {
 		pkgs := strings.Join(unreachable, " ")
 		prnt.Red("Unable to resolve those pacman packages: ", pkgs)
 		os.Exit(1)
 	}
-}
-
-// Fill struct that shows which packages could be resolved with pacman
-// (packages that you can load from pacman servers).
-func GetDependeciesResolvableByPacman() map[string]struct{} {
-	o, err := system.Call("pacman -Ssq")
-	CheckErr(err)
-	deps := map[string]struct{}{}
-	for _, pkg := range strings.Split(o, "\n") {
-		deps[pkg] = struct{}{}
-	}
-	return deps
 }
 
 // Check if some pack packages could not be installed.

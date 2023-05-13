@@ -47,8 +47,8 @@ This command will make a call to pacman servers and collect information about
 all remote repos for packages installed with pack. Then it will print a list
 of packages that require update displaying current and new available version.`
 
-var BuildShort = "🛠️ build packages"
-var BuildLong = `🛠️ build packages
+var BuildShort = "🛠️  build packages"
+var BuildLong = `🛠️  build packages
 
 If no arguements provided, this script will build package in current directory.
 If there are some arguements, pack will treat them as pack links, clone 

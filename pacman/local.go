@@ -204,3 +204,26 @@ func PrintNotFoundPackages(o string) {
 	o = strings.ReplaceAll(o, `error: target not found: `, "")
 	prnt.Red("Packages not found: ", o)
 }
+
+// Check which packages from list could not be installed with pacman. Takes a
+// list of packages and returning those, that could not be installed.
+func GetUnreachable(pkgs []string) []string {
+	o, err := system.Call("pacman -Ssq")
+	if err != nil {
+		prnt.Red("Unexpected error on system call: ", "pacman -Ssq")
+		fmt.Println(o)
+		os.Exit(1)
+	}
+	available := map[string]struct{}{}
+	for _, pkg := range strings.Split(o, "\n") {
+		available[pkg] = struct{}{}
+	}
+	var unavailable []string
+	for _, pkg := range pkgs {
+		_, ok := available[pkg]
+		if !ok {
+			unavailable = append(unavailable, pkg)
+		}
+	}
+	return unavailable
+}
