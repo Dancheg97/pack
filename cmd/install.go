@@ -10,7 +10,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"strings"
 
@@ -42,7 +41,7 @@ func Install(cmd *cobra.Command, upkgs []string) {
 	groups := GroupPackages(upkgs)
 	CheckUnreachablePacmanPackages(groups.PacmanPackages)
 	CheckUnreachablePackPackages(groups.PackPackages)
-	InstallPacmanPackages(groups.PacmanPackages)
+	CheckErr(pacman.Install(groups.PacmanPackages))
 	InstallPackPackages(groups.PackPackages)
 }
 
@@ -136,34 +135,6 @@ func EjectInfoFromPackLink(pkg string) PackInfo {
 	return rez
 }
 
-// Install pacman packages.
-func InstallPacmanPackages(pkgs []string) {
-	uninstalled := CleanAlreadyInstalled(pkgs)
-	if len(uninstalled) == 0 {
-		return
-	}
-	joined := strings.Join(uninstalled, " ")
-	o, err := system.Callf("sudo pacman --noconfirm -S %s", joined)
-	if err != nil {
-		prnt.Red("Unable to get pacman packages: ", joined)
-		fmt.Println(o)
-		os.Exit(1)
-	}
-	prnt.Green("Pacman packages installed: ", joined)
-}
-
-// Removes pacman packages that are already installed in the system.
-func CleanAlreadyInstalled(pkgs []string) []string {
-	var uninstalledPkgs []string
-	for _, pkg := range pkgs {
-		_, err := system.Callf("pacman -Q %s", pkg)
-		if err != nil {
-			uninstalledPkgs = append(uninstalledPkgs, pkg)
-		}
-	}
-	return uninstalledPkgs
-}
-
 // Checks if packages are not installed and installing them.
 func InstallPackPackages(pkgs []string) {
 	for _, pkg := range pkgs {
@@ -206,7 +177,7 @@ func InstallPackPackage(i PackInfo) {
 	prnt.Yellow("Staring build: ", i.PackName)
 	err = pacman.Build(i.Directory)
 	CheckErr(err)
-	err = pacman.Install(i.Directory)
+	err = pacman.InstallDir(i.Directory)
 	CheckErr(err)
 	pack.Update(pack.Package{
 		PacmanName:    i.PacmanName,

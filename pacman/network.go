@@ -12,6 +12,7 @@ import (
 	"os"
 	"strings"
 
+	"fmnx.io/core/pack/prnt"
 	"fmnx.io/core/pack/system"
 )
 
@@ -88,4 +89,30 @@ func parsePackageLink(link string) (string, string) {
 	packageName := strings.Join(fileSplit[0:len(fileSplit)-3], "-")
 	newVersion := fileSplit[len(fileSplit)-3]
 	return packageName, newVersion
+}
+
+func Install(pkgs []string) error {
+	uninstalled := GetInstalled(pkgs)
+	if len(uninstalled) == 0 {
+		return nil
+	}
+	joined := strings.Join(uninstalled, " ")
+	o, err := system.Callf("sudo pacman --noconfirm -S %s", joined)
+	if err != nil {
+		return errors.New(o)
+	}
+	prnt.Green("Installed: ", joined)
+	return nil
+}
+
+// Check which packages are already installed and remove them from list.
+func GetInstalled(pkgs []string) []string {
+	var uninstalledPkgs []string
+	for _, pkg := range pkgs {
+		_, err := system.Callf("pacman -Q %s", pkg)
+		if err != nil {
+			uninstalledPkgs = append(uninstalledPkgs, pkg)
+		}
+	}
+	return uninstalledPkgs
 }
