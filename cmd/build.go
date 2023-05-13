@@ -9,10 +9,8 @@ package cmd
 // Each file contains a single command, including root cmd.
 
 import (
-	"strings"
-
+	"fmnx.io/core/pack/config"
 	"fmnx.io/core/pack/git"
-	"fmnx.io/core/pack/pack"
 	"fmnx.io/core/pack/pacman"
 	"fmnx.io/core/pack/system"
 	"fmnx.io/core/pack/tmpl"
@@ -34,29 +32,31 @@ var buildCmd = &cobra.Command{
 // Cli command preparing package in current directory.
 func Build(cmd *cobra.Command, pkgs []string) {
 	if len(pkgs) == 0 {
-		BuildCurrentDirectory()
+		dir := system.Pwd()
+		BuildDirectory(dir, ``)
 		return
 	}
-	// TODO add functions to build remote repos.
+	for _, pkg := range pkgs {
+		i := EjectInfoFromPackLink(pkg)
+		err := git.Clone(i.Url, i.Directory)
+		CheckErr(err)
+		BuildDirectory(i.Directory, i.Version)
+		err = system.MvExt(i.Directory, config.PackageCacheDir, ".pkg.tar.zst")
+		CheckErr(err)
+	}
 }
 
-// Build package in current directory.
-func BuildCurrentDirectory() {
-	dir := system.Pwd()
-	err := pacman.Build(dir)
+// Build package in specified directory. Assumes this directory has cloned git
+// repository with PKGBUILD in it.
+func BuildDirectory(dir string, version string) {
+	if version == `` {
+		branch, err := git.DefaultBranch(dir)
+		CheckErr(err)
+		version, err = git.LastCommitDir(dir, branch)
+		CheckErr(err)
+	}
+	err := git.Checkout(dir, version)
 	CheckErr(err)
-	branch, err := git.DefaultBranch(dir)
+	err = pacman.Build(dir)
 	CheckErr(err)
-	commit, err := git.CurrentCommitDir(dir)
-	CheckErr(err)
-	name, err := pacman.PkgbuildParam(dir+"/PKGBUILD", "pkgname")
-	CheckErr(err)
-	url, err := git.Url(dir)
-	CheckErr(err)
-	pack.Update(pack.Package{
-		PackName:      strings.Replace(url, "https://", "", 1),
-		PacmanName:    name,
-		Version:       commit,
-		DefaultBranch: branch,
-	})
 }

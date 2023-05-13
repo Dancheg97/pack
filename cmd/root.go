@@ -49,7 +49,7 @@ func Execute() {
 	}
 }
 
-// Utility to exit on unexpected errors.
+// Herlper function to exit on unexpected errors.
 func CheckErr(err error) {
 	if err != nil {
 		fmt.Println(err.Error())
