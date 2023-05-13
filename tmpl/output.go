@@ -57,7 +57,7 @@ in '~/.pack/config.yml'. You can also specify versions of packages that you
 want to build after @, similarly with install.
 
 To double check build process, you can test it inside pack docker container:
-docker run --rm -it fmnx.io/core/pack i example.com/package`
+docker run --rm -it fmnx.io/core/pack b example.com/package`
 
 var RemoveShort = "❌ remove packages"
 var RemoveLong = `❌ remove packages

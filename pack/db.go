@@ -15,6 +15,7 @@ import (
 	"sync"
 
 	"fmnx.io/core/pack/config"
+	"fmnx.io/core/pack/pacman"
 	"fmnx.io/core/pack/prnt"
 )
 
@@ -42,6 +43,12 @@ func init() {
 	if err != nil {
 		prnt.Red("Unable to parse package mapping file: ", config.MapFile)
 		os.Exit(1)
+	}
+	pacmanList := pacman.List()
+	for i, p := range packages {
+		if _, ok := pacmanList[p.PacmanName]; !ok {
+			packages = append(packages[:i], packages[i+1:]...)
+		}
 	}
 }
 
