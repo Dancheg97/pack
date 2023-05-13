@@ -57,7 +57,7 @@ package() {
 }
 `
 
-const PrettyDesc = `
+const PrettyDesc = `--------------------------------
 Name        : %s
 Version     : %s
 Description : %s
