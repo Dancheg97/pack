@@ -12,7 +12,7 @@ import (
 	"os"
 	"strings"
 
-	"fmnx.io/core/pack/config"
+	"fmnx.su/core/pack/config"
 )
 
 // Swap dependencies in PKGBUILD file for proper installation with pacman.
