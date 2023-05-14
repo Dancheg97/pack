@@ -30,11 +30,15 @@ func Checkout(dir string, target string) error {
 // Clean git repository - all changes in tracked files, newly created files and
 // files under gitignore.
 func Clean(dir string) error {
-	o, err := system.Callf("sudo git -C %s clean -xdf", dir)
+	o, err := system.Callf("sudo chmod a+rwx -R %s", dir)
+	if err != nil {
+		return errors.New("unable to change permissions for cleanup:\n" + o)
+	}
+	o, err = system.Callf("git -C %s clean -xdf", dir)
 	if err != nil {
 		return errors.New("git unable to clean xdf\n" + o)
 	}
-	_, err = system.Callf("sudo git -C %s reset --hard", dir)
+	_, err = system.Callf("git -C %s reset --hard", dir)
 	if err != nil {
 		return errors.New("git unable to reset -hard")
 	}

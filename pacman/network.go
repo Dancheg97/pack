@@ -38,7 +38,7 @@ func Update(pkgs []string) error {
 	mu.Lock()
 	defer mu.Unlock()
 	joined := strings.Join(pkgs, " ")
-	_, err := system.Call("sudo pacman --noconfirm -Sy " + joined)
+	_, err := system.Call("sudo pacman --noconfirm --needed -Sy " + joined)
 	if err != nil {
 		return errors.New("pacman unable to update")
 	}
@@ -104,7 +104,7 @@ func Install(pkgs []string) error {
 		return nil
 	}
 	joined := strings.Join(uninstalled, " ")
-	o, err := system.Callf("sudo pacman --noconfirm -S %s", joined)
+	o, err := system.Callf("sudo pacman --needed --noconfirm -S %s", joined)
 	if err != nil {
 		return errors.New(o)
 	}
