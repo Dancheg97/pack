@@ -36,6 +36,8 @@ var installCmd = &cobra.Command{
 
 // Cli command installing packages into system.
 func Install(cmd *cobra.Command, upkgs []string) {
+	// Add ability to install cirectories with pkgbuild, files with
+	// .pkg.tar.zst extensions and file links
 	groups := GroupPackages(upkgs)
 	CheckUnreachablePacmanPackages(groups.PacmanPackages)
 	CheckErr(pacman.Install(groups.PacmanPackages))
