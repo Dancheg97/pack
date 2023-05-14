@@ -70,3 +70,8 @@ PackBranch  : %s
 DependsOn   : %s
 RequiredBy  : %s
 `
+
+const PkgbuildList = `source ./PKGBUILD;
+for i in ${%s[@]}; do
+    echo $i
+done`

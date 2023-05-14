@@ -71,7 +71,8 @@ func parseDescField(o string, field string) string {
 
 // InstallDir all .pkg.tar.zst files in provided directory.
 func InstallDir(dir string) error {
-	_, err := system.Call("sudo pacman --noconfirm -U " + dir + "/*.pkg.tar.zst")
+	cmd := "sudo pacman --noconfirm --needed -U " + dir + "/*.pkg.tar.zst"
+	_, err := system.Call(cmd)
 	if err != nil {
 		return errors.New("pacman unable to install in dir " + dir)
 	}
@@ -126,37 +127,22 @@ func PkgbuildParam(dir string, param string) (string, error) {
 }
 
 // Eject list parameters from shell file, typically PKGBUILD.
-func PkgbuildParamList(file string, param string) ([]string, error) {
-	f, err := os.ReadFile(file)
+func PkgbuildParamList(dir string, param string) ([]string, error) {
+	mu.Lock()
+	defer mu.Unlock()
+	err := os.Chdir(dir)
 	if err != nil {
 		return nil, err
 	}
-	splitted := strings.Split(string(f), "\n"+param+"=(")
-	if len(splitted) < 2 {
-		return nil, nil
+	err = system.WriteFile(dir+"/l.sh", fmt.Sprintf(tmpl.PkgbuildList, param))
+	if err != nil {
+		return nil, err
 	}
-	splitted = strings.Split(splitted[1], ")")
-	dirtyParams := splitted[0]
-	var cleanParams []string
-	for _, param := range splitParams(dirtyParams) {
-		cleanParams = append(cleanParams, cleanParameter(param))
+	o, err := system.Call("sh l.sh")
+	if err != nil {
+		return nil, err
 	}
-	return cleanParams, nil
-}
-
-func splitParams(params string) []string {
-	// TODO rework add quotas check
-	params = strings.ReplaceAll(params, "\n", " ")
-	for strings.Contains(params, "  ") {
-		params = strings.ReplaceAll(params, "  ", " ")
-	}
-	return strings.Split(strings.Trim(params, " "), " ")
-}
-
-func cleanParameter(param string) string {
-	param = strings.ReplaceAll(param, "'", "")
-	param = strings.ReplaceAll(param, "\"", "")
-	return param
+	return strings.Split(strings.Trim(o, "\n"), "\n"), nil
 }
 
 // Function that takes a list of packages and returns those that are not
@@ -173,12 +159,12 @@ func GetUninstalled(pkgs []string) []string {
 }
 
 // Get dependecies from PKGBUILD file.
-func GetDeps(pkgbuild string) ([]string, error) {
-	deps, err := PkgbuildParamList(pkgbuild, "depends")
+func GetDeps(dir string) ([]string, error) {
+	deps, err := PkgbuildParamList(dir, "depends")
 	if err != nil {
 		return nil, err
 	}
-	makedeps, err := PkgbuildParamList(pkgbuild, "makedepends")
+	makedeps, err := PkgbuildParamList(dir, "makedepends")
 	if err != nil {
 		return nil, err
 	}

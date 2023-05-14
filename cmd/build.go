@@ -63,7 +63,7 @@ func BuildDirectory(dir string, version string, install bool) string {
 	}
 	err := git.Checkout(dir, version)
 	CheckErr(err)
-	ResolvePackDeps(dir)
+	ResolveDependencies(dir, pkgname)
 	err = pacman.Build(dir)
 	CheckErr(err)
 	if install {
@@ -101,15 +101,20 @@ func ValidateBuildDir(dir string) string {
 }
 
 // Resolve pack dependencies for package in provided directory.
-func ResolvePackDeps(dir string) {
-	deps, err := pacman.GetDeps(dir + "/PKGBUILD")
+func ResolveDependencies(dir string, pkg string) {
+	deps, err := pacman.GetDeps(dir)
 	CheckErr(err)
 	groups := GroupPackages(deps)
-	uninstalled := pack.GetUninstalled(groups.PackPackages)
-	if len(uninstalled) > 0 {
-		prnt.Blue("Resolving pack deps: ", strings.Join(uninstalled, " "))
-		Install(nil, uninstalled)
+	nf := pack.GetUninstalled(groups.PackPackages)
+	if len(nf) > 0 {
+		prnt.Blue("Resolving pack deps for "+pkg+": ", strings.Join(nf, " "))
+		Install(nil, nf)
 	}
 	err = pack.SwapDeps(dir+"/PKGBUILD", groups.PackPackages)
+	CheckErr(err)
+	deps, err = pacman.GetDeps(dir)
+	CheckErr(err)
+	prnt.Blue("Resolving pacman deps for "+pkg+": ", strings.Join(deps, " "))
+	err = pacman.Install(deps)
 	CheckErr(err)
 }
