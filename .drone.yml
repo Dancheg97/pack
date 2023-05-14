@@ -22,7 +22,7 @@ steps:
         from_secret: PASS
     commands:
       - docker build --no-cache -t fmnx.su/core/pack:latest .
-      - docker login -u dancheg97 -p $PASS fmnx.su
+      - docker login -u dancheg -p $PASS fmnx.su
       - docker push fmnx.su/core/pack:latest
 
   - name: push github mirror

@@ -5,7 +5,7 @@
 
 FROM archlinux/archlinux:base-devel
 
-LABEL maintainer="dancheg97 <help@fmnx.su>"
+LABEL maintainer="dancheg <dancheg@fmnx.su>"
 LABEL source="https://fmnx.su/core/pack"
 
 RUN pacman -Syu --needed --noconfirm git pacman-contrib wget go
