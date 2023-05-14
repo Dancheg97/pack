@@ -9,9 +9,13 @@ package pacman
 // Package is safe for concurrent usage.
 
 import (
+	"bytes"
 	"errors"
+	"fmt"
 	"os"
+	"os/exec"
 	"strings"
+	"time"
 
 	"fmnx.su/core/pack/prnt"
 	"fmnx.su/core/pack/system"
@@ -19,16 +23,29 @@ import (
 
 // This command will build package in provided directory. Also installing
 // missing packages with pacman. Safe for concurrent usage.
-func Build(dir string) error {
+func Build(dir string, name string) error {
+	prnt.Yellow("Makepkg building: ", name)
 	mu.Lock()
-	defer mu.Unlock()
 	err := os.Chdir(dir)
 	if err != nil {
 		return err
 	}
-	o, err := system.Call("makepkg -sf --noconfirm")
+	var b bytes.Buffer
+	cmd := exec.Command("makepkg", "-f", "--needed", "--noconfirm")
+	cmd.Stdout = &b
+	cmd.Stderr = &b
+	go func() {
+		for {
+			time.Sleep(time.Millisecond)
+			if strings.Contains(b.String(), "Making package") {
+				mu.Unlock()
+				break
+			}
+		}
+	}()
+	err = cmd.Run()
 	if err != nil {
-		return errors.New(o)
+		return fmt.Errorf("unable to build %s\nerror: %s", name, b.String())
 	}
 	return nil
 }

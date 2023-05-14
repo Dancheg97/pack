@@ -54,7 +54,6 @@ func Build(cmd *cobra.Command, pkgs []string) {
 // repository with PKGBUILD in it.
 func BuildDirectory(dir string, version string, install bool) string {
 	pkgname := ValidateBuildDir(dir)
-	prnt.Yellow("Building: ", pkgname)
 	if version == `` {
 		branch, err := git.DefaultBranch(dir)
 		CheckErr(err)
@@ -64,7 +63,7 @@ func BuildDirectory(dir string, version string, install bool) string {
 	err := git.Checkout(dir, version)
 	CheckErr(err)
 	ResolveDependencies(dir, pkgname)
-	err = pacman.Build(dir)
+	err = pacman.Build(dir, pkgname)
 	CheckErr(err)
 	if install {
 		err = pacman.InstallDir(dir)

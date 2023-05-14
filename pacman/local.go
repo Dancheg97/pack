@@ -71,10 +71,12 @@ func parseDescField(o string, field string) string {
 
 // InstallDir all .pkg.tar.zst files in provided directory.
 func InstallDir(dir string) error {
+	mu.Lock()
+	defer mu.Unlock()
 	cmd := "sudo pacman --noconfirm --needed -U " + dir + "/*.pkg.tar.zst"
-	_, err := system.Call(cmd)
+	o, err := system.Call(cmd)
 	if err != nil {
-		return errors.New("pacman unable to install in dir " + dir)
+		return fmt.Errorf("pacman cant install %s\n%s", dir, o)
 	}
 	return nil
 }
