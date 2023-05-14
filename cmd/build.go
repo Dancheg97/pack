@@ -38,23 +38,21 @@ var buildCmd = &cobra.Command{
 func Build(cmd *cobra.Command, pkgs []string) {
 	if len(pkgs) == 0 {
 		dir := system.Pwd()
-		BuildDirectory(dir, ``)
+		BuildDirectory(dir, ``, false)
 		return
 	}
 	for _, pkg := range pkgs {
-		i := EjectInfoFromPackLink(pkg)
-		err := git.Clone(i.Url, i.Directory)
+		i := pack.GetPackInfo(pkg)
+		err := git.Clone(i.GitUrl, i.Directory)
 		CheckErr(err)
-		BuildDirectory(i.Directory, i.Version)
-		err = system.MvExt(i.Directory, config.PackageCacheDir, ".pkg.tar.zst")
-		CheckErr(err)
+		BuildDirectory(i.Directory, i.Version, false)
 	}
 	prnt.Blue("Build complete, results in: ", config.PackageCacheDir)
 }
 
 // Build package in specified directory. Assumes this directory has cloned git
 // repository with PKGBUILD in it.
-func BuildDirectory(dir string, version string) {
+func BuildDirectory(dir string, version string, install bool) string {
 	pkgname := ValidateBuildDir(dir)
 	prnt.Yellow("Building: ", pkgname)
 	if version == `` {
@@ -68,7 +66,23 @@ func BuildDirectory(dir string, version string) {
 	ResolvePackDeps(dir)
 	err = pacman.Build(dir)
 	CheckErr(err)
-	prnt.Green("Build complete: ", pkgname)
+	if install {
+		err = pacman.InstallDir(dir)
+		CheckErr(err)
+	}
+	if !config.RemoveBuiltPackages {
+		err = system.MvExt(dir, config.PackageCacheDir, ".pkg.tar.zst")
+		CheckErr(err)
+	}
+	if !config.RemoveGitRepos {
+		err = git.Clean(dir)
+		CheckErr(err)
+		prnt.Green("Complete: ", pkgname)
+		return version
+	}
+	err = os.RemoveAll(dir)
+	CheckErr(err)
+	return version
 }
 
 // Validate directory to be valid pack package - git repo name matching package
@@ -76,7 +90,7 @@ func BuildDirectory(dir string, version string) {
 func ValidateBuildDir(dir string) string {
 	url, err := git.Url(dir)
 	CheckErr(err)
-	pkgname, err := pacman.PkgbuildParam(dir+"/PKGBUILD", "pkgname")
+	pkgname, err := pacman.PkgbuildParam(dir, "pkgname")
 	CheckErr(err)
 	splt := strings.Split(url, "/")
 	if pkgname != splt[len(splt)-1] {
@@ -93,7 +107,7 @@ func ResolvePackDeps(dir string) {
 	groups := GroupPackages(deps)
 	uninstalled := pack.GetUninstalled(groups.PackPackages)
 	if len(uninstalled) > 0 {
-		prnt.Blue("resolving pack deps: ", strings.Join(uninstalled, " "))
+		prnt.Blue("Resolving pack deps: ", strings.Join(uninstalled, " "))
 		Install(nil, uninstalled)
 	}
 	err = pack.SwapDeps(dir+"/PKGBUILD", groups.PackPackages)

@@ -6,23 +6,22 @@
 package pacman
 
 // This package acts as library wrapper over pacman and makepkg.
+// Package is safe for concurrent usage.
 
 import (
 	"errors"
 	"fmt"
 	"os"
 	"strings"
+	"sync"
 
 	"fmnx.su/core/pack/prnt"
 	"fmnx.su/core/pack/system"
 	"fmnx.su/core/pack/tmpl"
 )
 
-// ValidateDir directory to exist and contain PKGBUILD.
-func ValidateDir(dir string) error {
-	_, err := os.Stat(dir + "/PKGBUILD")
-	return err
-}
+// Global pacman mutext for safe installing and building packages.
+var mu sync.Mutex
 
 // Geberate PKGBUILD file template. Provide pacman package name and git url.
 func Generate(dir string, url string) error {
@@ -112,19 +111,18 @@ func Version(pkg string) string {
 }
 
 // Get parameter from PKGBUILD proving path to direcotry.
-func PkgbuildParam(file string, param string) (string, error) {
-	f, err := os.ReadFile(file)
+func PkgbuildParam(dir string, param string) (string, error) {
+	mu.Lock()
+	defer mu.Unlock()
+	err := os.Chdir(dir)
 	if err != nil {
 		return ``, err
 	}
-	splitted := strings.Split(string(f), "\n"+param+"=")
-	if len(splitted) < 2 {
-		return ``, nil
+	o, err := system.Callf("source PKGBUILD && echo $%s", param)
+	if err != nil {
+		return ``, err
 	}
-	value := strings.Split(splitted[1], "\n")[0]
-	value = strings.ReplaceAll(value, "'", "")
-	value = strings.ReplaceAll(value, "\"", "")
-	return value, nil
+	return strings.Trim(o, "\n"), nil
 }
 
 // Eject list parameters from shell file, typically PKGBUILD.
@@ -189,6 +187,8 @@ func GetDeps(pkgbuild string) ([]string, error) {
 
 // Try to remove all packages at once.
 func Remove(pkgs []string) error {
+	mu.Lock()
+	defer mu.Unlock()
 	pkgsStr := strings.Join(pkgs, " ")
 	o, err := system.Callf("sudo pacman --noconfirm -R %s", pkgsStr)
 	if err != nil {

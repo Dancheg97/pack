@@ -7,6 +7,7 @@ package git
 
 // This package acts as library wrapper over git.
 // You can use it to execute git calls.
+// Package is safe for concurrent usage.
 
 import (
 	"errors"
@@ -29,11 +30,11 @@ func Checkout(dir string, target string) error {
 // Clean git repository - all changes in tracked files, newly created files and
 // files under gitignore.
 func Clean(dir string) error {
-	_, err := system.Callf("git -C %s clean -xdf", dir)
+	o, err := system.Callf("sudo git -C %s clean -xdf", dir)
 	if err != nil {
-		return errors.New("git unable to clean xdf")
+		return errors.New("git unable to clean xdf\n" + o)
 	}
-	_, err = system.Callf("git -C %s reset --hard", dir)
+	_, err = system.Callf("sudo git -C %s reset --hard", dir)
 	if err != nil {
 		return errors.New("git unable to reset -hard")
 	}

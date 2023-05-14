@@ -45,11 +45,13 @@ func init() {
 		os.Exit(1)
 	}
 	pacmanList := pacman.List()
-	for i, p := range packages {
-		if _, ok := pacmanList[p.PacmanName]; !ok {
-			packages = append(packages[:i], packages[i+1:]...)
+	var checkedPackages []Package
+	for _, p := range packages {
+		if _, ok := pacmanList[p.PacmanName]; ok {
+			checkedPackages = append(checkedPackages, p)
 		}
 	}
+	packages = checkedPackages
 }
 
 func savePackages() {

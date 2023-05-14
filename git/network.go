@@ -7,6 +7,7 @@ package git
 
 // This package acts as library wrapper over git.
 // You can use it to execute git calls.
+// Package is safe for concurrent usage.
 
 import (
 	"errors"

@@ -6,6 +6,7 @@
 package pacman
 
 // This package acts as library wrapper over pacman and makepkg.
+// Package is safe for concurrent usage.
 
 import (
 	"errors"
@@ -17,8 +18,10 @@ import (
 )
 
 // This command will build package in provided directory. Also installing
-// missing packages with pacman.
+// missing packages with pacman. Safe for concurrent usage.
 func Build(dir string) error {
+	mu.Lock()
+	defer mu.Unlock()
 	err := os.Chdir(dir)
 	if err != nil {
 		return err
@@ -32,6 +35,8 @@ func Build(dir string) error {
 
 // Update listed pacman packages with sync command.
 func Update(pkgs []string) error {
+	mu.Lock()
+	defer mu.Unlock()
 	joined := strings.Join(pkgs, " ")
 	_, err := system.Call("sudo pacman --noconfirm -Sy " + joined)
 	if err != nil {
@@ -92,6 +97,8 @@ func parsePackageLink(link string) (string, string) {
 }
 
 func Install(pkgs []string) error {
+	mu.Lock()
+	defer mu.Unlock()
 	uninstalled := GetInstalled(pkgs)
 	if len(uninstalled) == 0 {
 		return nil

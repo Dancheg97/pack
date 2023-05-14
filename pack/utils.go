@@ -11,6 +11,8 @@ package pack
 import (
 	"os"
 	"strings"
+
+	"fmnx.io/core/pack/config"
 )
 
 // Swap dependencies in PKGBUILD file for proper installation with pacman.
@@ -26,4 +28,28 @@ func SwapDeps(pkgbuild string, deps []string) error {
 		rez = strings.ReplaceAll(rez, dep, shortname)
 	}
 	return os.WriteFile(pkgbuild, []byte(rez), 0o600)
+}
+
+// Pack metadata parsed from pack link.
+type PackMd struct {
+	PackName   string
+	PacmanName string
+	Version    string
+	GitUrl     string
+	Directory  string
+}
+
+// Form pack installation metadata from pack link.
+func GetPackInfo(link string) PackMd {
+	rez := PackMd{}
+	versplt := strings.Split(link, "@")
+	rez.PackName = versplt[0]
+	rez.GitUrl = "https://" + versplt[0]
+	if len(versplt) > 1 {
+		rez.Version = versplt[1]
+	}
+	dashsplt := strings.Split(rez.PackName, "/")
+	rez.PacmanName = dashsplt[len(dashsplt)-1]
+	rez.Directory = config.RepoCacheDir + "/" + rez.PacmanName
+	return rez
 }
