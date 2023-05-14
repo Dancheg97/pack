@@ -15,6 +15,7 @@ import (
 	"strings"
 	"sync"
 
+	"fmnx.su/core/pack/config"
 	"fmnx.su/core/pack/git"
 	"fmnx.su/core/pack/pack"
 	"fmnx.su/core/pack/pacman"
@@ -108,6 +109,10 @@ func GetPackOutdated() []pacman.OutdatedPackage {
 				NewVersion:     last,
 			})
 			mu.Unlock()
+			err = git.Pull(config.PackageCacheDir + "/" + sinfo.PacmanName)
+			if err != nil {
+				return err
+			}
 			return nil
 		})
 	}

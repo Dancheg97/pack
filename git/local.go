@@ -21,7 +21,7 @@ func Checkout(dir string, target string) error {
 	o, err := system.Callf("git -C %s checkout %s ", dir, target)
 	if err != nil {
 		if !strings.HasPrefix(o, "Already on ") {
-			return errors.New("git unable to find checkout target")
+			return errors.New("git unable to find checkout target - " + target)
 		}
 	}
 	return nil
