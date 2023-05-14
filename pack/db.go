@@ -1,7 +1,7 @@
 // 2023 FMNX team.
 // Use of this code is governed by GNU General Public License.
-// Additional information can be found on official web page: https://fmnx.io/
-// Contact email: help@fmnx.io
+// Additional information can be found on official web page: https://fmnx.su/
+// Contact email: help@fmnx.su
 
 package pack
 
@@ -14,9 +14,9 @@ import (
 	"os"
 	"sync"
 
-	"fmnx.io/core/pack/config"
-	"fmnx.io/core/pack/pacman"
-	"fmnx.io/core/pack/prnt"
+	"fmnx.su/core/pack/config"
+	"fmnx.su/core/pack/pacman"
+	"fmnx.su/core/pack/prnt"
 )
 
 // Data about pack package stored in pack database.

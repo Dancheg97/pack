@@ -1,7 +1,7 @@
 // 2023 FMNX team.
 // Use of this code is governed by GNU General Public License.
-// Additional information can be found on official web page: https://fmnx.io/
-// Contact email: help@fmnx.io
+// Additional information can be found on official web page: https://fmnx.su/
+// Contact email: help@fmnx.su
 
 package tmpl
 
@@ -11,7 +11,7 @@ package tmpl
 import (
 	"strings"
 
-	"fmnx.io/core/pack/config"
+	"fmnx.su/core/pack/config"
 )
 
 var DescribeShort = `📝 describe packages`
@@ -20,7 +20,7 @@ var DescribeLong = `📝 view information about packages
 This tool provides information about package retrieved from pacman or pack.
 
 Example:
-pack describe fmnx.io/core/ainst`
+pack describe fmnx.su/core/ainst`
 
 var GenerateShort = "📋 generate PKGBUILD"
 var GenerateLong = `📋 generate PKGBUILD and update README.md with installation helper
@@ -35,8 +35,8 @@ You can mix pacman and pack packages, provoding names and git links. If you
 need to specify version, you can provide it after @ symbol.
 
 Examples:
-pack install fmnx.io/core/aist@v0.21
-pack install fmnx.io/core/ainst github.com/exm/pkg@v1.23 nano`
+pack install fmnx.su/core/aist@v0.21
+pack install fmnx.su/core/ainst github.com/exm/pkg@v1.23 nano`
 
 var ListShort = "📄 show installed packages"
 
@@ -57,7 +57,7 @@ in '~/.pack/config.yml'. You can also specify versions of packages that you
 want to build after @, similarly with install.
 
 To double check build process, you can test it inside pack docker container:
-docker run --rm -it fmnx.io/core/pack b example.com/package`
+docker run --rm -it fmnx.su/core/pack b example.com/package`
 
 var RemoveShort = "❌ remove packages"
 var RemoveLong = `❌ remove packages
@@ -66,13 +66,13 @@ Use this command to remove packages from system. You can specify both pacman
 packages and pack links.
 
 Example:
-pack rm fmnx.io/core/ainst`
+pack rm fmnx.su/core/ainst`
 
 var RootShort = "📦 decentralized package manager based on git and pacman"
 var RootLong = `📦 decentralized package manager based on git and pacman
 
 Configuration file: ~/.pack/config.yml
-Official web page: https://fmnx.io/core/pack.
+Official web page: https://fmnx.su/core/pack.
 
 Usage:
 pack [command] <package(s)>`
@@ -87,7 +87,7 @@ If you don't specify any arguements, all packages will be updated.
 
 Examples:
 pack update
-pack update fmnx.io/core/aist@v0.21`
+pack update fmnx.su/core/aist@v0.21`
 
 func init() {
 	if config.DisablePrettyPrint {

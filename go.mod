@@ -1,4 +1,4 @@
-module fmnx.io/core/pack
+module fmnx.su/core/pack
 
 go 1.20
 

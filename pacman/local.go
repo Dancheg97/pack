@@ -1,7 +1,7 @@
 // 2023 FMNX team.
 // Use of this code is governed by GNU General Public License.
-// Additional information can be found on official web page: https://fmnx.io/
-// Contact email: help@fmnx.io
+// Additional information can be found on official web page: https://fmnx.su/
+// Contact email: help@fmnx.su
 
 package pacman
 
@@ -13,9 +13,9 @@ import (
 	"os"
 	"strings"
 
-	"fmnx.io/core/pack/prnt"
-	"fmnx.io/core/pack/system"
-	"fmnx.io/core/pack/tmpl"
+	"fmnx.su/core/pack/prnt"
+	"fmnx.su/core/pack/system"
+	"fmnx.su/core/pack/tmpl"
 )
 
 // ValidateDir directory to exist and contain PKGBUILD.

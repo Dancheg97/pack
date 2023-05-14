@@ -1,7 +1,7 @@
 // 2023 FMNX team.
 // Use of this code is governed by GNU General Public License.
-// Additional information can be found on official web page: https://fmnx.io/
-// Contact email: help@fmnx.io
+// Additional information can be found on official web page: https://fmnx.su/
+// Contact email: help@fmnx.su
 
 package cmd
 
@@ -12,11 +12,11 @@ import (
 	"context"
 	"sync"
 
-	"fmnx.io/core/pack/git"
-	"fmnx.io/core/pack/pack"
-	"fmnx.io/core/pack/pacman"
-	"fmnx.io/core/pack/prnt"
-	"fmnx.io/core/pack/tmpl"
+	"fmnx.su/core/pack/git"
+	"fmnx.su/core/pack/pack"
+	"fmnx.su/core/pack/pacman"
+	"fmnx.su/core/pack/prnt"
+	"fmnx.su/core/pack/tmpl"
 	"github.com/spf13/cobra"
 	"golang.org/x/sync/errgroup"
 )
