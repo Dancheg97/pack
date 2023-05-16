@@ -38,6 +38,15 @@ func Pwd() string {
 	return dir
 }
 
+// Get all file names with extension from some directory.
+func LsExt(src string, ext string) ([]string, error) {
+	o, err := Callf("ls -a %s/*%s", src, ext)
+	if err != nil {
+		return nil, err
+	}
+	return strings.Split(o, " "), nil
+}
+
 // Move files with provided extension from one directory to another.
 func MvExt(src string, dst string, ext string) error {
 	const command = "sudo mv %s/*%s %s"

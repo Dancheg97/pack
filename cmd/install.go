@@ -45,7 +45,6 @@ func Install(cmd *cobra.Command, upkgs []string) {
 	CopyFilePackages(groups.LocalFiles)
 	CheckUnreachablePacmanPackages(groups.PacmanPackages)
 	CheckErr(pacman.Install(groups.PacmanPackages))
-	CheckErr(pacman.InstallDir(config.CacheDir))
 	InstallPackPackages(groups.PackPackages)
 }
 
@@ -134,6 +133,17 @@ func CopyFilePackages(pkgs []string) {
 		_, err := system.Callf("sudo cp %s %s/%s", pkg, config.CacheDir, file)
 		CheckErr(err)
 	}
+}
+
+// Install packages in pack cache dir and move them to pacman cache dir.
+func InstallFromPackCache() {
+	err := pacman.InstallDir(config.CacheDir)
+	CheckErr(err)
+	pkgs, err := system.LsExt(config.CacheDir, ".pkg.tar.zst")
+	CheckErr(err)
+	prnt.Green("File packages installed: ", strings.Join(pkgs, " "))
+	err = system.MvExt(config.CacheDir, config.PackageCacheDir, ".pkg.tar.zst")
+	CheckErr(err)
 }
 
 // Checks if packages are not installed and installing them.
