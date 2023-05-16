@@ -40,7 +40,6 @@ var updateCmd = &cobra.Command{
 
 // Cli command performing package update.
 func Update(cmd *cobra.Command, pkgs []string) {
-	Updating = true
 	if len(pkgs) == 0 {
 		FullPacmanUpdate()
 		FullPackUpdate()
@@ -68,8 +67,6 @@ func FullPacmanUpdate() {
 	}
 	prnt.Green("Pacman update: ", "done")
 }
-
-var Updating bool
 
 // Perform full pack update.
 func FullPackUpdate() {
@@ -116,6 +113,6 @@ func GetPackOutdated() []pacman.OutdatedPackage {
 			return nil
 		})
 	}
-	g.Wait()
+	CheckErr(g.Wait())
 	return rez
 }

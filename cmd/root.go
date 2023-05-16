@@ -61,11 +61,13 @@ func CheckErr(err error) {
 
 // Set output for pack logs.
 func SetLogger() {
+	err := os.WriteFile(config.LogFile, []byte{}, 0666)
+	CheckErr(err)
 	f, err := os.OpenFile(
 		config.LogFile,
 		os.O_RDWR|os.O_CREATE|os.O_APPEND,
 		0666,
 	)
 	CheckErr(err)
-	log.SetOutput(f)
+	log.Default().SetOutput(f)
 }

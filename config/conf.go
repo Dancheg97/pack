@@ -69,6 +69,7 @@ func init() {
 	checkErr(err)
 	err = yaml.Unmarshal(b, &cfg)
 	checkErr(err)
+	SetConfigParams()
 }
 
 func checkErr(err error) {
@@ -80,18 +81,21 @@ func checkErr(err error) {
 
 // SetDefaults configuration to default values and set save config file.
 func SetDefaults() {
-	cfg.RmDeps = false
-	cfg.Needed = false
-	cfg.RmRepos = false
-	cfg.CachePkgs = true
-	cfg.Verbose = false
-	cfg.PrettyPrint = true
-	cfg.RepoCacheDir = homedir + "/.pack"
-	cfg.PkgCacheDir = "/var/cache/pacman/pkg"
-	cfg.LogFile = "/tmp/pack.log"
-	cfg.MapFile = homedir + "/.pack/mapping.json"
-	cfg.LockFile = "/tmp/pack.lock"
+	RmDeps = false
+	Needed = false
+	RmRepos = false
+	CachePkgs = true
+	Verbose = false
+	PrettyPrint = true
+	RepoCacheDir = homedir + "/.pack"
+	PkgCacheDir = "/var/cache/pacman/pkg"
+	LogFile = "/tmp/pack.log"
+	MapFile = homedir + "/.pack/mapping.json"
+	LockFile = "/tmp/pack.lock"
+}
 
+// Set params from config to variables.
+func SetConfigParams() {
 	RmDeps = cfg.RmDeps
 	Needed = cfg.Needed
 	RmRepos = cfg.RmRepos
@@ -107,6 +111,8 @@ func SetDefaults() {
 
 // Save configuration with all new variables.
 func Save() {
+	err := os.MkdirAll(homedir+"/.pack", os.ModePerm)
+	checkErr(err)
 	b, err := yaml.Marshal(&config{
 		RmDeps:       RmDeps,
 		Needed:       Needed,
