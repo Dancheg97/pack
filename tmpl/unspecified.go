@@ -5,6 +5,8 @@
 
 package tmpl
 
+import "github.com/fatih/color"
+
 // This package contains string templates for utility command output.
 // Output might be modified based on configuration - prettyprint.
 
@@ -55,6 +57,41 @@ package() {
   # Example of dir installation
   cd build/bundle && find . -type f -exec install -Dm755 {} $pkgdir/etc/share/example/{} \; && cd $srcdir/..
 }
+`
+
+var PrettyConfig = `
+Do not reinstall the targets that are already up to date
+ - ` + color.YellowString(`needed`) + `: %s
+
+Remove installed dependencies after a successful build
+ - ` + color.YellowString(`remove-build-deps`) + `: %s
+
+Remove repositories with sources/PKGBUILDs after installation
+ - ` + color.YellowString(`remove-git-repos`) + `: %s
+
+Cache packages after installation with pack
+ - ` + color.YellowString(`cache-packages`) + `: %s
+
+Show output of every executed system call
+ - ` + color.YellowString(`verbose-output`) + `: %s
+
+Enable colors and emoji in CLI output
+ - ` + color.YellowString(`pretty-print`) + `: %s
+
+Location where pack will store repositories with sources
+ - ` + color.YellowString(`repo-cache-dir`) + `: %s
+
+Location where pack will store built .pkg.tar.zst packages
+ - ` + color.YellowString(`package-cache-dir`) + `: %s
+
+File containg log verbose outputs for last pack command
+ - ` + color.YellowString(`log-file`) + `: %s
+
+File with pack package mapped to pacman packages
+ - ` + color.YellowString(`map-file`) + `: %s
+
+File containing number of the process of executed pack command
+ - ` + color.YellowString(`lock-file`) + `: %s
 `
 
 const PrettyDesc = `--------------------------------

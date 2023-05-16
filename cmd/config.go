@@ -6,8 +6,12 @@
 package cmd
 
 import (
+	"fmt"
+	"strconv"
+
 	"fmnx.su/core/pack/config"
 	"fmnx.su/core/pack/tmpl"
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
@@ -23,19 +27,83 @@ var configCmd = &cobra.Command{
 	Aliases: []string{"c", "cfg"},
 	Short:   tmpl.ConfigShort,
 	Long:    tmpl.ConfigLong,
-	Run:     Install,
+	Run:     Config,
 }
 
 // View and change config
 func Config(cmd *cobra.Command, args []string) {
 	if len(args) == 0 {
-
+		ShowConfigDescription()
+		return
 	}
 	if len(args) == 1 && args[0] == "reset" {
 		config.SetDefaults()
 		config.Save()
-
 		return
 	}
+	if len(args) != 2 {
+		fmt.Println("bad input for config, run 'pack config -h'")
+		return
+	}
+	switch args[0] {
+	case `needed`:
+		config.Needed = ParseBool(args[1])
+		return
+	case `remove-build-deps`:
+		config.RmDeps = ParseBool(args[1])
+		return
+	case `remove-git-repos`:
+		config.RmRepos = ParseBool(args[1])
+		return
+	case `cache-packages`:
+		config.CachePkgs = ParseBool(args[1])
+		return
+	case `verbose-output`:
+		config.Verbose = ParseBool(args[1])
+		return
+	case `pretty-print`:
+		config.PrettyPrint = ParseBool(args[1])
+		return
+	case `repo-cache-dir`:
+		config.RepoCacheDir = args[1]
+		return
+	case `package-cache-dir`:
+		config.PkgCacheDir = args[1]
+		return
+	case `log-file`:
+		config.LogFile = args[1]
+		return
+	case `map-file`:
+		config.MapFile = args[1]
+		return
+	case `lock-file`:
+		config.LockFile = args[1]
+		return
+	}
+	fmt.Println("unable to find config arguement: ", args[0])
+}
 
+// Show configuration variables of configuration and describe them.
+func ShowConfigDescription() {
+	fmt.Printf(
+		tmpl.PrettyConfig,
+		color.CyanString(fmt.Sprint(config.RmDeps)),
+		color.CyanString(fmt.Sprint(config.Needed)),
+		color.CyanString(fmt.Sprint(config.RmRepos)),
+		color.CyanString(fmt.Sprint(config.CachePkgs)),
+		color.CyanString(fmt.Sprint(config.Verbose)),
+		color.CyanString(fmt.Sprint(config.PrettyPrint)),
+		color.CyanString(config.RepoCacheDir),
+		color.CyanString(config.PkgCacheDir),
+		color.CyanString(config.LogFile),
+		color.CyanString(config.MapFile),
+		color.CyanString(config.LockFile),
+	)
+}
+
+// Parse boolean variable from string for config.
+func ParseBool(s string) bool {
+	o, err := strconv.ParseBool(s)
+	CheckErr(err)
+	return o
 }

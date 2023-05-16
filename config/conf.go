@@ -9,6 +9,7 @@ package config
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"os/user"
 
@@ -53,6 +54,7 @@ type config struct {
 
 // Initialize runtime configuration variables.
 func init() {
+	defer SetLogger()
 	usr, err := user.Current()
 	checkErr(err)
 	homedir = usr.HomeDir
@@ -65,11 +67,7 @@ func init() {
 		return
 	}
 
-	b, err := os.ReadFile(cfgfile)
-	checkErr(err)
-	err = yaml.Unmarshal(b, &cfg)
-	checkErr(err)
-	SetConfigParams()
+	ReadConfigParams()
 }
 
 func checkErr(err error) {
@@ -77,6 +75,26 @@ func checkErr(err error) {
 		fmt.Println("configuration error occured: ", fmt.Sprintf("%+v", err))
 		os.Exit(1)
 	}
+}
+
+// Set params from config to variables.
+func ReadConfigParams() {
+	b, err := os.ReadFile(cfgfile)
+	checkErr(err)
+	err = yaml.Unmarshal(b, &cfg)
+	checkErr(err)
+
+	RmDeps = cfg.RmDeps
+	Needed = cfg.Needed
+	RmRepos = cfg.RmRepos
+	CachePkgs = cfg.CachePkgs
+	Verbose = cfg.Verbose
+	PrettyPrint = cfg.PrettyPrint
+	RepoCacheDir = cfg.RepoCacheDir
+	PkgCacheDir = cfg.PkgCacheDir
+	LogFile = cfg.LogFile
+	MapFile = cfg.MapFile
+	LockFile = cfg.LockFile
 }
 
 // SetDefaults configuration to default values and set save config file.
@@ -92,21 +110,6 @@ func SetDefaults() {
 	LogFile = "/tmp/pack.log"
 	MapFile = homedir + "/.pack/mapping.json"
 	LockFile = "/tmp/pack.lock"
-}
-
-// Set params from config to variables.
-func SetConfigParams() {
-	RmDeps = cfg.RmDeps
-	Needed = cfg.Needed
-	RmRepos = cfg.RmRepos
-	CachePkgs = cfg.CachePkgs
-	Verbose = cfg.Verbose
-	PrettyPrint = cfg.PrettyPrint
-	RepoCacheDir = cfg.RepoCacheDir
-	PkgCacheDir = cfg.PkgCacheDir
-	LogFile = cfg.LogFile
-	MapFile = cfg.MapFile
-	LockFile = cfg.LockFile
 }
 
 // Save configuration with all new variables.
@@ -129,4 +132,17 @@ func Save() {
 	checkErr(err)
 	err = os.WriteFile(cfgfile, b, 0o600)
 	checkErr(err)
+}
+
+// Set output for pack logs.
+func SetLogger() {
+	err := os.WriteFile(LogFile, []byte{}, 0666)
+	checkErr(err)
+	f, err := os.OpenFile(
+		LogFile,
+		os.O_RDWR|os.O_CREATE|os.O_APPEND,
+		0666,
+	)
+	checkErr(err)
+	log.Default().SetOutput(f)
 }

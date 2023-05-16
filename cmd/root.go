@@ -10,7 +10,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	"fmnx.su/core/pack/config"
@@ -34,7 +33,6 @@ var rootCmd = &cobra.Command{
 
 // Prepare cobra and viper templates.
 func init() {
-	SetLogger()
 	rootCmd.SetHelpCommand(&cobra.Command{})
 	rootCmd.SetUsageTemplate(tmpl.Cobra)
 	lock, err := lockfile.New(config.LockFile)
@@ -57,17 +55,4 @@ func CheckErr(err error) {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
-}
-
-// Set output for pack logs.
-func SetLogger() {
-	err := os.WriteFile(config.LogFile, []byte{}, 0666)
-	CheckErr(err)
-	f, err := os.OpenFile(
-		config.LogFile,
-		os.O_RDWR|os.O_CREATE|os.O_APPEND,
-		0666,
-	)
-	CheckErr(err)
-	log.Default().SetOutput(f)
 }
