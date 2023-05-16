@@ -171,7 +171,22 @@ func InstallPackPackage(pkg string) {
 	prnt.Blue("Cloned: ", i.GitUrl)
 	branch, err := git.DefaultBranch(i.Directory)
 	CheckErr(err)
-	i.Version = BuildDirectory(i.Directory, i.Version, true)
+	i.Version = BuildDirectory(i.Directory, i.Version)
+	err = pacman.InstallDir(i.Directory)
+	CheckErr(err)
+	prnt.Green("Installed package: ", i.PackName+"@"+i.Version)
+	if !config.RemoveBuiltPackages {
+		err = system.MvExt(i.Directory, config.PackageCacheDir, ".pkg.tar.zst")
+		CheckErr(err)
+	}
+	if !config.RemoveGitRepos {
+		err = git.Clean(i.Directory)
+		CheckErr(err)
+	}
+	if config.RemoveGitRepos {
+		err = os.RemoveAll(i.Directory)
+		CheckErr(err)
+	}
 	pack.Update(pack.Package{
 		PacmanName:    i.PacmanName,
 		PackName:      i.PackName,

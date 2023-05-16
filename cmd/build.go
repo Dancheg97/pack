@@ -38,21 +38,23 @@ var buildCmd = &cobra.Command{
 func Build(cmd *cobra.Command, pkgs []string) {
 	if len(pkgs) == 0 {
 		dir := system.Pwd()
-		BuildDirectory(dir, ``, false)
+		BuildDirectory(dir, ``)
 		return
 	}
 	for _, pkg := range pkgs {
 		i := pack.GetPackInfo(pkg)
 		err := git.Clone(i.GitUrl, i.Directory)
 		CheckErr(err)
-		BuildDirectory(i.Directory, i.Version, false)
+		BuildDirectory(i.Directory, i.Version)
+		err = system.MvExt(i.Directory, config.PackageCacheDir, ".pkg.tar.zst")
+		CheckErr(err)
 	}
 	prnt.Blue("Build complete, results in: ", config.PackageCacheDir)
 }
 
 // Build package in specified directory. Assumes this directory has cloned git
 // repository with PKGBUILD in it.
-func BuildDirectory(dir string, version string, install bool) string {
+func BuildDirectory(dir string, version string) string {
 	pkgname := ValidateBuildDir(dir)
 	if version == `` {
 		branch, err := git.DefaultBranch(dir)
@@ -64,22 +66,6 @@ func BuildDirectory(dir string, version string, install bool) string {
 	CheckErr(err)
 	ResolveDependencies(dir, pkgname)
 	err = pacman.Build(dir, pkgname)
-	CheckErr(err)
-	if install {
-		err = pacman.InstallDir(dir)
-		CheckErr(err)
-	}
-	if !config.RemoveBuiltPackages {
-		err = system.MvExt(dir, config.PackageCacheDir, ".pkg.tar.zst")
-		CheckErr(err)
-	}
-	if !config.RemoveGitRepos {
-		err = git.Clean(dir)
-		CheckErr(err)
-		prnt.Green("Complete: ", pkgname)
-		return version
-	}
-	err = os.RemoveAll(dir)
 	CheckErr(err)
 	return version
 }
