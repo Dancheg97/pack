@@ -95,7 +95,7 @@ provide provide just links to get latest version from default branch.
 If you don't specify any arguements, all packages will be updated.
 
 Examples:
-pack update fmnx.su/core/aist@v0.21`
+pack update fmnx.su/core/aist`
 
 func init() {
 	if !config.PrettyPrint {

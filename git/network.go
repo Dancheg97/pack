@@ -22,7 +22,7 @@ func Clone(url string, dir string) error {
 	out, err := system.Callf("git clone %s %s", url, dir)
 	if err != nil {
 		if !strings.Contains(out, "already exists and is not an empty dir") {
-			return fmt.Errorf("git unable to clone: %s", err)
+			return fmt.Errorf("git unable to clone: %s", out)
 		}
 	}
 	return nil

@@ -15,7 +15,6 @@ import (
 	"strings"
 	"sync"
 
-	"fmnx.su/core/pack/config"
 	"fmnx.su/core/pack/git"
 	"fmnx.su/core/pack/pack"
 	"fmnx.su/core/pack/pacman"
@@ -55,7 +54,11 @@ func Update(cmd *cobra.Command, pkgs []string) {
 	}
 	err := pacman.Update(groups.PacmanPackages)
 	CheckErr(err)
-	Install(nil, groups.PackPackages)
+	for _, v := range groups.PackPackages {
+		PrepareUpdateRepo(v)
+		InstallPackPackage(v)
+	}
+	InstallPackPackages(groups.PackPackages)
 }
 
 // Perform full pacman update.
@@ -70,12 +73,18 @@ func FullPacmanUpdate() {
 
 // Perform full pack update.
 func FullPackUpdate() {
+	g, _ := errgroup.WithContext(context.Background())
 	outdatedpkgs := GetPackOutdated()
-	var pkgs []string
 	for _, pkg := range outdatedpkgs {
-		pkgs = append(pkgs, fmt.Sprintf("%s@%s", pkg.Name, pkg.NewVersion))
+		spkg := pkg
+		g.Go(func() error {
+			PrepareUpdateRepo(spkg.Name)
+			pkgNver := fmt.Sprintf("%s@%s", spkg.Name, spkg.NewVersion)
+			InstallPackPackage(pkgNver)
+			return nil
+		})
 	}
-	Install(nil, pkgs)
+	g.Wait()
 	prnt.Green("Pack update: ", "done")
 }
 
@@ -91,9 +100,7 @@ func GetPackOutdated() []pacman.OutdatedPackage {
 			link := "https://" + sinfo.PackName
 			last, err := git.LastCommitUrl(link, sinfo.DefaultBranch)
 			if err != nil {
-				mu.Lock()
 				prnt.Yellow("Unable to get versoin for: ", link)
-				mu.Unlock()
 				return nil
 			}
 			if sinfo.Version == last {
@@ -106,13 +113,26 @@ func GetPackOutdated() []pacman.OutdatedPackage {
 				NewVersion:     last,
 			})
 			mu.Unlock()
-			err = git.Pull(config.RepoCacheDir + "/" + sinfo.PacmanName)
-			if err != nil {
-				return err
-			}
 			return nil
 		})
 	}
-	CheckErr(g.Wait())
+	g.Wait()
 	return rez
+}
+
+// Clone if not exist, checkout and pull if exists.
+func PrepareUpdateRepo(link string) {
+	info := pack.GetPackInfo(link)
+	_, err := os.Stat(info.Directory)
+	if err != nil {
+		err = git.Clone(info.GitUrl, info.Directory)
+		CheckErr(err)
+		return
+	}
+	pkg, err := pack.Get(link)
+	CheckErr(err)
+	err = git.Checkout(info.Directory, pkg.DefaultBranch)
+	CheckErr(err)
+	err = git.Pull(info.Directory)
+	CheckErr(err)
 }

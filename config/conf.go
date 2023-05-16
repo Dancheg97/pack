@@ -100,7 +100,7 @@ func ReadConfigParams() {
 // SetDefaults configuration to default values and set save config file.
 func SetDefaults() {
 	RmDeps = false
-	Needed = false
+	Needed = true
 	RmRepos = false
 	CachePkgs = true
 	Verbose = false
