@@ -5,5 +5,22 @@
 
 package cmd
 
+import (
+	"fmnx.su/core/pack/tmpl"
+	"github.com/spf13/cobra"
+)
+
 // This package contains all CLI commands that might be executed by user.
 // Each file contains a single command, including root cmd.
+
+func init() {
+	rootCmd.AddCommand(configCmd)
+}
+
+var configCmd = &cobra.Command{
+	Use:     "config",
+	Aliases: []string{"c", "cfg"},
+	Short:   tmpl.ConfigShort,
+	Long:    tmpl.ConfigLong,
+	Run:     Install,
+}

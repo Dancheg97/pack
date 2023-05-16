@@ -23,6 +23,12 @@ Official web page: https://fmnx.su/core/pack.
 Usage:
 pack [command] <package(s)>`
 
+var ConfigShort = "🔧 modify configuration"
+var ConfigLong = `🔧 modify configuration
+
+
+`
+
 var DescribeShort = `📝 describe packages`
 var DescribeLong = `📝 view information about packages
 

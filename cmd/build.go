@@ -36,6 +36,15 @@ var buildCmd = &cobra.Command{
 
 // Cli command preparing package in current directory.
 func Build(cmd *cobra.Command, pkgs []string) {
+	if len(pkgs) == 1 && pkgs[0] == `gen` {
+		dir := system.Pwd()
+		url, err := git.Url(dir)
+		CheckErr(err)
+		err = pacman.Generate(dir, url)
+		CheckErr(err)
+		prnt.Green("Generated file: ", "PKGBUILD")
+		return
+	}
 	if len(pkgs) == 0 {
 		dir := system.Pwd()
 		BuildDirectory(dir, ``)
