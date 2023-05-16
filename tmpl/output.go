@@ -98,7 +98,7 @@ Examples:
 pack update fmnx.su/core/aist@v0.21`
 
 func init() {
-	if config.DisablePrettyPrint {
+	if !config.PrettyPrint {
 		DescribeShort = strings.ReplaceAll(DescribeShort, `📝 `, ``)
 		DescribeLong = strings.ReplaceAll(DescribeLong, `📝 `, ``)
 		ConfigShort = strings.ReplaceAll(ConfigShort, `🔧 `, ``)

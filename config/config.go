@@ -17,15 +17,20 @@ import (
 
 // This variables are automatically initialized in init().
 var (
-	RemoveGitRepos      bool
-	RemoveBuiltPackages bool
-	DebugMode           bool
-	DisablePrettyPrint  bool
-	CacheDir            string
-	PackageCacheDir     string
-	MapFile             string
-	LockFile            string
+	RemoveBuildDeps bool
+	SyncPackages    bool
+	RemoveGitRepos  bool
+	CachePackages   bool
+	VerboseOutput   bool
+	PrettyPrint     bool
+	RepoCacheDir    string
+	PackageCacheDir string
+	LogFile         string
+	MapFile         string
+	LockFile        string
+)
 
+var (
 	homedir string
 	cfgfile string
 	cfg     config
@@ -33,14 +38,17 @@ var (
 
 // Configuration variables.
 type config struct {
-	RemoveGitRepos      bool   `yaml:"remove-git-repo"`
-	RemoveBuiltPackages bool   `yaml:"remove-built-packages"`
-	DebugMode           bool   `yaml:"debug-mode"`
-	DisablePrettyPrint  bool   `yaml:"pack-disable-prettyprint"`
-	PackCacheDir        string `yaml:"pack-cache-dir"`
-	PackageCacheDir     string `yaml:"package-cache-dir"`
-	MapFile             string `yaml:"map-file"`
-	LockFile            string `yaml:"lock-file"`
+	RemoveBuildDeps bool   `yaml:"remove-build-deps"`
+	SyncPackages    bool   `yaml:"sync-packages"`
+	RemoveGitRepos  bool   `yaml:"remove-git-repos"`
+	CachePackages   bool   `yaml:"cache-packages"`
+	VerboseOutput   bool   `yaml:"verbose-output"`
+	PrettyPrint     bool   `yaml:"pretty-print"`
+	RepoCacheDir    string `yaml:"repo-cache-dir"`
+	PackageCacheDir string `yaml:"package-cache-dir"`
+	LogFile         string `yaml:"log-file"`
+	MapFile         string `yaml:"map-file"`
+	LockFile        string `yaml:"lock-file"`
 }
 
 // Initialize runtime configuration variables.
@@ -72,21 +80,27 @@ func checkErr(err error) {
 
 // SetDefaults configuration to default values and set save config file.
 func SetDefaults() {
+	cfg.RemoveBuildDeps = false
+	cfg.SyncPackages = false
 	cfg.RemoveGitRepos = false
-	cfg.RemoveBuiltPackages = false
-	cfg.DebugMode = false
-	cfg.DisablePrettyPrint = false
-	cfg.PackCacheDir = homedir + "/.pack"
+	cfg.CachePackages = true
+	cfg.VerboseOutput = false
+	cfg.PrettyPrint = true
+	cfg.RepoCacheDir = homedir + "/.pack"
 	cfg.PackageCacheDir = "/var/cache/pacman/pkg"
+	cfg.LogFile = "/tmp/pack.log"
 	cfg.MapFile = homedir + "/.pack/mapping.json"
 	cfg.LockFile = "/tmp/pack.lock"
 
+	RemoveBuildDeps = cfg.RemoveBuildDeps
+	SyncPackages = cfg.SyncPackages
 	RemoveGitRepos = cfg.RemoveGitRepos
-	RemoveBuiltPackages = cfg.RemoveBuiltPackages
-	DebugMode = cfg.DebugMode
-	DisablePrettyPrint = cfg.DisablePrettyPrint
-	CacheDir = cfg.PackCacheDir
+	CachePackages = cfg.CachePackages
+	VerboseOutput = cfg.VerboseOutput
+	PrettyPrint = cfg.PrettyPrint
+	RepoCacheDir = cfg.RepoCacheDir
 	PackageCacheDir = cfg.PackageCacheDir
+	LogFile = cfg.LogFile
 	MapFile = cfg.MapFile
 	LockFile = cfg.LockFile
 }
@@ -94,14 +108,17 @@ func SetDefaults() {
 // Save configuration with all new variables.
 func Save() {
 	b, err := yaml.Marshal(&config{
-		RemoveGitRepos:      RemoveGitRepos,
-		RemoveBuiltPackages: RemoveBuiltPackages,
-		DebugMode:           DebugMode,
-		DisablePrettyPrint:  DisablePrettyPrint,
-		PackCacheDir:        PackageCacheDir,
-		PackageCacheDir:     PackageCacheDir,
-		MapFile:             MapFile,
-		LockFile:            LockFile,
+		RemoveBuildDeps: RemoveBuildDeps,
+		SyncPackages:    SyncPackages,
+		RemoveGitRepos:  RemoveGitRepos,
+		CachePackages:   CachePackages,
+		VerboseOutput:   VerboseOutput,
+		PrettyPrint:     PrettyPrint,
+		RepoCacheDir:    RepoCacheDir,
+		PackageCacheDir: PackageCacheDir,
+		LogFile:         LogFile,
+		MapFile:         MapFile,
+		LockFile:        LockFile,
 	})
 	checkErr(err)
 	err = os.WriteFile(cfgfile, b, 0o600)

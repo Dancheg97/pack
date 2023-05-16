@@ -17,7 +17,7 @@ import (
 
 // Print white message and red postfix.
 func Red(white string, red string) {
-	if config.DisablePrettyPrint {
+	if !config.PrettyPrint {
 		fmt.Printf(white + red + "\n")
 		return
 	}
@@ -26,7 +26,7 @@ func Red(white string, red string) {
 
 // Print white message and blue postfix.
 func Blue(white string, blue string) {
-	if config.DisablePrettyPrint {
+	if !config.PrettyPrint {
 		fmt.Printf(white + blue + "\n")
 		return
 	}
@@ -35,7 +35,7 @@ func Blue(white string, blue string) {
 
 // Print white message and green postfix.
 func Green(white string, green string) {
-	if config.DisablePrettyPrint {
+	if !config.PrettyPrint {
 		fmt.Printf(white + green + "\n")
 		return
 	}
@@ -44,7 +44,7 @@ func Green(white string, green string) {
 
 // Print white message and green postfix.
 func Yellow(white string, yellow string) {
-	if config.DisablePrettyPrint {
+	if !config.PrettyPrint {
 		fmt.Printf(white + yellow + "\n")
 		return
 	}
@@ -71,7 +71,7 @@ type ColoredMessage struct {
 // single string.
 func Custom(msgs []ColoredMessage) {
 	var rez string
-	if config.DisablePrettyPrint {
+	if !config.PrettyPrint {
 		for _, msg := range msgs {
 			rez += msg.Message
 		}

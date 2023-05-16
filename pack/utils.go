@@ -50,6 +50,6 @@ func GetPackInfo(link string) PackMd {
 	}
 	dashsplt := strings.Split(rez.PackName, "/")
 	rez.PacmanName = dashsplt[len(dashsplt)-1]
-	rez.Directory = config.CacheDir + "/" + rez.PacmanName
+	rez.Directory = config.RepoCacheDir + "/" + rez.PacmanName
 	return rez
 }

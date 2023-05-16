@@ -117,7 +117,7 @@ func LoadLinkPackages(links []string) {
 		defer r.Body.Close()
 		splt := strings.Split(link, "/")
 		pkgName := splt[len(splt)-1]
-		f, err := os.Create(config.CacheDir + "/" + pkgName)
+		f, err := os.Create(config.RepoCacheDir + "/" + pkgName)
 		CheckErr(err)
 		_, err = io.Copy(f, r.Body)
 		prnt.Green("Loaded file: ", pkgName)
@@ -130,20 +130,23 @@ func CopyFilePackages(pkgs []string) {
 	for _, pkg := range pkgs {
 		splt := strings.Split(pkg, "/")
 		file := splt[len(splt)-1]
-		_, err := system.Callf("sudo cp %s %s/%s", pkg, config.CacheDir, file)
+		_, err := system.Callf("sudo cp %s %s/%s", pkg, config.RepoCacheDir, file)
 		CheckErr(err)
 	}
 }
 
 // Install packages in pack cache dir and move them to pacman cache dir.
 func InstallFromPackCache() {
-	err := pacman.InstallDir(config.CacheDir)
+	err := pacman.InstallDir(config.RepoCacheDir)
 	CheckErr(err)
-	pkgs, err := system.LsExt(config.CacheDir, ".pkg.tar.zst")
+	pkgs, err := system.LsExt(config.RepoCacheDir, ".pkg.tar.zst")
 	CheckErr(err)
 	prnt.Green("File packages installed: ", strings.Join(pkgs, " "))
-	err = system.MvExt(config.CacheDir, config.PackageCacheDir, ".pkg.tar.zst")
-	CheckErr(err)
+	CheckErr(system.MvExt(
+		config.RepoCacheDir,
+		config.PackageCacheDir,
+		".pkg.tar.zst",
+	))
 }
 
 // Checks if packages are not installed and installing them.
@@ -175,7 +178,7 @@ func InstallPackPackage(pkg string) {
 	err = pacman.InstallDir(i.Directory)
 	CheckErr(err)
 	prnt.Green("Installed package: ", i.PackName+"@"+i.Version)
-	if !config.RemoveBuiltPackages {
+	if config.CachePackages {
 		err = system.MvExt(i.Directory, config.PackageCacheDir, ".pkg.tar.zst")
 		CheckErr(err)
 	}

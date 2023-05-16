@@ -13,6 +13,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"os/exec"
 
@@ -29,13 +30,13 @@ func Callf(format string, a ...any) (string, error) {
 func Call(cmd string) (string, error) {
 	execute := exec.Command("bash", "-c", cmd)
 	var buf bytes.Buffer
-	if config.DebugMode {
+	if config.VerboseOutput {
 		prnt.Yellow("=> Executing system call: ", cmd)
-		execute.Stdout = io.MultiWriter(&buf, os.Stdout)
-		execute.Stderr = io.MultiWriter(&buf, os.Stderr)
+		execute.Stdout = io.MultiWriter(&buf, log.Writer(), os.Stdout)
+		execute.Stderr = io.MultiWriter(&buf, log.Writer(), os.Stderr)
 	} else {
-		execute.Stdout = &buf
-		execute.Stderr = &buf
+		execute.Stdout = io.MultiWriter(&buf, log.Writer())
+		execute.Stderr = io.MultiWriter(&buf, log.Writer())
 	}
 	err := execute.Run()
 	if err != nil {
