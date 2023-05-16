@@ -3,7 +3,7 @@
 
 pkgname="pack"
 pkgdesc="📦 decentralized package manager based on git and pacman"
-pkgver="1"
+pkgver="0.5"
 pkgrel="1"
 arch=('any')
 url="https://fmnx.su/core/pack"
