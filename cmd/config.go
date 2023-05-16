@@ -29,9 +29,8 @@ var configCmd = &cobra.Command{
 // View and change config
 func Config(cmd *cobra.Command, args []string) {
 	if len(args) == 0 {
-		//
-	}
 
+	}
 	if len(args) == 1 && args[0] == "reset" {
 		config.SetDefaults()
 		config.Save()

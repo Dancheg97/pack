@@ -17,6 +17,7 @@ import (
 	"strings"
 	"time"
 
+	"fmnx.su/core/pack/config"
 	"fmnx.su/core/pack/prnt"
 	"fmnx.su/core/pack/system"
 )
@@ -30,8 +31,15 @@ func Build(dir string, name string) error {
 	if err != nil {
 		return err
 	}
+	flags := []string{"-f", "--noconfirm"}
+	if config.RmDeps {
+		flags = append(flags, "-f")
+	}
+	if config.Needed {
+		flags = append(flags, "--needed")
+	}
 	var b bytes.Buffer
-	cmd := exec.Command("makepkg", "-f", "--needed", "--noconfirm")
+	cmd := exec.Command("makepkg", flags...)
 	cmd.Stdout = &b
 	cmd.Stderr = &b
 	go func() {
@@ -54,8 +62,12 @@ func Build(dir string, name string) error {
 func Update(pkgs []string) error {
 	mu.Lock()
 	defer mu.Unlock()
-	joined := strings.Join(pkgs, " ")
-	_, err := system.Call("sudo pacman --noconfirm --needed -Sy " + joined)
+	join := strings.Join(pkgs, " ")
+	needed := ``
+	if config.Needed {
+		needed += "--needed "
+	}
+	_, err := system.Call("sudo pacman --noconfirm " + needed + "-Sy " + join)
 	if err != nil {
 		return errors.New("pacman unable to update")
 	}
@@ -120,8 +132,12 @@ func Install(pkgs []string) error {
 	if len(uninstalled) == 0 {
 		return nil
 	}
+	needed := ""
+	if config.Needed {
+		needed += "--needed "
+	}
 	joined := strings.Join(uninstalled, " ")
-	o, err := system.Callf("sudo pacman --needed --noconfirm -S %s", joined)
+	o, err := system.Callf("sudo pacman "+needed+"--noconfirm -S %s", joined)
 	if err != nil {
 		return errors.New(o)
 	}

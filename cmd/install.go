@@ -144,7 +144,7 @@ func InstallFromPackCache() {
 	prnt.Green("File packages installed: ", strings.Join(pkgs, " "))
 	CheckErr(system.MvExt(
 		config.RepoCacheDir,
-		config.PackageCacheDir,
+		config.PkgCacheDir,
 		".pkg.tar.zst",
 	))
 }
@@ -178,15 +178,15 @@ func InstallPackPackage(pkg string) {
 	err = pacman.InstallDir(i.Directory)
 	CheckErr(err)
 	prnt.Green("Installed package: ", i.PackName+"@"+i.Version)
-	if config.CachePackages {
-		err = system.MvExt(i.Directory, config.PackageCacheDir, ".pkg.tar.zst")
+	if config.CachePkgs {
+		err = system.MvExt(i.Directory, config.PkgCacheDir, ".pkg.tar.zst")
 		CheckErr(err)
 	}
-	if !config.RemoveGitRepos {
+	if !config.RmRepos {
 		err = git.Clean(i.Directory)
 		CheckErr(err)
 	}
-	if config.RemoveGitRepos {
+	if config.RmRepos {
 		err = os.RemoveAll(i.Directory)
 		CheckErr(err)
 	}

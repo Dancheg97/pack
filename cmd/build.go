@@ -55,10 +55,10 @@ func Build(cmd *cobra.Command, pkgs []string) {
 		err := git.Clone(i.GitUrl, i.Directory)
 		CheckErr(err)
 		BuildDirectory(i.Directory, i.Version)
-		err = system.MvExt(i.Directory, config.PackageCacheDir, ".pkg.tar.zst")
+		err = system.MvExt(i.Directory, config.PkgCacheDir, ".pkg.tar.zst")
 		CheckErr(err)
 	}
-	prnt.Blue("Build complete, results in: ", config.PackageCacheDir)
+	prnt.Blue("Build complete, results in: ", config.PkgCacheDir)
 }
 
 // Build package in specified directory. Assumes this directory has cloned git

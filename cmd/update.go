@@ -109,7 +109,7 @@ func GetPackOutdated() []pacman.OutdatedPackage {
 				NewVersion:     last,
 			})
 			mu.Unlock()
-			err = git.Pull(config.PackageCacheDir + "/" + sinfo.PacmanName)
+			err = git.Pull(config.PkgCacheDir + "/" + sinfo.PacmanName)
 			if err != nil {
 				return err
 			}
