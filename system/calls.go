@@ -30,7 +30,7 @@ func Call(cmd string) (string, error) {
 	execute := exec.Command("bash", "-c", cmd)
 	var buf bytes.Buffer
 	if config.DebugMode {
-		prnt.Yellow("Executing system call: ", cmd)
+		prnt.Yellow("=> Executing system call: ", cmd)
 		execute.Stdout = io.MultiWriter(&buf, os.Stdout)
 		execute.Stderr = io.MultiWriter(&buf, os.Stderr)
 	} else {

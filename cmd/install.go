@@ -10,13 +10,17 @@ package cmd
 
 import (
 	"context"
+	"io"
+	"net/http"
 	"os"
 	"strings"
 
+	"fmnx.su/core/pack/config"
 	"fmnx.su/core/pack/git"
 	"fmnx.su/core/pack/pack"
 	"fmnx.su/core/pack/pacman"
 	"fmnx.su/core/pack/prnt"
+	"fmnx.su/core/pack/system"
 	"fmnx.su/core/pack/tmpl"
 	"github.com/spf13/cobra"
 	"golang.org/x/sync/errgroup"
@@ -36,34 +40,64 @@ var installCmd = &cobra.Command{
 
 // Cli command installing packages into system.
 func Install(cmd *cobra.Command, upkgs []string) {
-	// Add ability to install cirectories with pkgbuild, files with
-	// .pkg.tar.zst extensions and file links
 	groups := GroupPackages(upkgs)
+	LoadLinkPackages(groups.NetworkLinks)
+	CopyFilePackages(groups.LocalFiles)
 	CheckUnreachablePacmanPackages(groups.PacmanPackages)
 	CheckErr(pacman.Install(groups.PacmanPackages))
+	CheckErr(pacman.InstallDir(config.CacheDir))
 	InstallPackPackages(groups.PackPackages)
 }
 
+// Packages splitted into groups depending on type of installation.
 type PackageGroups struct {
 	PacmanPackages []string
 	PackPackages   []string
+	NetworkLinks   []string
+	LocalFiles     []string
 }
 
-// Split packages into pacman and pack groups.
+// Existing package groups.
+const (
+	PACMAN_PACKAGE = 0
+	PACK_GIT_REPO  = 1
+	LOCAL_FILE     = 2
+	HTTP_FILE_LINK = 3
+)
+
+// Split packages into groups.
 func GroupPackages(pkgs []string) PackageGroups {
-	var pacmanPackages []string
-	var packPackages []string
+	var groups PackageGroups
 	for _, pkg := range pkgs {
-		if strings.Contains(pkg, "/") {
-			packPackages = append(packPackages, pkg)
-			continue
+		group := GetPackageGroup(pkg)
+		switch group {
+		case PACMAN_PACKAGE:
+			groups.PacmanPackages = append(groups.PacmanPackages, pkg)
+		case PACK_GIT_REPO:
+			groups.PackPackages = append(groups.PackPackages, pkg)
+		case HTTP_FILE_LINK:
+			groups.NetworkLinks = append(groups.NetworkLinks, pkg)
+		case LOCAL_FILE:
+			groups.LocalFiles = append(groups.LocalFiles, pkg)
 		}
-		pacmanPackages = append(pacmanPackages, pkg)
 	}
-	return PackageGroups{
-		PacmanPackages: pacmanPackages,
-		PackPackages:   packPackages,
+	return groups
+}
+
+// Get package group based on it's name.
+func GetPackageGroup(pkg string) int {
+	hasSuffix := strings.HasPrefix(pkg, "http")
+	hasPrefix := strings.HasSuffix(pkg, ".pkg.tar.zst")
+	if hasSuffix && hasPrefix {
+		return HTTP_FILE_LINK
 	}
+	if hasPrefix {
+		return LOCAL_FILE
+	}
+	if strings.Contains(pkg, "/") {
+		return PACK_GIT_REPO
+	}
+	return PACMAN_PACKAGE
 }
 
 // Check if some pacman packages could not be installed.
@@ -73,6 +107,32 @@ func CheckUnreachablePacmanPackages(pkgs []string) {
 		pkgs := strings.Join(unreachable, " ")
 		prnt.Red("Unable to resolve those pacman packages: ", pkgs)
 		os.Exit(1)
+	}
+}
+
+// Load packages that are defined as network links to pack cache directory.
+func LoadLinkPackages(links []string) {
+	for _, link := range links {
+		r, err := http.Get(link)
+		CheckErr(err)
+		defer r.Body.Close()
+		splt := strings.Split(link, "/")
+		pkgName := splt[len(splt)-1]
+		f, err := os.Create(config.CacheDir + "/" + pkgName)
+		CheckErr(err)
+		_, err = io.Copy(f, r.Body)
+		prnt.Green("Loaded file: ", pkgName)
+		CheckErr(err)
+	}
+}
+
+// Copy packages that are meant to be installed as files to cache dir.
+func CopyFilePackages(pkgs []string) {
+	for _, pkg := range pkgs {
+		splt := strings.Split(pkg, "/")
+		file := splt[len(splt)-1]
+		_, err := system.Callf("sudo cp %s %s/%s", pkg, config.CacheDir, file)
+		CheckErr(err)
 	}
 }
 

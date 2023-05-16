@@ -14,13 +14,22 @@ import (
 	"fmnx.su/core/pack/config"
 )
 
+var RootShort = "📦 decentralized package manager based on git and pacman"
+var RootLong = `📦 decentralized package manager based on git and pacman
+
+Configuration file: ~/.pack/config.yml
+Official web page: https://fmnx.su/core/pack.
+
+Usage:
+pack [command] <package(s)>`
+
 var DescribeShort = `📝 describe packages`
 var DescribeLong = `📝 view information about packages
 
 This tool provides information about package retrieved from pacman or pack.
 
 Example:
-pack describe fmnx.su/core/ainst`
+pack d fmnx.su/core/ainst`
 
 var GenerateShort = "📋 generate PKGBUILD"
 var GenerateLong = `📋 generate PKGBUILD and update README.md with installation helper
@@ -31,12 +40,12 @@ to provide information about installation with pack.`
 var InstallShort = "📥 install packages"
 var InstallLong = `📥 install packages
 
-You can mix pacman and pack packages, provoding names and git links. If you
-need to specify version, you can provide it after @ symbol.
+You can provide links to repositories, regular package names, network links or
+pathes to packages in local file system. This command this split packages into
+groups and install. If some are already installed pack will skip them.
 
-Examples:
-pack install fmnx.su/core/aist@v0.21
-pack install fmnx.su/core/ainst github.com/exm/pkg@v1.23 nano`
+Example:
+pack i github.com/exm/pkg@v1.23 nano https://example.com/package.pkg.tar.zst`
 
 var ListShort = "📄 show installed packages"
 
@@ -67,15 +76,6 @@ packages and pack links.
 
 Example:
 pack rm fmnx.su/core/ainst`
-
-var RootShort = "📦 decentralized package manager based on git and pacman"
-var RootLong = `📦 decentralized package manager based on git and pacman
-
-Configuration file: ~/.pack/config.yml
-Official web page: https://fmnx.su/core/pack.
-
-Usage:
-pack [command] <package(s)>`
 
 var UpdateShort = "🗳️  update packages"
 var UpdateLong = `🗳️  update packages
