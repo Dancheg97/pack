@@ -5,7 +5,7 @@
 
 package config
 
-// Project runtime configuration.
+// Project configuration.
 
 import (
 	"fmt"
@@ -15,7 +15,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// This variables will be automatically initialized in init().
+// This variables are automatically initialized in init().
 var (
 	RemoveGitRepos      bool
 	RemoveBuiltPackages bool
@@ -25,9 +25,13 @@ var (
 	PackageCacheDir     string
 	MapFile             string
 	LockFile            string
+
+	homedir string
+	cfgfile string
+	cfg     config
 )
 
-// Default template configuration for pack can be found on top.
+// Configuration variables.
 type config struct {
 	RemoveGitRepos      bool   `yaml:"remove-git-repo"`
 	RemoveBuiltPackages bool   `yaml:"remove-built-packages"`
@@ -39,84 +43,67 @@ type config struct {
 	LockFile            string `yaml:"lock-file"`
 }
 
+// Initialize runtime configuration variables.
 func init() {
 	usr, err := user.Current()
 	checkErr(err)
-	err = os.MkdirAll(usr.HomeDir+"/.pack", 0755)
-	checkErr(err)
-	cfg, err := os.Stat(usr.HomeDir + "/.pack/config.yml")
-	if err != nil || cfg.IsDir() {
-		cfgString := fmt.Sprintf(
-			defaultConfig,
-			getBoolEnv(`PACK_REMOVE_GIT_REPOS`),
-			getBoolEnv(`PACK_REMOVE_BUILT_PACKAGES`),
-			getBoolEnv(`PACK_DEBUG_MODE`),
-			getBoolEnv(`PACK_DISABLE_PRETTYPRINT`),
-			usr.HomeDir,
-			usr.HomeDir,
-		)
-		err = os.WriteFile(
-			usr.HomeDir+"/.pack/config.yml",
-			[]byte(cfgString), 0o600,
-		)
-		checkErr(err)
-		RemoveGitRepos = getBoolEnv(`PACK_REMOVE_GIT_REPOS`)
-		RemoveBuiltPackages = getBoolEnv(`PACK_REMOVE_BUILT_PACKAGES`)
-		DebugMode = getBoolEnv(`PACK_DEBUG_MODE`)
-		DisablePrettyPrint = getBoolEnv(`PACK_DISABLE_PRETTYPRINT`)
-		CacheDir = usr.HomeDir + "/.pack"
-		PackageCacheDir = "/var/cache/pacman/pkg"
-		MapFile = usr.HomeDir + "/.pack/mapping.json"
-		LockFile = "/tmp/pack.lock"
-	}
-	b, err := os.ReadFile(usr.HomeDir + "/.pack/config.yml")
-	checkErr(err)
-	var conf config
-	err = yaml.Unmarshal(b, &conf)
-	checkErr(err)
-	RemoveGitRepos = conf.RemoveGitRepos
-	RemoveBuiltPackages = conf.RemoveBuiltPackages
-	DebugMode = conf.DebugMode
-	DisablePrettyPrint = conf.DisablePrettyPrint
-	CacheDir = conf.PackCacheDir
-	PackageCacheDir = conf.PackageCacheDir
-	MapFile = conf.MapFile
-	LockFile = conf.LockFile
-}
+	homedir = usr.HomeDir
+	cfgfile = homedir + "/.pack/config.yml"
 
-// Function that is made to reduce amount of dependencies.
-func getBoolEnv(v string) bool {
-	return os.Getenv(v) == `true`
+	_, err = os.Stat(cfgfile)
+	if err != nil {
+		SetDefaults()
+		Save()
+		return
+	}
+
+	b, err := os.ReadFile(cfgfile)
+	checkErr(err)
+	err = yaml.Unmarshal(b, &cfg)
+	checkErr(err)
 }
 
 func checkErr(err error) {
 	if err != nil {
-		fmt.Println("Error occured: ", fmt.Sprintf("%+v", err))
+		fmt.Println("configuration error occured: ", fmt.Sprintf("%+v", err))
 		os.Exit(1)
 	}
 }
 
-const defaultConfig = `# Remove git repositroy after package installation
-remove-git-repo: %t
+// SetDefaults configuration to default values and set save config file.
+func SetDefaults() {
+	cfg.RemoveGitRepos = false
+	cfg.RemoveBuiltPackages = false
+	cfg.DebugMode = false
+	cfg.DisablePrettyPrint = false
+	cfg.PackCacheDir = homedir + "/.pack"
+	cfg.PackageCacheDir = "/var/cache/pacman/pkg"
+	cfg.MapFile = homedir + "/.pack/mapping.json"
+	cfg.LockFile = "/tmp/pack.lock"
 
-# Don't cache .pkg.tar.zst file after installation
-remove-built-packages: %t
+	RemoveGitRepos = cfg.RemoveGitRepos
+	RemoveBuiltPackages = cfg.RemoveBuiltPackages
+	DebugMode = cfg.DebugMode
+	DisablePrettyPrint = cfg.DisablePrettyPrint
+	CacheDir = cfg.PackCacheDir
+	PackageCacheDir = cfg.PackageCacheDir
+	MapFile = cfg.MapFile
+	LockFile = cfg.LockFile
+}
 
-# Print every system call execution
-debug-mode: %t
-
-# Disable colors and emojis in output
-disable-prettyprint: %t
-
-# Location where pack will store package repositories
-pack-cache-dir: %s/.pack
-
-# Location of mapping file (pack packages and related pacman packages)
-map-file: %s/.pack/mapping.json
-
-# Location to put .pkg.tar.zst packages after installation
-package-cache-dir: /var/cache/pacman/pkg
-
-# Location of lock file
-lock-file: /tmp/pack.lock
-`
+// Save configuration with all new variables.
+func Save() {
+	b, err := yaml.Marshal(&config{
+		RemoveGitRepos:      RemoveGitRepos,
+		RemoveBuiltPackages: RemoveBuiltPackages,
+		DebugMode:           DebugMode,
+		DisablePrettyPrint:  DisablePrettyPrint,
+		PackCacheDir:        PackageCacheDir,
+		PackageCacheDir:     PackageCacheDir,
+		MapFile:             MapFile,
+		LockFile:            LockFile,
+	})
+	checkErr(err)
+	err = os.WriteFile(cfgfile, b, 0o600)
+	checkErr(err)
+}

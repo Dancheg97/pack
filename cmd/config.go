@@ -6,6 +6,7 @@
 package cmd
 
 import (
+	"fmnx.su/core/pack/config"
 	"fmnx.su/core/pack/tmpl"
 	"github.com/spf13/cobra"
 )
@@ -23,4 +24,19 @@ var configCmd = &cobra.Command{
 	Short:   tmpl.ConfigShort,
 	Long:    tmpl.ConfigLong,
 	Run:     Install,
+}
+
+// View and change config
+func Config(cmd *cobra.Command, args []string) {
+	if len(args) == 0 {
+		//
+	}
+
+	if len(args) == 1 && args[0] == "reset" {
+		config.SetDefaults()
+		config.Save()
+
+		return
+	}
+
 }

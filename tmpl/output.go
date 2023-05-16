@@ -20,14 +20,18 @@ var RootLong = `📦 decentralized package manager based on git and pacman
 Configuration file: ~/.pack/config.yml
 Official web page: https://fmnx.su/core/pack.
 
-Usage:
+Example:
 pack [command] <package(s)>`
 
-var ConfigShort = "🔧 modify configuration"
-var ConfigLong = `🔧 modify configuration
+var ConfigShort = "🔧 view/change config"
+var ConfigLong = `🔧 view/change config
 
+If no arguements provided this command will show current configuration.
+If you run 'pack config reset', command will restore default configuration.
+To set new value for configuration variable type 'pack config <param> <value>'
 
-`
+Example:
+pack cfg debug-mode true`
 
 var DescribeShort = `📝 describe packages`
 var DescribeLong = `📝 view information about packages
@@ -36,12 +40,6 @@ This tool provides information about package retrieved from pacman or pack.
 
 Example:
 pack d fmnx.su/core/ainst`
-
-var GenerateShort = "📋 generate PKGBUILD"
-var GenerateLong = `📋 generate PKGBUILD and update README.md with installation helper
-
-This command will generate .pack.yml template and add some lines to README.md
-to provide information about installation with pack.`
 
 var InstallShort = "📥 install packages"
 var InstallLong = `📥 install packages
@@ -71,8 +69,13 @@ repositories, build packages inside and store them in cache, which is defined
 in '~/.pack/config.yml'. You can also specify versions of packages that you
 want to build after @, similarly with install.
 
+If you run 'pack build gen', pack will generate PKGBUILD template.
+
 To double check build process, you can test it inside pack docker container:
-docker run --rm -it fmnx.su/core/pack b example.com/package`
+docker run --rm -it fmnx.su/core/pack b example.com/package
+
+Examples:
+pack b fmnx.su/core/ainst`
 
 var RemoveShort = "❌ remove packages"
 var RemoveLong = `❌ remove packages
@@ -92,15 +95,14 @@ provide provide just links to get latest version from default branch.
 If you don't specify any arguements, all packages will be updated.
 
 Examples:
-pack update
 pack update fmnx.su/core/aist@v0.21`
 
 func init() {
 	if config.DisablePrettyPrint {
 		DescribeShort = strings.ReplaceAll(DescribeShort, `📝 `, ``)
 		DescribeLong = strings.ReplaceAll(DescribeLong, `📝 `, ``)
-		GenerateShort = strings.ReplaceAll(GenerateShort, `📋 `, ``)
-		GenerateLong = strings.ReplaceAll(GenerateLong, `📋 `, ``)
+		ConfigShort = strings.ReplaceAll(ConfigShort, `🔧 `, ``)
+		ConfigLong = strings.ReplaceAll(ConfigLong, `🔧 `, ``)
 		InstallShort = strings.ReplaceAll(InstallShort, `📥 `, ``)
 		InstallLong = strings.ReplaceAll(InstallLong, `📥 `, ``)
 		ListShort = strings.ReplaceAll(ListShort, `📄 `, ``)
