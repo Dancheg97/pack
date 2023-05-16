@@ -4,12 +4,15 @@
 
 <h2 align="center">Pack - package manager</h2>
 
-[![Generic badge](https://img.shields.io/badge/LICENSE-GPL-orange.svg)](https://fmnx.su/core/pack/src/branch/main/LICENSE)
-[![Generic badge](https://img.shields.io/badge/FMNX-REPO-006db0.svg)](https://fmnx.su/core/pack)
-[![Generic badge](https://img.shields.io/badge/CODEBERG-REPO-45a3fb.svg)](https://codeberg.org/fmnx/pack)
-[![Generic badge](https://img.shields.io/badge/GITHUB-REPO-white.svg)](https://github.com/fmnx-io/pack)
-[![Generic badge](https://img.shields.io/badge/DOCKER-REGISTRY-blue.svg)](https://fmnx.su/core/-/packages/container/pack/latest)
+![Generic badge](https://img.shields.io/badge/status-alpha-red.svg)
+[![Generic badge](https://img.shields.io/badge/license-gpl-orange.svg)](https://fmnx.su/core/pack/src/branch/main/LICENSE)
+[![Generic badge](https://img.shields.io/badge/fmnx-repo-006db0.svg)](https://fmnx.su/core/pack)
+[![Generic badge](https://img.shields.io/badge/codeberg-repo-45a3fb.svg)](https://codeberg.org/fmnx/pack)
+[![Generic badge](https://img.shields.io/badge/github-repo-white.svg)](https://github.com/fmnx-io/pack)
+[![Generic badge](https://img.shields.io/badge/docker-info-blue.svg)](https://fmnx.su/core/-/packages/container/pack/latest)
 [![Build Status](https://ci.fmnx.su/api/badges/core/pack/status.svg)](https://ci.fmnx.su/core/pack)
+
+> **Warning!** Project is in alpha stage, API's are very likely to be changed.
 
 Decentralized package manager based on git and pacman. Accumulates power of both `git` and `pacman` to provide easier way to create arch packages and distribute them using git links.
 
