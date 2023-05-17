@@ -29,7 +29,6 @@ var (
 	LogFile      string
 	MapFile      string
 	LockFile     string
-	SyncDur      string
 )
 
 var (
@@ -41,13 +40,13 @@ var (
 // Configuration variables.
 type config struct {
 	Needed       bool   `yaml:"needed"`
-	RmDeps       bool   `yaml:"remove-build-deps"`
-	RmRepos      bool   `yaml:"remove-git-repos"`
-	CachePkgs    bool   `yaml:"cache-packages"`
-	Verbose      bool   `yaml:"verbose-output"`
+	RmDeps       bool   `yaml:"rm-deps"`
+	RmRepos      bool   `yaml:"rm-repos"`
+	CachePkgs    bool   `yaml:"cache-pkgs"`
+	Verbose      bool   `yaml:"verbose"`
 	PrettyPrint  bool   `yaml:"pretty-print"`
 	RepoCacheDir string `yaml:"repo-cache-dir"`
-	PkgCacheDir  string `yaml:"package-cache-dir"`
+	PkgCacheDir  string `yaml:"pkg-cache-dir"`
 	LogFile      string `yaml:"log-file"`
 	MapFile      string `yaml:"map-file"`
 	LockFile     string `yaml:"lock-file"`

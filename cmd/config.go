@@ -48,19 +48,19 @@ func Config(cmd *cobra.Command, args []string) {
 	switch args[0] {
 	case `needed`:
 		config.Needed = ParseBool(args[1])
-	case `remove-build-deps`:
+	case `rm-deps`:
 		config.RmDeps = ParseBool(args[1])
-	case `remove-git-repos`:
+	case `rm-repos`:
 		config.RmRepos = ParseBool(args[1])
-	case `cache-packages`:
+	case `cache-pkgs`:
 		config.CachePkgs = ParseBool(args[1])
-	case `verbose-output`:
+	case `verbose`:
 		config.Verbose = ParseBool(args[1])
 	case `pretty-print`:
 		config.PrettyPrint = ParseBool(args[1])
 	case `repo-cache-dir`:
 		config.RepoCacheDir = args[1]
-	case `package-cache-dir`:
+	case `pkg-cache-dir`:
 		config.PkgCacheDir = args[1]
 	case `log-file`:
 		config.LogFile = args[1]
