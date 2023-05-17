@@ -51,6 +51,15 @@ func Yellow(white string, yellow string) {
 	fmt.Printf(white + color.YellowString(yellow) + "\n")
 }
 
+// Print white message and cyan postfix.
+func Cyan(white string, cyan string) {
+	if !config.PrettyPrint {
+		fmt.Printf(white + cyan + "\n")
+		return
+	}
+	fmt.Printf(white + color.CyanString(cyan) + "\n")
+}
+
 // Enum for custom colored message.
 type Color int
 
@@ -60,6 +69,7 @@ const (
 	COLOR_BLUE   Color = iota
 	COLOR_GREEN  Color = iota
 	COLOR_YELLOW Color = iota
+	COLOR_CYAN   Color = iota
 )
 
 type ColoredMessage struct {
@@ -90,6 +100,8 @@ func Custom(msgs []ColoredMessage) {
 			rez += color.GreenString(msg.Message)
 		case COLOR_YELLOW:
 			rez += color.YellowString(msg.Message)
+		case COLOR_CYAN:
+			rez += color.CyanString(msg.Message)
 		}
 	}
 	fmt.Println(rez)

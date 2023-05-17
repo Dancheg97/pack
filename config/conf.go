@@ -29,6 +29,8 @@ var (
 	LogFile      string
 	MapFile      string
 	LockFile     string
+
+	SearchSources []SearchSource
 )
 
 var (
@@ -50,6 +52,15 @@ type config struct {
 	LogFile      string `yaml:"log-file"`
 	MapFile      string `yaml:"map-file"`
 	LockFile     string `yaml:"lock-file"`
+
+	SearchSources []SearchSource `yaml:"search-sources"`
+}
+
+type SearchSource struct {
+	Name   string `yaml:"name"`
+	Url    string `yaml:"url"`
+	Field  string `yaml:"regexp"`
+	Prefix string `yaml:"prefix"`
 }
 
 // Initialize runtime configuration variables.
@@ -95,6 +106,7 @@ func ReadConfigParams() {
 	LogFile = cfg.LogFile
 	MapFile = cfg.MapFile
 	LockFile = cfg.LockFile
+	SearchSources = cfg.SearchSources
 }
 
 // SetDefaults configuration to default values and set save config file.
@@ -110,6 +122,20 @@ func SetDefaults() {
 	LogFile = "/tmp/pack.log"
 	MapFile = homedir + "/.pack/mapping.json"
 	LockFile = "/tmp/pack.lock"
+	SearchSources = []SearchSource{
+		{
+			Name:   "fmnx linux packages",
+			Url:    "https://fmnx.su/api/v1/repos/search?q={{package}}&team_id=4",
+			Field:  "name",
+			Prefix: "fmnx.su/",
+		},
+		{
+			Name:   "arch linux repository",
+			Url:    "https://aur.archlinux.org/rpc/?v=5&type=search&by=name&arg={{package}}",
+			Field:  "PackageBase",
+			Prefix: "aur.archlinux.org/",
+		},
+	}
 }
 
 // Save configuration with all new variables.
@@ -117,17 +143,18 @@ func Save() {
 	err := os.MkdirAll(homedir+"/.pack", os.ModePerm)
 	checkErr(err)
 	b, err := yaml.Marshal(&config{
-		Needed:       Needed,
-		RmDeps:       RmDeps,
-		RmRepos:      RmRepos,
-		CachePkgs:    CachePkgs,
-		Verbose:      Verbose,
-		PrettyPrint:  PrettyPrint,
-		RepoCacheDir: RepoCacheDir,
-		PkgCacheDir:  PkgCacheDir,
-		LogFile:      LogFile,
-		MapFile:      MapFile,
-		LockFile:     LockFile,
+		Needed:        Needed,
+		RmDeps:        RmDeps,
+		RmRepos:       RmRepos,
+		CachePkgs:     CachePkgs,
+		Verbose:       Verbose,
+		PrettyPrint:   PrettyPrint,
+		RepoCacheDir:  RepoCacheDir,
+		PkgCacheDir:   PkgCacheDir,
+		LogFile:       LogFile,
+		MapFile:       MapFile,
+		LockFile:      LockFile,
+		SearchSources: SearchSources,
 	})
 	checkErr(err)
 	err = os.WriteFile(cfgfile, b, 0o600)

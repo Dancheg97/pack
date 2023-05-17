@@ -67,7 +67,7 @@ func Update(pkgs []string) error {
 	if config.Needed {
 		needed += "--needed "
 	}
-	_, err := system.Call("sudo pacman --noconfirm " + needed + "-S " + join)
+	_, err := system.Call("sudo pacman --noconfirm " + needed + "-Sy " + join)
 	if err != nil {
 		return errors.New("pacman unable to update")
 	}
@@ -102,7 +102,7 @@ func Outdated() ([]OutdatedPackage, error) {
 
 // Get all links for outdated packages.
 func oudatedLinks() ([]string, error) {
-	o, err := system.Call("sudo pacman -Sup")
+	o, err := system.Call("sudo pacman -Syup")
 	if err != nil {
 		return nil, errors.New("pacman unable to get outdated")
 	}
@@ -158,6 +158,11 @@ func GetInstalled(pkgs []string) []string {
 }
 
 // Search for package in pacman repositories.
-// func SearchPkg(pkg string) {
-// 	system.Callf(`sudo pacman -Sysq %s`+)
-// }
+func SearchPkg(pkg string) ([]string, error) {
+	o, err := system.Callf(`sudo pacman -Sysq %s`, pkg)
+	if err != nil {
+		return nil, err
+	}
+	splt := strings.Split(o, "downloading...")
+	return strings.Split(splt[len(splt)-1], "\n"), nil
+}
