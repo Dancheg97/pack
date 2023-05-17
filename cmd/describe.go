@@ -33,37 +33,46 @@ var describeCmd = &cobra.Command{
 // Cli command giving package description.
 func Describe(cmd *cobra.Command, pkgs []string) {
 	for _, pkg := range pkgs {
-		fd, err := pacman.Describe(pkg)
-		if err != nil {
+		pm, pk := DescribePackage(pkg)
+		if pm == nil {
 			prnt.Yellow("--------------------------------\nNot found: ", pkg)
 			continue
 		}
-		sd, err := pack.GetByPacmanName(pkg)
-		if err != nil {
-			sd = &pack.Package{
-				PackName:      "None",
-				Version:       "None",
-				DefaultBranch: "None",
-			}
-		}
-		PrintDescription(fd, sd)
+		PrintDescription(pm, pk)
 	}
 }
 
+// Get pacman description, and append pack information if package has it.
+func DescribePackage(pkg string) (*pacman.Package, *pack.Package) {
+	pm, err := pacman.Describe(pkg)
+	if err != nil {
+		return nil, nil
+	}
+	pk, err := pack.GetByPacmanName(pkg)
+	if err != nil {
+		pk = &pack.Package{
+			PackName:      "None",
+			Version:       "None",
+			DefaultBranch: "None",
+		}
+	}
+	return pm, pk
+}
+
 // Print package description.
-func PrintDescription(r *pacman.Package, o *pack.Package) {
+func PrintDescription(pm *pacman.Package, pk *pack.Package) {
 	fmt.Printf(
 		tmpl.PrettyDesc,
-		r.Name,
-		r.Version,
-		r.Description,
-		r.Size,
-		r.Url,
-		r.BuildDate,
-		o.PackName,
-		o.Version,
-		o.DefaultBranch,
-		r.DependsOn,
-		r.RequiredBy,
+		pm.Name,
+		pm.Version,
+		pm.Description,
+		pm.Size,
+		pm.Url,
+		pm.BuildDate,
+		pk.PackName,
+		pk.Version,
+		pk.DefaultBranch,
+		pm.DependsOn,
+		pm.RequiredBy,
 	)
 }
