@@ -51,7 +51,19 @@ groups and install. If some are already installed pack will skip them.
 Example:
 pack i github.com/exm/pkg@v1.23 nano https://example.com/package.pkg.tar.zst`
 
-var ListShort = "📄 show installed packages"
+var ListShort = "📄 show package list"
+var ListLong = `📄 show package list
+
+This command can be used to show packages with some additional parameters.
+If no arguements provided, command prints packages and their versions.
+You can add following options to filter packages:
+ - outdated (list outdated packages)
+ - pack (list packages built with pack)
+ - pacman (list packages installed with pacman)
+
+Example:
+pack list outdated
+`
 
 var OutdatedShort = "📌 show outdated packages"
 var OutdatedLong = `📌 show outdated packages
@@ -115,8 +127,7 @@ func init() {
 		InstallShort = strings.ReplaceAll(InstallShort, `📥 `, ``)
 		InstallLong = strings.ReplaceAll(InstallLong, `📥 `, ``)
 		ListShort = strings.ReplaceAll(ListShort, `📄 `, ``)
-		OutdatedShort = strings.ReplaceAll(OutdatedShort, `📌 `, ``)
-		OutdatedLong = strings.ReplaceAll(OutdatedLong, `📌 `, ``)
+		ListLong = strings.ReplaceAll(ListLong, `📄 `, ``)
 		BuildShort = strings.ReplaceAll(BuildShort, `🛠️ `, ``)
 		BuildLong = strings.ReplaceAll(BuildLong, `🛠️ `, ``)
 		RemoveShort = strings.ReplaceAll(RemoveShort, `❌ `, ``)
