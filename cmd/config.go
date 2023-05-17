@@ -48,39 +48,31 @@ func Config(cmd *cobra.Command, args []string) {
 	switch args[0] {
 	case `needed`:
 		config.Needed = ParseBool(args[1])
-		return
 	case `remove-build-deps`:
 		config.RmDeps = ParseBool(args[1])
-		return
 	case `remove-git-repos`:
 		config.RmRepos = ParseBool(args[1])
-		return
 	case `cache-packages`:
 		config.CachePkgs = ParseBool(args[1])
-		return
 	case `verbose-output`:
 		config.Verbose = ParseBool(args[1])
-		return
 	case `pretty-print`:
 		config.PrettyPrint = ParseBool(args[1])
-		return
 	case `repo-cache-dir`:
 		config.RepoCacheDir = args[1]
-		return
 	case `package-cache-dir`:
 		config.PkgCacheDir = args[1]
-		return
 	case `log-file`:
 		config.LogFile = args[1]
-		return
 	case `map-file`:
 		config.MapFile = args[1]
-		return
 	case `lock-file`:
 		config.LockFile = args[1]
+	default:
+		fmt.Println("unable to find config arguement: ", args[0])
 		return
 	}
-	fmt.Println("unable to find config arguement: ", args[0])
+	config.Save()
 }
 
 // Show configuration variables of configuration and describe them.

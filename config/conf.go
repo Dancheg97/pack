@@ -29,6 +29,7 @@ var (
 	LogFile      string
 	MapFile      string
 	LockFile     string
+	SyncDur      string
 )
 
 var (

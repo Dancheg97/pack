@@ -27,5 +27,5 @@ var searchCmd = &cobra.Command{
 
 // Search for packages in connected search sources.
 func Search(cmd *cobra.Command, args []string) {
-
+	
 }
