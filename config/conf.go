@@ -84,8 +84,8 @@ func ReadConfigParams() {
 	err = yaml.Unmarshal(b, &cfg)
 	checkErr(err)
 
-	RmDeps = cfg.RmDeps
 	Needed = cfg.Needed
+	RmDeps = cfg.RmDeps
 	RmRepos = cfg.RmRepos
 	CachePkgs = cfg.CachePkgs
 	Verbose = cfg.Verbose
@@ -99,8 +99,8 @@ func ReadConfigParams() {
 
 // SetDefaults configuration to default values and set save config file.
 func SetDefaults() {
-	RmDeps = false
 	Needed = true
+	RmDeps = false
 	RmRepos = false
 	CachePkgs = true
 	Verbose = false
@@ -117,8 +117,8 @@ func Save() {
 	err := os.MkdirAll(homedir+"/.pack", os.ModePerm)
 	checkErr(err)
 	b, err := yaml.Marshal(&config{
-		RmDeps:       RmDeps,
 		Needed:       Needed,
+		RmDeps:       RmDeps,
 		RmRepos:      RmRepos,
 		CachePkgs:    CachePkgs,
 		Verbose:      Verbose,

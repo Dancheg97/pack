@@ -87,8 +87,8 @@ func Config(cmd *cobra.Command, args []string) {
 func ShowConfigDescription() {
 	fmt.Printf(
 		tmpl.PrettyConfig,
-		color.CyanString(fmt.Sprint(config.RmDeps)),
 		color.CyanString(fmt.Sprint(config.Needed)),
+		color.CyanString(fmt.Sprint(config.RmDeps)),
 		color.CyanString(fmt.Sprint(config.RmRepos)),
 		color.CyanString(fmt.Sprint(config.CachePkgs)),
 		color.CyanString(fmt.Sprint(config.Verbose)),
