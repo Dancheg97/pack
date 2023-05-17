@@ -46,13 +46,13 @@ func List(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 	switch args[0] {
-	case "outdated":
+	case "outdated", "out", "o":
 		ShowOutdated()
 		return
-	case "pack":
+	case "pack", "pk":
 		PrintPackages(true, false)
 		return
-	case "pacman":
+	case "pacman", "pm":
 		PrintPackages(false, true)
 		return
 	}
