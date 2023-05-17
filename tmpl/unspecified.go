@@ -94,6 +94,8 @@ File with pack package mapped to pacman packages.
 
 File containing number of the process of executed pack command.
  - ` + color.YellowString(`lock-file`) + `: %s
+
+Configuration file: ` + color.BlueString(`~/.pack/config.yml`) + `
 -----------------------------------------------------------
 `
 

@@ -17,7 +17,6 @@ import (
 var RootShort = "📦 decentralized package manager based on git and pacman"
 var RootLong = `📦 decentralized package manager based on git and pacman
 
-Configuration file: ~/.pack/config.yml
 Official web page: https://fmnx.su/core/pack.
 
 Example:
