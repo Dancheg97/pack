@@ -97,6 +97,15 @@ If you don't specify any arguements, all packages will be updated.
 Examples:
 pack update fmnx.su/core/aist`
 
+var SearchShort = `🔎 search for packages`
+var SearchLong = `🔎 search for packages
+
+By default, pack will search for packages in pacman repositories, aur, github,
+codeberg and fmnx. You can connect additional search sources in configuration.
+
+Example:
+pack s ainst`
+
 func init() {
 	if !config.PrettyPrint {
 		DescribeShort = strings.ReplaceAll(DescribeShort, `📝 `, ``)
@@ -116,5 +125,7 @@ func init() {
 		RootLong = strings.ReplaceAll(RootLong, `📦 `, ``)
 		UpdateShort = strings.ReplaceAll(UpdateShort, `🗳️  `, ``)
 		UpdateLong = strings.ReplaceAll(UpdateLong, `🗳️  `, ``)
+		SearchShort = strings.ReplaceAll(SearchShort, `🔎 `, ``)
+		SearchLong = strings.ReplaceAll(SearchLong, `🔎 `, ``)
 	}
 }

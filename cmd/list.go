@@ -9,6 +9,9 @@ package cmd
 // Each file contains a single command, including root cmd.
 
 import (
+	"os"
+	"strings"
+
 	"fmnx.su/core/pack/pack"
 	"fmnx.su/core/pack/pacman"
 	"fmnx.su/core/pack/prnt"
@@ -29,6 +32,27 @@ var listCmd = &cobra.Command{
 
 // Cli command listing installed packages and version.
 func List(cmd *cobra.Command, args []string) {
+	if len(args) == 0 {
+		ShowAllPackages()
+		return
+	}
+	if len(args) != 1 {
+		prnt.Red("Too many arguemnents for list: ", strings.Join(args, " "))
+		os.Exit(1)
+	}
+	switch args[0] {
+	case "outdated":
+
+	case "pack":
+
+	default:
+		prnt.Red("Unknown arguement: ", args[0])
+		os.Exit(1)
+	}
+}
+
+// Function that prints packages installed in the system and their versions.
+func ShowAllPackages() {
 	pkgs := pacman.List()
 	for pkg, version := range pkgs {
 		i, err := pack.GetByPacmanName(pkg)
