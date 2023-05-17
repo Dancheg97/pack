@@ -138,11 +138,7 @@ func Save() {
 func SetLogger() {
 	err := os.WriteFile(LogFile, []byte{}, 0666)
 	checkErr(err)
-	f, err := os.OpenFile(
-		LogFile,
-		os.O_RDWR|os.O_CREATE|os.O_APPEND,
-		0666,
-	)
+	f, err := os.OpenFile(LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	checkErr(err)
 	log.Default().SetOutput(f)
 }
