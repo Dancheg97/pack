@@ -13,7 +13,6 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"sync"
 
 	"fmnx.su/core/pack/git"
 	"fmnx.su/core/pack/pack"
@@ -74,7 +73,7 @@ func FullPacmanUpdate() {
 // Perform full pack update.
 func FullPackUpdate() {
 	g, _ := errgroup.WithContext(context.Background())
-	outdatedpkgs := GetPackOutdated()
+	outdatedpkgs := PackOutdated()
 	for _, pkg := range outdatedpkgs {
 		spkg := pkg
 		g.Go(func() error {
@@ -86,38 +85,6 @@ func FullPackUpdate() {
 	}
 	g.Wait()
 	prnt.Green("Pack update: ", "done")
-}
-
-// Get list of pack outdated packages.
-func GetPackOutdated() []pacman.OutdatedPackage {
-	pkgs := pack.List()
-	g, _ := errgroup.WithContext(context.Background())
-	var mu sync.Mutex
-	var rez []pacman.OutdatedPackage
-	for _, info := range pkgs {
-		sinfo := info
-		g.Go(func() error {
-			link := "https://" + sinfo.PackName
-			last, err := git.LastCommitUrl(link, sinfo.DefaultBranch)
-			if err != nil {
-				prnt.Yellow("Unable to get versoin for: ", link)
-				return nil
-			}
-			if sinfo.Version == last {
-				return nil
-			}
-			mu.Lock()
-			rez = append(rez, pacman.OutdatedPackage{
-				Name:           sinfo.PackName,
-				CurrentVersion: sinfo.Version,
-				NewVersion:     last,
-			})
-			mu.Unlock()
-			return nil
-		})
-	}
-	g.Wait()
-	return rez
 }
 
 // Clone if not exist, checkout and pull if exists.

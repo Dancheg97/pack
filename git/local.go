@@ -78,7 +78,7 @@ func Url(dir string) (string, error) {
 }
 
 // Function to get last tag name for git directory.
-func GetLastTagDir(dir string) (string, error) {
+func LastTagDir(dir string) (string, error) {
 	o, err := system.Callf("git -C %s describe --tags --abbrev=0", dir)
 	if err != nil {
 		return ``, err

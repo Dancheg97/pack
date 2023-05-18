@@ -94,21 +94,24 @@ func PackOutdated() []pacman.OutdatedPackage {
 		sinfo := info
 		g.Go(func() error {
 			link := "https://" + sinfo.PackName
-			last, err := git.LastCommitUrl(link, sinfo.DefaultBranch)
+			newver, err := git.LastTagRemote(link)
 			if err != nil {
-				mu.Lock()
-				prnt.Yellow("Unable to get versoin for: ", link)
-				mu.Unlock()
-				return nil
+				newver, err = git.LastCommitUrl(link, sinfo.DefaultBranch)
+				if err != nil {
+					mu.Lock()
+					prnt.Yellow("Unable to get versoin for: ", link)
+					mu.Unlock()
+					return nil
+				}
 			}
-			if sinfo.Version == last {
+			if sinfo.Version == newver {
 				return nil
 			}
 			mu.Lock()
 			rez = append(rez, pacman.OutdatedPackage{
 				Name:           sinfo.PackName,
 				CurrentVersion: sinfo.Version,
-				NewVersion:     last,
+				NewVersion:     newver,
 			})
 			mu.Unlock()
 			return nil
