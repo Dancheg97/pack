@@ -6,7 +6,6 @@
 FROM archlinux/archlinux:base-devel
 
 LABEL maintainer="dancheg <dancheg@fmnx.su>"
-LABEL source="https://fmnx.su/core/pack"
 
 RUN pacman -Syu --needed --noconfirm git pacman-contrib wget go
 
@@ -15,10 +14,8 @@ RUN echo "pack ALL=(ALL:ALL) NOPASSWD:ALL" > /etc/sudoers.d/pack
 USER pack
 WORKDIR /home/pack
 
-COPY . /home/pack/pack
-RUN git config --global --add safe.directory /home/pack/pack
-RUN sudo chmod a+rwx -R /home/pack
-RUN cd pack && makepkg --noconfirm -sfri
+RUN git clone https://fmnx.su/core/pack
+RUN cd pack && makepkg --noconfirm --needed -sri
 RUN sudo mv /home/pack/pack/*.pkg.tar.zst /var/cache/pacman/pkg
 RUN sudo rm -r /home/pack/pack
 RUN sudo rm -r /home/pack/go
