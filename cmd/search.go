@@ -96,6 +96,9 @@ func ejectSearchFields(field string, json string) []string {
 	splt := strings.Split(json, "\""+field+"\"")
 	var rez []string
 	for i, v := range splt {
+		if i == 350 {
+			break
+		}
 		if i == 0 {
 			continue
 		}

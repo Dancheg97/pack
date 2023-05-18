@@ -59,7 +59,7 @@ type config struct {
 type SearchSource struct {
 	Name   string `yaml:"name"`
 	Url    string `yaml:"url"`
-	Field  string `yaml:"regexp"`
+	Field  string `yaml:"field"`
 	Prefix string `yaml:"prefix"`
 }
 
@@ -125,7 +125,7 @@ func SetDefaults() {
 	SearchSources = []SearchSource{
 		{
 			Name:   "fmnx linux packages",
-			Url:    "https://fmnx.su/api/v1/repos/search?q={{package}}&team_id=4",
+			Url:    "https://fmnx.su/api/v1/repos/search?q={{package}}",
 			Field:  "name",
 			Prefix: "fmnx.su/",
 		},
