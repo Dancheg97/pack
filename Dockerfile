@@ -16,6 +16,7 @@ USER pack
 WORKDIR /home/pack
 
 COPY . /home/pack/pack
+RUN git config --global --add safe.directory /home/pack/pack
 RUN sudo chmod a+rwx -R /home/pack
 RUN cd pack && makepkg --noconfirm -sfri
 RUN sudo mv /home/pack/pack/*.pkg.tar.zst /var/cache/pacman/pkg
