@@ -10,10 +10,12 @@ package cmd
 
 import (
 	"fmt"
+	"io"
+	"net/http"
+	"strings"
 
 	"fmnx.su/core/pack/config"
 	"fmnx.su/core/pack/prnt"
-	"fmnx.su/core/pack/search"
 	"fmnx.su/core/pack/tmpl"
 	"github.com/spf13/cobra"
 )
@@ -65,7 +67,7 @@ func Search(cmd *cobra.Command, args []string) {
 					Color:   prnt.COLOR_YELLOW,
 				},
 			})
-			rez, err := search.Search(v, ss.Url, ss.Field)
+			rez, err := UrlSearch(v, ss.Url, ss.Field)
 			CheckErr(err)
 			for i, pkg := range rez {
 				fmt.Printf("  %d - %s%s\n", i, ss.Prefix, pkg)
@@ -73,4 +75,32 @@ func Search(cmd *cobra.Command, args []string) {
 			}
 		}
 	}
+}
+
+// This package implements funcitons related to UrlSearch of arch packages in
+// different compatible formats. Safe for concurrent usage.
+func UrlSearch(req string, url string, field string) ([]string, error) {
+	resp, err := http.Get(strings.ReplaceAll(url, `{{package}}`, req))
+	if err != nil {
+		return nil, err
+	}
+	bodystr, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	return ejectSearchFields(field, string(bodystr)), nil
+}
+
+// Eject values from json by field.
+func ejectSearchFields(field string, json string) []string {
+	splt := strings.Split(json, "\""+field+"\"")
+	var rez []string
+	for i, v := range splt {
+		if i == 0 {
+			continue
+		}
+		vsplt := strings.Split(v, "\"")
+		rez = append(rez, vsplt[1])
+	}
+	return rez
 }
