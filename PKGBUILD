@@ -3,7 +3,7 @@
 
 pkgname="pack"
 pkgdesc="📦 decentralized package manager based on git and pacman"
-pkgver=`git describe --tags`
+pkgver=`git describe --tags --abbrev=0`
 pkgrel="1"
 arch=('any')
 url="https://fmnx.su/core/pack"

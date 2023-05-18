@@ -76,3 +76,12 @@ func Url(dir string) (string, error) {
 	out = strings.Replace(out, ".git", "", 1)
 	return strings.Replace(out, "///", "://", 1), nil
 }
+
+// Function to get last tag name for git directory.
+func GetLastTagDir(dir string) (string, error) {
+	o, err := system.Callf("git -C %s describe --tags --abbrev=0", dir)
+	if err != nil {
+		return ``, err
+	}
+	return strings.Trim(o, "\n"), nil
+}

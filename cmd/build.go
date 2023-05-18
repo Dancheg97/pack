@@ -68,8 +68,11 @@ func BuildDirectory(dir string, version string) string {
 	if version == `` {
 		branch, err := git.DefaultBranch(dir)
 		CheckErr(err)
-		version, err = git.LastCommitDir(dir, branch)
-		CheckErr(err)
+		version, err = git.GetLastTagDir(dir)
+		if err != nil {
+			version, err = git.LastCommitDir(dir, branch)
+			CheckErr(err)
+		}
 	}
 	err := git.Checkout(dir, version)
 	CheckErr(err)
