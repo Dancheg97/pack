@@ -69,8 +69,8 @@ func Pull(dir string) error {
 
 // Get last tag from remote repository.
 func LastTagRemote(url string) (string, error) {
-	call := "git -c 'versionsort.suffix=-' ls-remote --refs " +
-		"--sort='version:refname' --tags " + url
+	call := "git -c 'versionsort.suffix=-' ls-remote --exit-code " +
+		" --refs --sort='version:refname' --tags " + url
 	o, err := system.Call(call)
 	if err != nil {
 		return ``, err
