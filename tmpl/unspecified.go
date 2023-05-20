@@ -28,7 +28,7 @@ pkgname="%s"
 pkgdesc="Something awesome"
 pkgver=` + "`git describe --tags`" + `
 pkgrel="1"
-arch=("any")
+arch=("x86_64")
 url="%s"
 
 # Edit runtime dependencies

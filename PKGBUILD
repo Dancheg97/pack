@@ -5,7 +5,7 @@ pkgname="pack"
 pkgdesc="📦 decentralized package manager based on git and pacman"
 pkgver=`git describe --tags --abbrev=0`
 pkgrel="1"
-arch=('any')
+arch=('x86_64')
 url="https://fmnx.su/core/pack"
 depends=(
   "git"
