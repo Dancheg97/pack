@@ -137,7 +137,7 @@ func Install(pkgs []string) error {
 		needed += "--needed "
 	}
 	joined := strings.Join(uninstalled, " ")
-	o, err := system.Callf("sudo pacman "+needed+"--noconfirm -S %s", joined)
+	o, err := system.Callf("sudo pacman "+needed+"--noconfirm -Sy %s", joined)
 	if err != nil {
 		return errors.New(o)
 	}
