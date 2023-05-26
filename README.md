@@ -19,7 +19,7 @@ Decentralized package manager based on git and pacman. Accumulates power of both
 💿 Single line installation script (for all arch based distributions):
 
 ```sh
-git clone https://fmnx.su/core/pack && cd pack && makepkg --noconfirm -sfri
+git clone https://fmnx.su/pkg/pack && cd pack && makepkg --noconfirm -sfri
 ```
 
 ## Features
