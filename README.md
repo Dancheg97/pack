@@ -18,16 +18,15 @@ Decentralized package manager based on `pacman` and `git`. Provides the ability 
 
 You can use pack to:
 
-- install packages from compatible repos (pack-repo)
-- install packages from compatible git repositories
-- generate PKGBUILD's for your applications
+- install packages from compatible pacman repositories
+- build packages from compatible git repositories
 - set up personal pack repository to provide your packages for others
 
-Single line installation script (for all arch based distributions):
+This application can be installed with:
 
-```sh
-git clone https://fmnx.su/pkg/pack && cd pack && makepkg --noconfirm -sfri
-```
+- git&pacman
+- go
+- docker
 
 <!--
 Add emoji to help command, mb add pull req to cobra.

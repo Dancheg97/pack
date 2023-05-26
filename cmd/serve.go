@@ -9,7 +9,7 @@ package cmd
 // Each file contains a single command, including root cmd.
 
 import (
-	"fmnx.su/core/pack/pack"
+	"fmnx.su/core/pack/server"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -48,10 +48,10 @@ var serveCmd = &cobra.Command{
 
 // Cli command installing packages into system.
 func Serve(cmd *cobra.Command, pkgs []string) {
-	err := pack.Serve(pack.ServeParameters{
+	s := server.Server{
 		Dir:  viper.GetString("serve-dir"),
 		Port: viper.GetString("serve-port"),
 		Repo: viper.GetString("serve-repo"),
-	})
-	CheckErr(err)
+	}
+	CheckErr(s.Serve())
 }
