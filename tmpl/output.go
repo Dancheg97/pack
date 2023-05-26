@@ -102,11 +102,11 @@ If you don't specify any arguements, all packages will be updated.
 Examples:
 pack update fmnx.su/core/aist`
 
-var SearchShort = `🔎 search for packages`
-var SearchLong = `🔎 search for packages
+var ServeShort = `🌐 run pack server`
+var ServeLong = `🌐 run pack server
 
-By default, pack will search for packages in pacman repositories, aur, github,
-codeberg and fmnx. You can connect additional search sources in configuration.
+This command will launch pack server, which will can provide packages to 
+end-user.
 
 Example:
 pack s ainst`

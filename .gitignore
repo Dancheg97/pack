@@ -1,6 +1,6 @@
-
 pkg/**
 src/**
 **.pkg.tar.zst
 .vscode
 packbin
+tmp/**

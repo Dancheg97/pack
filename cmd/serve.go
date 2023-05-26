@@ -9,23 +9,29 @@ package cmd
 // Each file contains a single command, including root cmd.
 
 import (
+	"fmnx.su/core/pack/pack"
 	"fmnx.su/core/pack/tmpl"
 	"github.com/spf13/cobra"
 )
 
 func init() {
-	rootCmd.AddCommand(installCmd)
+	rootCmd.AddCommand(serveCmd)
 }
 
-var installCmd = &cobra.Command{
-	Use:     "install",
-	Aliases: []string{"i"},
-	Short:   tmpl.InstallShort,
-	Long:    tmpl.InstallLong,
-	Run:     Install,
+var serveCmd = &cobra.Command{
+	Use:     "serve",
+	Aliases: []string{"s"},
+	Short:   tmpl.ServeShort,
+	Long:    tmpl.ServeLong,
+	Run:     Serve,
 }
 
 // Cli command installing packages into system.
-func Install(cmd *cobra.Command, pkgs []string) {
-
+func Serve(cmd *cobra.Command, pkgs []string) {
+	err := pack.Serve(pack.ServeParameters{
+		Dir:  "",
+		Port: "8080",
+		Repo: "localhost:8080",
+	})
+	CheckErr(err)
 }

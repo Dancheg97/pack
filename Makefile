@@ -13,6 +13,10 @@ clean:
 	sudo rm -rf src
 	sudo rm -rf ~/.pack
 	sudo rm -f packbin
+	sudo rm *.db
+	sudo rm *.tar.gz
+	sudo rm *.files
+	sudo rm *.old
 	sudo rm -f /tmp/pack.lock
 
 test:

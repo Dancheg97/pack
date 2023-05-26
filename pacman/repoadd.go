@@ -60,7 +60,7 @@ func RepoAdd(f string, db string, opts ...RepoAddOptions) error {
 		args = append(args, "--remove")
 	}
 	if o.PreventDowngrade {
-		args = append(args, "revent-downgrade")
+		args = append(args, "--prevent-downgrade")
 	}
 	if o.NoColor {
 		args = append(args, "--nocolor")
@@ -71,8 +71,8 @@ func RepoAdd(f string, db string, opts ...RepoAddOptions) error {
 	if o.Verify {
 		args = append(args, "--verify")
 	}
-	if o.Key == "" {
-		args = append(args, "--file")
+	if o.Key != "" {
+		args = append(args, "--key")
 		args = append(args, o.Key)
 	}
 	args = append(args, o.AdditionalParams...)

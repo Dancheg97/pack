@@ -12,7 +12,6 @@ import (
 	"fmt"
 	"os"
 
-	"fmnx.su/core/pack/tmpl"
 	"github.com/nightlyone/lockfile"
 	"github.com/spf13/cobra"
 )
@@ -52,7 +51,6 @@ var rootCmd = &cobra.Command{
 // Prepare cobra and viper templates.
 func init() {
 	rootCmd.SetHelpCommand(&cobra.Command{})
-	rootCmd.SetUsageTemplate(tmpl.Cobra)
 	lock, err := lockfile.New("/tmp/pack.lock")
 	CheckErr(err)
 	err = lock.TryLock()
