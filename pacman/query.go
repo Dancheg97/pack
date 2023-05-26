@@ -92,7 +92,7 @@ type PackageInfoFull struct {
 	Version       string
 	Description   string
 	Architecture  string
-	Url           string
+	URL           string
 	Licenses      string
 	Groups        string
 	Provides      string
@@ -129,7 +129,7 @@ func Info(pkg string) (*PackageInfoFull, error) {
 		Version:       parseField(out, "Version         : "),
 		Description:   parseField(out, "Description     : "),
 		Architecture:  parseField(out, "Architecture    : "),
-		Url:           parseField(out, "URL             : "),
+		URL:           parseField(out, "URL             : "),
 		Licenses:      parseField(out, "Licenses        : "),
 		Groups:        parseField(out, "Groups          : "),
 		Provides:      parseField(out, "Provides        : "),

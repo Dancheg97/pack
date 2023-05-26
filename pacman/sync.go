@@ -49,7 +49,6 @@ type SyncOptions struct {
 	AdditionalParams []string
 }
 
-// Those are options that will be set up by default on program execution.
 var SyncDefault = SyncOptions{
 	Sudo:      true,
 	Needed:    true,

@@ -16,8 +16,20 @@ import (
 
 // Options for building packages.
 type MakepkgOptions struct {
+	// Additional parameters, that will be appended to command as arguements.
+	AdditionalParams []string
+	// Where command will write output text.
+	Stdout io.Writer
+	// Where command will write output text.
+	Stderr io.Writer
+	// Stdin from user is command will ask for something.
+	Stdin io.Reader
 	// Directory where process will be executed.
 	Dir string
+	// Specify a key to use for gpg signing instead of the default. [--key <key>]
+	GpgKey string
+	// Use an alternate build script (not 'PKGBUILD'). [-p <file>]
+	File string
 	// Ignore incomplete arch field in PKGBUILD. [--ignorearch]
 	IgnoreEach bool
 	// Clean up work files after build. [--clean]
@@ -40,8 +52,6 @@ type MakepkgOptions struct {
 	NoColor bool
 	// Download and extract files only. [--nobuild]
 	NpBuild bool
-	// Use an alternate build script (not 'PKGBUILD'). [-p <file>]
-	File string
 	// Remove installed dependencies after a successful build. [--rmdeps]
 	RmDeps bool
 	// Repackage contents of the package without rebuilding. [--repackage]
@@ -52,8 +62,6 @@ type MakepkgOptions struct {
 	Config string
 	// Do not update VCS sources. [--holdver]
 	HoldVer bool
-	// Specify a key to use for gpg signing instead of the default. [--key <key>]
-	GpgKey string
 	// Do not create package archive. [--noarchive]
 	NoArchive bool
 	// Do not run the check() function in the PKGBUILD. [--nocheck]
@@ -78,14 +86,6 @@ type MakepkgOptions struct {
 	NoProgressBar bool
 	// Install packages as non-explicitly installed. [--asdeps]
 	AsDeps bool
-	// Where command will write output text.
-	Stdout io.Writer
-	// Where command will write output text.
-	Stderr io.Writer
-	// Stdin from user is command will ask for something.
-	Stdin io.Reader
-	// Additional parameters, that will be appended to command as arguements.
-	AdditionalParams []string
 }
 
 var MakepkgDefault = MakepkgOptions{
@@ -219,10 +219,11 @@ func Makepkg(opts ...MakepkgOptions) error {
 // Get parameters from a shell file (might be usefull to resolve dependencies
 // before package build/installation process).
 func GetShellParams(file string, arg string) ([]string, error) {
-	tmpl := "source %s; for i in ${%s[@]}; do \necho $i\ndone"
+	const tmpl = "source %s; for i in ${%s[@]}; do \necho $i\ndone"
+	command := fmt.Sprintf(tmpl, file, arg)
 
 	var b bytes.Buffer
-	cmd := exec.Command("sh", "-c", fmt.Sprintf(tmpl, file, arg))
+	cmd := exec.Command("sh", "-c", command)
 	cmd.Stdout = &b
 
 	err := cmd.Run()

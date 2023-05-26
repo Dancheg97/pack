@@ -12,11 +12,21 @@ import (
 
 // Parameters for adding packages to pacman repo.
 type RepoAddOptions struct {
+	// Additional parameters, that will be appended to command as arguements.
+	AdditionalParams []string
 	// Run with sudo priveleges. [sudo]
+	Dir string
+	// Use the specified key to sign the database. [--key <file>]
+	Key string
+	// Where command will write output text.
+	Stdout io.Writer
+	// Where command will write output text.
+	Stderr io.Writer
+	// Stdin from user is command will ask for something.
+	Stdin io.Reader
+	// Skip existing and add only new packages. [--new]
 	Sudo bool
 	// Directory where process will be executed.
-	Dir string
-	// Skip existing and add only new packages. [--new]
 	New bool
 	// Remove old package file from disk after updating database. [--remove]
 	Remove bool
@@ -28,16 +38,6 @@ type RepoAddOptions struct {
 	Sign bool
 	// Verify database signature before update. [--verify]
 	Verify bool
-	// Use the specified key to sign the database. [--key <file>]
-	Key string
-	// Where command will write output text.
-	Stdout io.Writer
-	// Where command will write output text.
-	Stderr io.Writer
-	// Stdin from user is command will ask for something.
-	Stdin io.Reader
-	// Additional parameters, that will be appended to command as arguements.
-	AdditionalParams []string
 }
 
 var RepoAddDefault = RepoAddOptions{
