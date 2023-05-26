@@ -11,7 +11,8 @@ package tmpl
 var RootShort = "📦 decentralized package manager based on git and pacman"
 var RootLong = `📦 decentralized package manager based on git and pacman
 
-Official web page: https://fmnx.su/core/pack.
+This program may be freely used and redistributed under 
+the terms of the GNU General Public License.
 
 Example:
 pack [command] <package(s)>`
@@ -35,14 +36,6 @@ Example:
 pack d fmnx.su/core/ainst`
 
 var InstallShort = "📥 install packages"
-var InstallLong = `📥 install packages
-
-You can provide links to repositories, regular package names, network links or
-pathes to packages in local file system. This command this split packages into
-groups and install. If some are already installed pack will skip them.
-
-Example:
-pack i github.com/exm/pkg@v1.23 nano https://example.com/package.pkg.tar.zst`
 
 var ListShort = "📄 show package list"
 var ListLong = `📄 show package list

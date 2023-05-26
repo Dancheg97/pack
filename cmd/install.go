@@ -21,11 +21,11 @@ var installCmd = &cobra.Command{
 	Use:     "install",
 	Aliases: []string{"i"},
 	Short:   tmpl.InstallShort,
-	Long:    tmpl.InstallLong,
 	Run:     Install,
 }
 
 // Cli command installing packages into system.
 func Install(cmd *cobra.Command, pkgs []string) {
-
+	err := lock.TryLock()
+	CheckErr(err)
 }
