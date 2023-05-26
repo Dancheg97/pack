@@ -12,16 +12,34 @@ import (
 	"fmt"
 	"os"
 
-	"fmnx.su/core/pack/config"
 	"fmnx.su/core/pack/tmpl"
 	"github.com/nightlyone/lockfile"
 	"github.com/spf13/cobra"
 )
 
+var RootShort = "📦 decentralized package manager based on pacman"
+var RootLong = `📦 decentralized package manager based on pacman
+
+Official web page: https://fmnx.su/core/pack.
+
+Example:
+pack [command] <package(s)>`
+
+const Cobra = `{{if gt (len .Aliases) 0}}Aliases:
+{{.NameAndAliases}}{{end}}{{if .HasAvailableSubCommands}}{{$cmds := .Commands}}{{if eq (len .Groups) 0}}Available Commands:{{range $cmds}}{{if (or .IsAvailableCommand (eq .Name "help"))}}
+{{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}{{else}}{{range $group := .Groups}}
+
+{{.Title}}{{range $cmds}}{{if (and (eq .GroupID $group.ID) (or .IsAvailableCommand (eq .Name "help")))}}
+{{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}{{end}}{{if not .AllChildCommandsHaveGroup}}
+
+Additional Commands:{{range $cmds}}{{if (and (eq .GroupID "") (or .IsAvailableCommand (eq .Name "help")))}}
+{{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}{{end}}{{end}}{{end}}{{if .HasAvailableLocalFlags}}{{end}}
+`
+
 var rootCmd = &cobra.Command{
 	Use:          "pack",
-	Short:        tmpl.RootShort,
-	Long:         tmpl.RootLong,
+	Short:        RootShort,
+	Long:         RootLong,
 	SilenceUsage: true,
 	CompletionOptions: cobra.CompletionOptions{
 		DisableDefaultCmd:   true,
@@ -35,7 +53,7 @@ var rootCmd = &cobra.Command{
 func init() {
 	rootCmd.SetHelpCommand(&cobra.Command{})
 	rootCmd.SetUsageTemplate(tmpl.Cobra)
-	lock, err := lockfile.New(config.LockFile)
+	lock, err := lockfile.New("/tmp/pack.lock")
 	CheckErr(err)
 	err = lock.TryLock()
 	CheckErr(err)

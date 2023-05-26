@@ -8,12 +8,6 @@ package tmpl
 // This package contains string templates for utility command output.
 // Output might be modified based on configuration - prettyprint.
 
-import (
-	"strings"
-
-	"fmnx.su/core/pack/config"
-)
-
 var RootShort = "📦 decentralized package manager based on git and pacman"
 var RootLong = `📦 decentralized package manager based on git and pacman
 
@@ -116,26 +110,3 @@ codeberg and fmnx. You can connect additional search sources in configuration.
 
 Example:
 pack s ainst`
-
-func init() {
-	if !config.PrettyPrint {
-		DescribeShort = strings.ReplaceAll(DescribeShort, `📝 `, ``)
-		DescribeLong = strings.ReplaceAll(DescribeLong, `📝 `, ``)
-		ConfigShort = strings.ReplaceAll(ConfigShort, `🔧 `, ``)
-		ConfigLong = strings.ReplaceAll(ConfigLong, `🔧 `, ``)
-		InstallShort = strings.ReplaceAll(InstallShort, `📥 `, ``)
-		InstallLong = strings.ReplaceAll(InstallLong, `📥 `, ``)
-		ListShort = strings.ReplaceAll(ListShort, `📄 `, ``)
-		ListLong = strings.ReplaceAll(ListLong, `📄 `, ``)
-		BuildShort = strings.ReplaceAll(BuildShort, `🛠️ `, ``)
-		BuildLong = strings.ReplaceAll(BuildLong, `🛠️ `, ``)
-		RemoveShort = strings.ReplaceAll(RemoveShort, `❌ `, ``)
-		RemoveLong = strings.ReplaceAll(RemoveLong, `❌ `, ``)
-		RootShort = strings.ReplaceAll(RootShort, `📦 `, ``)
-		RootLong = strings.ReplaceAll(RootLong, `📦 `, ``)
-		UpdateShort = strings.ReplaceAll(UpdateShort, `🗳️  `, ``)
-		UpdateLong = strings.ReplaceAll(UpdateLong, `🗳️  `, ``)
-		SearchShort = strings.ReplaceAll(SearchShort, `🔎 `, ``)
-		SearchLong = strings.ReplaceAll(SearchLong, `🔎 `, ``)
-	}
-}
