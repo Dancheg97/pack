@@ -12,6 +12,7 @@ import (
 	"fmnx.su/core/pack/pacman"
 )
 
+// Parameters that used in pack server.
 type ServeParameters struct {
 	Dir  string
 	Port string
@@ -26,13 +27,13 @@ type ServeParameters struct {
 func Serve(p ServeParameters) error {
 	opts := pacman.RepoAddDefault
 	opts.Dir = p.Dir
-	err := pacman.RepoAdd("nano-7.2-1-x86_64.pkg.tar.zst", p.Repo+".db.tar.gz")
+	err := pacman.RepoAdd(p.Dir+"/*.pkg.tar.zst", p.Repo+".db.tar.gz")
 	if err != nil {
 		return err
 	}
 
 	fs := http.FileServer(http.Dir(p.Dir))
-	http.Handle("/", fs)
+	http.Handle("/pacman/", fs)
 
 	log.Print(":: Listening on " + p.Port + "...")
 	return http.ListenAndServe(":"+p.Port, nil)

@@ -101,12 +101,3 @@ If you don't specify any arguements, all packages will be updated.
 
 Examples:
 pack update fmnx.su/core/aist`
-
-var ServeShort = `🌐 run pack server`
-var ServeLong = `🌐 run pack server
-
-This command will launch pack server, which will can provide packages to 
-end-user.
-
-Example:
-pack s ainst`
