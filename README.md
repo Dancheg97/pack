@@ -28,3 +28,7 @@ Single line installation script (for all arch based distributions):
 ```sh
 git clone https://fmnx.su/pkg/pack && cd pack && makepkg --noconfirm -sfri
 ```
+
+<!--
+Add emoji to help command, mb add pull req to cobra.
+-->
