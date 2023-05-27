@@ -9,6 +9,9 @@ package cmd
 // Each file contains a single command, including root cmd.
 
 import (
+	"net/http"
+	"time"
+
 	"fmnx.su/core/pack/server"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -24,17 +27,29 @@ func init() {
 	})
 	AddStringFlag(&FlagParameters{
 		Cmd:     serveCmd,
-		Name:    "serve-port",
-		Desc:    "🌐 exposed port, on which server will run",
-		Default: "8080",
-		Env:     "PACK_EXPOSED_PORT",
+		Name:    "serve-addr",
+		Desc:    "🌐 adress, on which server will run",
+		Default: ":8080",
+		Env:     "PACK_SERVE_ADDR",
 	})
 	AddStringFlag(&FlagParameters{
 		Cmd:     serveCmd,
 		Name:    "serve-repo",
 		Desc:    "📋 name of repository, should match the domain",
 		Default: "localhost:8080",
-		Env:     "PACK_EXPOSED_PORT",
+		Env:     "PACK_SERVE_PORT",
+	})
+	AddStringFlag(&FlagParameters{
+		Cmd:  serveCmd,
+		Name: "serve-cert",
+		Desc: "📃 certificate file for TLS server",
+		Env:  "PACK_SERVE_CERT",
+	})
+	AddStringFlag(&FlagParameters{
+		Cmd:  serveCmd,
+		Name: "serve-key",
+		Desc: "🔑 key file for TLS server",
+		Env:  "PACK_SERVE_KEY",
 	})
 	rootCmd.AddCommand(serveCmd)
 }
@@ -49,9 +64,13 @@ var serveCmd = &cobra.Command{
 // Cli command installing packages into system.
 func Serve(cmd *cobra.Command, pkgs []string) {
 	s := server.Server{
-		Dir:  viper.GetString("serve-dir"),
-		Port: viper.GetString("serve-port"),
-		Repo: viper.GetString("serve-repo"),
+		Server: http.Server{
+			Addr:         viper.GetString("serve-addr"),
+			ReadTimeout:  time.Minute,
+			WriteTimeout: time.Minute,
+		},
+		ServeDir: viper.GetString("serve-dir"),
+		RepoName: viper.GetString("serve-repo"),
 	}
 	CheckErr(s.Serve())
 }
