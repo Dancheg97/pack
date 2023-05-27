@@ -53,7 +53,7 @@ func init() {
 	AddStringFlag(&FlagParameters{
 		Cmd:  serveCmd,
 		Name: "serve-db-path",
-		Desc: "💾 path to local leveldb for user info",
+		Desc: "💾 path to local leveldb with user info",
 		Env:  "PACK_SERVE_DB_PATH",
 	})
 	AddBoolFlag(&FlagParameters{
@@ -61,6 +61,13 @@ func init() {
 		Name: "serve-auto-tls",
 		Desc: "🔒 automatically generate certs in db dir (depends on openssl)",
 		Env:  "PACK_SERVE_AUTO_CERT",
+	})
+	AddStringListFlag(&FlagParameters{
+		Cmd:   serveCmd,
+		Name:  "serve-users",
+		Short: "u",
+		Desc:  "😀 initial users that can manipulate repo, format: name|pwd",
+		Env:   "PACK_SERVE_USERS",
 	})
 	rootCmd.AddCommand(serveCmd)
 }
@@ -86,6 +93,7 @@ func Serve(cmd *cobra.Command, pkgs []string) {
 		Key:         viper.GetString("serve-key"),
 		LevelDbPath: viper.GetString("serve-db-path"),
 		Autocert:    viper.GetBool("serve-auto-tls"),
+		Users:       viper.GetStringSlice("serve-users"),
 	}
 	CheckErr(s.Serve())
 }

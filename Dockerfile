@@ -3,23 +3,23 @@
 # Additional information can be found on official web page: https://fmnx.su/
 # Contact email: help@fmnx.su
 
+FROM docker.io/golang:latest as build
+
+WORKDIR /src
+
+COPY go.mod /src
+COPY go.sum /src
+RUN go mod download
+
+COPY . /src/
+
+RUN go build -o packbin .
+
 FROM archlinux/archlinux:base-devel
 
 LABEL maintainer="dancheg <dancheg@fmnx.su>"
 
-RUN pacman -Syu --needed --noconfirm git pacman-contrib wget go
-
-RUN useradd --system --create-home pack
-RUN echo "pack ALL=(ALL:ALL) NOPASSWD:ALL" > /etc/sudoers.d/pack
-USER pack
-WORKDIR /home/pack
-
-RUN git clone https://fmnx.su/core/pack
-RUN cd pack && makepkg --noconfirm --needed -sri
-RUN sudo mv /home/pack/pack/*.pkg.tar.zst /var/cache/pacman/pkg
-RUN sudo rm -r /home/pack/pack
-RUN sudo rm -r /home/pack/go
-RUN sudo pacman --noconfirm -R wget go
+COPY --from=build /src/packbin /usr/bin/pack
 
 ENTRYPOINT ["pack"]
 CMD ["-h"]

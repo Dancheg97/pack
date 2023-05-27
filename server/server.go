@@ -17,6 +17,13 @@ import (
 	"fmnx.su/core/pack/pacman"
 )
 
+type Handler struct {
+	http.HandlerFunc
+	Path string
+}
+
+var Handlers []Handler
+
 // Server that will provide access to packages.
 // You can add custom endpoints to mux, they will be added to server.
 type Server struct {
@@ -29,6 +36,7 @@ type Server struct {
 	Key         string
 	LevelDbPath string
 	Autocert    bool
+	Users       []string
 }
 
 // This function runs a server on a specified directory. This directory will be
@@ -70,11 +78,21 @@ func (s *Server) initDir() error {
 
 // Initialize server database.
 func (s *Server) initDatabase() error {
-	db, err := db.GetLevelDB(s.LevelDbPath)
+	ldb, err := db.GetLevelDB(s.LevelDbPath)
 	if err != nil {
 		return err
 	}
-	s.Db = db
+	for _, u := range s.Users {
+		splt := strings.Split(u, "|")
+		err = ldb.Update(db.User{
+			Name:     splt[0],
+			Password: splt[1],
+		})
+		if err != nil {
+			return err
+		}
+	}
+	s.Db = ldb
 	return nil
 }
 
@@ -121,6 +139,10 @@ func (s *Server) runServer() error {
 
 	fs := http.FileServer(http.Dir(s.ServeDir))
 	s.Mux.Handle("/pacman/", http.StripPrefix("/pacman/", fs))
+	for _, h := range Handlers {
+		s.Mux.Handle("/pacman"+h.Path, http.StripPrefix("/pacman"+h.Path, h))
+	}
+
 	s.Server.Handler = s.Mux
 
 	if s.Autocert {

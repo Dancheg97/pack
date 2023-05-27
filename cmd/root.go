@@ -76,7 +76,7 @@ type FlagParameters struct {
 	Env string
 }
 
-// Add boolean flag to .
+// Add boolean flag to cobra command.
 func AddBoolFlag(p *FlagParameters) {
 	p.Cmd.PersistentFlags().BoolP(p.Name, p.Short, false, p.Desc)
 	err := viper.BindPFlag(p.Name, p.Cmd.PersistentFlags().Lookup(p.Name))
@@ -85,9 +85,18 @@ func AddBoolFlag(p *FlagParameters) {
 	CheckErr(err)
 }
 
-// Add boolean flag to .
+// Add string flag to cobra command.
 func AddStringFlag(p *FlagParameters) {
 	p.Cmd.PersistentFlags().StringP(p.Name, p.Short, p.Default, p.Desc)
+	err := viper.BindPFlag(p.Name, p.Cmd.PersistentFlags().Lookup(p.Name))
+	CheckErr(err)
+	err = viper.BindEnv(p.Name, p.Env)
+	CheckErr(err)
+}
+
+// Add string flag to cobra command.
+func AddStringListFlag(p *FlagParameters) {
+	p.Cmd.PersistentFlags().StringArrayP(p.Name, p.Short, nil, p.Desc)
 	err := viper.BindPFlag(p.Name, p.Cmd.PersistentFlags().Lookup(p.Name))
 	CheckErr(err)
 	err = viper.BindEnv(p.Name, p.Env)
