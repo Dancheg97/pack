@@ -17,13 +17,6 @@ import (
 	"fmnx.su/core/pack/pacman"
 )
 
-type Handler struct {
-	http.HandlerFunc
-	Path string
-}
-
-var Handlers []Handler
-
 // Server that will provide access to packages.
 // You can add custom endpoints to mux, they will be added to server.
 type Server struct {
@@ -37,6 +30,13 @@ type Server struct {
 	LevelDbPath string
 	Autocert    bool
 	Users       []string
+	Handlers    []Handler
+}
+
+// Additional handlers that can be added to server.
+type Handler struct {
+	http.HandlerFunc
+	Path string
 }
 
 // This function runs a server on a specified directory. This directory will be
@@ -57,6 +57,11 @@ func (s *Server) Serve() error {
 		return err
 	}
 
+	err = s.initDefaultHandlers()
+	if err != nil {
+		return err
+	}
+
 	return s.runServer()
 }
 
@@ -67,7 +72,7 @@ func (s *Server) initDir() error {
 		if err != nil {
 			return err
 		}
-		err = os.Mkdir("public", 0644)
+		err = os.MkdirAll("public", 0644)
 		if err != nil {
 			return err
 		}
@@ -131,34 +136,27 @@ func (s *Server) initPkgs(dir string, userprefix string) error {
 	return nil
 }
 
-// Initialize server for packages.
-func (s *Server) runServer() error {
+// Initialize default handlers for server.
+func (s *Server) initDefaultHandlers() error {
 	if s.Mux == nil {
 		s.Mux = http.DefaultServeMux
 	}
-
 	fs := http.FileServer(http.Dir(s.ServeDir))
 	s.Mux.Handle("/pacman/", http.StripPrefix("/pacman/", fs))
-	for _, h := range Handlers {
+
+	s.Handlers = append(s.Handlers, Handler{
+		HandlerFunc: s.pushHandler,
+		Path:        "/push",
+	})
+
+	for _, h := range s.Handlers {
 		s.Mux.Handle("/pacman"+h.Path, http.StripPrefix("/pacman"+h.Path, h))
 	}
-
 	s.Server.Handler = s.Mux
-
-	if s.Autocert {
-		err := s.generateCerts()
-		if err != nil {
-			return err
-		}
-	}
-
-	fmt.Print(":: Listening on " + s.Addr + "...")
-	if s.Cert != `` && s.Key != `` {
-		return s.Server.ListenAndServeTLS(s.Cert, s.Key)
-	}
-	return s.Server.ListenAndServe()
+	return nil
 }
 
+// Generate certificates for secure connection with server.
 func (s *Server) generateCerts() error {
 	fmt.Println(":: Generating certificates...")
 	cert := path.Join(s.LevelDbPath, "key.pem")
@@ -172,4 +170,19 @@ func (s *Server) generateCerts() error {
 	s.Key = key
 	s.Cert = cert
 	return cmd.Run()
+}
+
+// Initialize server for packages.
+func (s *Server) runServer() error {
+	if s.Autocert {
+		err := s.generateCerts()
+		if err != nil {
+			return err
+		}
+	}
+	fmt.Print(":: Listening on " + s.Addr + "...")
+	if s.Cert != `` && s.Key != `` {
+		return s.Server.ListenAndServeTLS(s.Cert, s.Key)
+	}
+	return s.Server.ListenAndServe()
 }

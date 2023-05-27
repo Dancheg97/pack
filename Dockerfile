@@ -12,7 +12,6 @@ COPY go.sum /src
 RUN go mod download
 
 COPY . /src/
-
 RUN go build -o packbin .
 
 FROM archlinux/archlinux:base-devel

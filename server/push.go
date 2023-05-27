@@ -5,15 +5,14 @@
 
 package server
 
-import "net/http"
+import (
+	"fmt"
+	"net/http"
+)
 
-func init() {
-	Handlers = append(Handlers, Handler{
-		HandlerFunc: pushHandler,
-		Path:        "push",
-	})
-}
-
-func pushHandler(w http.ResponseWriter, r *http.Request) {
-
+func (s *Server) pushHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("req recieved")
+	u := r.Header.Get("user")
+	p := r.Header.Get("password")
+	fmt.Println(u, p)
 }

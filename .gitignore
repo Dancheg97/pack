@@ -5,3 +5,4 @@ src/**
 packbin
 tmp/**
 **.conf
+users.db
