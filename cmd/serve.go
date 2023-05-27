@@ -21,14 +21,14 @@ func init() {
 	AddStringFlag(&FlagParameters{
 		Cmd:     serveCmd,
 		Name:    "serve-dir",
-		Desc:    "📂 directory with packages",
+		Desc:    "📂 directory with packages, publically exposed",
 		Default: "/var/cache/pacman/pkg",
 		Env:     "PACK_SERVE_DIR",
 	})
 	AddStringFlag(&FlagParameters{
 		Cmd:     serveCmd,
 		Name:    "serve-addr",
-		Desc:    "🌐 adress, on which server will run",
+		Desc:    "🌐 server adress",
 		Default: ":8080",
 		Env:     "PACK_SERVE_ADDR",
 	})
@@ -50,6 +50,18 @@ func init() {
 		Name: "serve-key",
 		Desc: "🔑 key file for TLS server",
 		Env:  "PACK_SERVE_KEY",
+	})
+	AddStringFlag(&FlagParameters{
+		Cmd:  serveCmd,
+		Name: "serve-db-path",
+		Desc: "💾 path to database with user info",
+		Env:  "PACK_SERVE_DB_LOC",
+	})
+	AddBoolFlag(&FlagParameters{
+		Cmd:  serveCmd,
+		Name: "serve-auto-tls",
+		Desc: "🔒 automatically generate certs in db dir (depends on openssl)",
+		Env:  "PACK_SERVE_AUTO_CERT",
 	})
 	rootCmd.AddCommand(serveCmd)
 }
@@ -73,6 +85,8 @@ func Serve(cmd *cobra.Command, pkgs []string) {
 		RepoName: viper.GetString("serve-repo"),
 		Cert:     viper.GetString("serve-cert"),
 		Key:      viper.GetString("serve-key"),
+		DbPath:   viper.GetString("serve-db-path"),
+		Autocert: viper.GetBool("serve-auto-tls"),
 	}
 	CheckErr(s.Serve())
 }
