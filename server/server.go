@@ -136,26 +136,6 @@ func (s *Server) initPkgs(dir string, userprefix string) error {
 	return nil
 }
 
-// Initialize default handlers for server.
-func (s *Server) initDefaultHandlers() error {
-	if s.Mux == nil {
-		s.Mux = http.DefaultServeMux
-	}
-	fs := http.FileServer(http.Dir(s.ServeDir))
-	s.Mux.Handle("/pacman/", http.StripPrefix("/pacman/", fs))
-
-	s.Handlers = append(s.Handlers, Handler{
-		HandlerFunc: s.pushHandler,
-		Path:        "/push",
-	})
-
-	for _, h := range s.Handlers {
-		s.Mux.Handle("/pacman"+h.Path, http.StripPrefix("/pacman"+h.Path, h))
-	}
-	s.Server.Handler = s.Mux
-	return nil
-}
-
 // Generate certificates for secure connection with server.
 func (s *Server) generateCerts() error {
 	fmt.Println(":: Generating certificates...")
