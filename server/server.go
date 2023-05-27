@@ -6,7 +6,7 @@
 package server
 
 import (
-	"log"
+	"fmt"
 	"net/http"
 	"os"
 	"os/exec"
@@ -39,7 +39,7 @@ func (s *Server) Serve() error {
 		return err
 	}
 
-	err = s.initPkgs()
+	err = s.initPkgs(s.ServeDir, "")
 	if err != nil {
 		return err
 	}
@@ -57,36 +57,26 @@ func (s *Server) initDatabase() error {
 	return nil
 }
 
-// Initialize packages.
-func (s *Server) initPkgs() error {
-	rootFileInfo, err := os.ReadDir(s.ServeDir)
+// Initializes packages, will recursively walk throw provided dir and add all
+// .pkg.tar.zst packages to in each specified repository. Userprefix is used
+// to add use names in nested folders.
+func (s *Server) initPkgs(dir string, userprefix string) error {
+	rootFileInfo, err := os.ReadDir(dir)
 	if err != nil {
 		return err
 	}
-	for _, ufi := range rootFileInfo {
-		if ufi.IsDir() {
-			userDir := path.Join(s.ServeDir, ufi.Name())
-			userFileInfo, err := os.ReadDir(userDir)
+	for _, fi := range rootFileInfo {
+		if fi.IsDir() {
+			err = s.initPkgs(path.Join(s.ServeDir, fi.Name()), "."+fi.Name())
 			if err != nil {
 				return err
 			}
-			for _, userFile := range userFileInfo {
-				if strings.HasSuffix(userFile.Name(), ".pkg.tar.zst") {
-					err = pacman.RepoAdd(
-						path.Join(userDir, userFile.Name()),
-						path.Join(userDir, s.RepoName+"."+userFile.Name()+".db.tar.gz"),
-					)
-					if err != nil {
-						return err
-					}
-				}
-			}
 			continue
 		}
-		if strings.HasSuffix(ufi.Name(), ".pkg.tar.zst") {
+		if strings.HasSuffix(fi.Name(), ".pkg.tar.zst") {
 			err = pacman.RepoAdd(
-				path.Join(s.ServeDir, ufi.Name()),
-				path.Join(s.ServeDir, s.RepoName+".db.tar.gz"),
+				path.Join(s.ServeDir, fi.Name()),
+				path.Join(s.ServeDir, userprefix+s.RepoName+".db.tar.gz"),
 			)
 			if err != nil {
 				return err
@@ -113,7 +103,7 @@ func (s *Server) runServer() error {
 		}
 	}
 
-	log.Print(":: Listening on " + s.Addr + "...")
+	fmt.Print(":: Listening on " + s.Addr + "...")
 	if s.Cert != `` && s.Key != `` {
 		return s.Server.ListenAndServeTLS(s.Cert, s.Key)
 	}
@@ -121,15 +111,16 @@ func (s *Server) runServer() error {
 }
 
 func (s *Server) generateCerts() error {
-	s.Cert = path.Join(s.DbPath, "key.pem")
-	s.Key = path.Join(s.DbPath, "cert.pem")
+	fmt.Println(":: Generating certificates...")
+	cert := path.Join(s.DbPath, "key.pem")
+	key := path.Join(s.DbPath, "cert.pem")
 	cmd := exec.Command(
 		"openssl", "req", "-x509", "-newkey", "rsa:4096",
-		"-keyout", s.Key, "-out", s.Cert,
+		"-keyout", key, "-out", cert,
 		"-sha256", "-days", "3650", "-nodes", "-subj",
 		"/C=XX/ST=_/L=_/O=_/OU=_/CN=_",
 	)
-	cmd.Stderr = os.Stderr
-	cmd.Stdout = os.Stdout
+	s.Key = key
+	s.Cert = cert
 	return cmd.Run()
 }

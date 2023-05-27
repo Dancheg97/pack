@@ -6,7 +6,7 @@
 package pacman
 
 import (
-	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"sync"
@@ -31,7 +31,7 @@ func init() {
 func checkDependency(p string) {
 	_, err := exec.LookPath(p)
 	if err != nil {
-		fmt.Printf("unable to find %s in system\n", p)
+		log.Printf("unable to find %s in system\n", p)
 		os.Exit(1)
 	}
 }
