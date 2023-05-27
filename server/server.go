@@ -21,14 +21,14 @@ import (
 // You can add custom endpoints to mux, they will be added to server.
 type Server struct {
 	http.Server
-	Mux      *http.ServeMux
-	db       db.Database
-	ServeDir string
-	RepoName string
-	Cert     string
-	Key      string
-	DbPath   string
-	Autocert bool
+	Mux         *http.ServeMux
+	Db          db.Database
+	ServeDir    string
+	RepoName    string
+	Cert        string
+	Key         string
+	LevelDbPath string
+	Autocert    bool
 }
 
 // This function runs a server on a specified directory. This directory will be
@@ -66,8 +66,11 @@ func (s *Server) initDir() error {
 
 // Initialize server database.
 func (s *Server) initDatabase() error {
-	
-
+	db, err := db.GetLevelDB(s.LevelDbPath)
+	if err != nil {
+		return err
+	}
+	s.Db = db
 	return nil
 }
 
@@ -93,10 +96,16 @@ func (s *Server) initPkgs(dir string, userprefix string) error {
 			}
 		}
 	}
-	// err = s.initPkgs(path.Join(s.ServeDir, fi.Name()), "."+fi.Name())
-	// if err != nil {
-	// 	return err
-	// }
+	users, err := s.Db.List()
+	if err != nil {
+		return err
+	}
+	for _, u := range users {
+		err = s.initPkgs(path.Join(s.ServeDir, u.Name), "."+u.Name)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -126,8 +135,8 @@ func (s *Server) runServer() error {
 
 func (s *Server) generateCerts() error {
 	fmt.Println(":: Generating certificates...")
-	cert := path.Join(s.DbPath, "key.pem")
-	key := path.Join(s.DbPath, "cert.pem")
+	cert := path.Join(s.LevelDbPath, "key.pem")
+	key := path.Join(s.LevelDbPath, "cert.pem")
 	cmd := exec.Command(
 		"openssl", "req", "-x509", "-newkey", "rsa:4096",
 		"-keyout", key, "-out", cert,
