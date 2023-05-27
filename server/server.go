@@ -13,8 +13,8 @@ import (
 	"path"
 	"strings"
 
+	"fmnx.su/core/pack/db"
 	"fmnx.su/core/pack/pacman"
-	"github.com/syndtr/goleveldb/leveldb"
 )
 
 // Server that will provide access to packages.
@@ -22,7 +22,7 @@ import (
 type Server struct {
 	http.Server
 	Mux      *http.ServeMux
-	db       *leveldb.DB
+	db       db.Database
 	ServeDir string
 	RepoName string
 	Cert     string
@@ -34,7 +34,12 @@ type Server struct {
 // This function runs a server on a specified directory. This directory will be
 // exposed to public.
 func (s *Server) Serve() error {
-	err := s.initDatabase()
+	err := s.initDir()
+	if err != nil {
+		return err
+	}
+
+	err = s.initDatabase()
 	if err != nil {
 		return err
 	}
@@ -47,13 +52,22 @@ func (s *Server) Serve() error {
 	return s.runServer()
 }
 
+// If directory is not provided by user, set up current process dir.
+func (s *Server) initDir() error {
+	if s.ServeDir == `` {
+		d, err := os.Getwd()
+		if err != nil {
+			return err
+		}
+		s.ServeDir = d
+	}
+	return nil
+}
+
 // Initialize server database.
 func (s *Server) initDatabase() error {
-	db, err := leveldb.OpenFile(path.Join(s.DbPath, "users.db"), nil)
-	if err != nil {
-		return err
-	}
-	s.db = db
+	
+
 	return nil
 }
 
@@ -67,10 +81,6 @@ func (s *Server) initPkgs(dir string, userprefix string) error {
 	}
 	for _, fi := range rootFileInfo {
 		if fi.IsDir() {
-			err = s.initPkgs(path.Join(s.ServeDir, fi.Name()), "."+fi.Name())
-			if err != nil {
-				return err
-			}
 			continue
 		}
 		if strings.HasSuffix(fi.Name(), ".pkg.tar.zst") {
@@ -83,6 +93,10 @@ func (s *Server) initPkgs(dir string, userprefix string) error {
 			}
 		}
 	}
+	// err = s.initPkgs(path.Join(s.ServeDir, fi.Name()), "."+fi.Name())
+	// if err != nil {
+	// 	return err
+	// }
 	return nil
 }
 

@@ -20,13 +20,6 @@ import (
 func init() {
 	AddStringFlag(&FlagParameters{
 		Cmd:     serveCmd,
-		Name:    "serve-dir",
-		Desc:    "📂 directory with packages, publically exposed",
-		Default: "/var/cache/pacman/pkg",
-		Env:     "PACK_SERVE_DIR",
-	})
-	AddStringFlag(&FlagParameters{
-		Cmd:     serveCmd,
 		Name:    "serve-addr",
 		Desc:    "🌐 server adress",
 		Default: ":8080",
@@ -38,6 +31,12 @@ func init() {
 		Desc:    "📋 name of repository, should match the domain",
 		Default: "localhost:8080",
 		Env:     "PACK_SERVE_PORT",
+	})
+	AddStringFlag(&FlagParameters{
+		Cmd:  serveCmd,
+		Name: "serve-dir",
+		Desc: "📂 directory with packages, publically exposed",
+		Env:  "PACK_SERVE_DIR",
 	})
 	AddStringFlag(&FlagParameters{
 		Cmd:  serveCmd,
