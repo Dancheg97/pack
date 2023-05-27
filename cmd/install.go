@@ -9,6 +9,7 @@ package cmd
 // Each file contains a single command, including root cmd.
 
 import (
+	"fmnx.su/core/pack/pack"
 	"fmnx.su/core/pack/tmpl"
 	"github.com/spf13/cobra"
 )
@@ -27,5 +28,7 @@ var installCmd = &cobra.Command{
 // Cli command installing packages into system.
 func Install(cmd *cobra.Command, pkgs []string) {
 	err := lock.TryLock()
+	CheckErr(err)
+	err = pack.Install(pkgs)
 	CheckErr(err)
 }

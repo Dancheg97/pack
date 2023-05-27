@@ -26,14 +26,14 @@ func init() {
 		Cmd:     serveCmd,
 		Name:    "serve-port",
 		Desc:    "🌐 exposed port, on which server will run",
-		Default: "1997",
+		Default: "8080",
 		Env:     "PACK_EXPOSED_PORT",
 	})
 	AddStringFlag(&FlagParameters{
 		Cmd:     serveCmd,
 		Name:    "serve-repo",
 		Desc:    "📋 name of repository, should match the domain",
-		Default: "localhost:1997",
+		Default: "localhost:8080",
 		Env:     "PACK_EXPOSED_PORT",
 	})
 	rootCmd.AddCommand(serveCmd)

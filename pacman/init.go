@@ -15,7 +15,6 @@ import (
 // Dependecy packages.
 const (
 	pacman  = `pacman`
-	sudo    = `sudo`
 	makepkg = `makepkg`
 	repoadd = `repo-add`
 )
@@ -25,7 +24,6 @@ var mu sync.Mutex
 
 func init() {
 	checkDependency(pacman)
-	checkDependency(sudo)
 	checkDependency(makepkg)
 	checkDependency(repoadd)
 }
@@ -36,14 +34,6 @@ func checkDependency(p string) {
 		fmt.Printf("unable to find %s in system\n", p)
 		os.Exit(1)
 	}
-}
-
-func SudoCommand(sudo bool, cmd string, args ...string) *exec.Cmd {
-	if sudo {
-		args := append([]string{cmd}, args...)
-		return exec.Command("sudo", args...)
-	}
-	return exec.Command(cmd, args...)
 }
 
 func formOptions[Options any](arr []Options, dv *Options) *Options {

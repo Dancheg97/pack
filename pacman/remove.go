@@ -8,6 +8,7 @@ package pacman
 import (
 	"io"
 	"os"
+	"os/exec"
 	"strings"
 )
 
@@ -68,7 +69,7 @@ func RemoveList(pkgs []string, opts ...RemoveOptions) error {
 	args = append(args, o.AdditionalParams...)
 	args = append(args, pkgs...)
 
-	cmd := SudoCommand(o.Sudo, pacman, args...)
+	cmd := exec.Command(pacman, args...)
 	cmd.Stdout = o.Stdout
 	cmd.Stderr = o.Stderr
 	cmd.Stdin = o.Stdin

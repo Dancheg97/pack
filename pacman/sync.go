@@ -10,6 +10,7 @@ import (
 	"errors"
 	"io"
 	"os"
+	"os/exec"
 	"strings"
 )
 
@@ -53,6 +54,7 @@ var SyncDefault = SyncOptions{
 	Sudo:      true,
 	Needed:    true,
 	NoConfirm: true,
+	Refresh:   true,
 	Stdout:    os.Stdout,
 	Stderr:    os.Stderr,
 }
@@ -107,7 +109,7 @@ func SyncList(pkgs []string, opts ...SyncOptions) error {
 	args = append(args, o.AdditionalParams...)
 	args = append(args, pkgs...)
 
-	cmd := SudoCommand(o.Sudo, pacman, args...)
+	cmd := exec.Command(pacman, args...)
 	cmd.Stdout = o.Stdout
 	cmd.Stderr = o.Stderr
 	cmd.Stdin = o.Stdin
@@ -152,7 +154,7 @@ func Search(re string, opts ...SearchOptions) ([]SearchResult, error) {
 	args = append(args, re)
 
 	var b bytes.Buffer
-	cmd := SudoCommand(o.Sudo, pacman, args...)
+	cmd := exec.Command(pacman, args...)
 	cmd.Stdout = &b
 	cmd.Stderr = &b
 	cmd.Stdin = os.Stdin

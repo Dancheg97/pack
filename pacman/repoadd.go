@@ -8,6 +8,7 @@ package pacman
 import (
 	"io"
 	"os"
+	"os/exec"
 )
 
 // Parameters for adding packages to pacman repo.
@@ -79,7 +80,7 @@ func RepoAdd(f string, db string, opts ...RepoAddOptions) error {
 	args = append(args, db)
 	args = append(args, f)
 
-	cmd := SudoCommand(o.Sudo, repoadd, args...)
+	cmd := exec.Command(repoadd, args...)
 	cmd.Dir = o.Dir
 	cmd.Stderr = o.Stderr
 	cmd.Stdout = o.Stdout
