@@ -59,7 +59,11 @@ func (s *Server) initDir() error {
 		if err != nil {
 			return err
 		}
-		s.ServeDir = d
+		err = os.Mkdir("public", 0644)
+		if err != nil {
+			return err
+		}
+		s.ServeDir = path.Join(d, "public")
 	}
 	return nil
 }
