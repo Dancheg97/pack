@@ -71,6 +71,8 @@ func Serve(cmd *cobra.Command, pkgs []string) {
 		},
 		ServeDir: viper.GetString("serve-dir"),
 		RepoName: viper.GetString("serve-repo"),
+		Cert:     viper.GetString("serve-cert"),
+		Key:      viper.GetString("serve-key"),
 	}
 	CheckErr(s.Serve())
 }

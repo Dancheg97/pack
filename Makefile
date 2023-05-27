@@ -1,10 +1,12 @@
+pwd := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
-docker:
-	docker build -t fmnx.su/core/pack:latest --no-cache .
-	docker run --rm -it fmnx.su/core/pack --help
-	docker run --rm -it fmnx.su/core/pack d pack
+serve:
+	mkdir -p tmp
+	sudo cp /var/cache/pacman/pkg/nano* tmp
+	go run . serve --serve-dir tmp
 
-
-test:
-	docker run --rm -it fmnx.su/core/pack i fmnx.su/pkg/gnome-browser-connector fmnx.su/pkg/gnome-shell-extension-dash-to-dock fmnx.su/pkg/zsh-theme-powerlevel10k-bin-git fmnx.su/pkg/zsh-syntax-highlighting-git fmnx.su/pkg/zsh-autosuggestions fmnx.su/pkg/adw-gtk3 fmnx.su/pkg/flutter fmnx.su/pkg/onlyoffice-bin fmnx.su/pkg/visual-studio-code-bin fmnx.su/pkg/neovim-git fmnx.su/pkg/vlang
-	# fmnx.su/pkg/adw-gtk-theme fmnx.su/pkg/papirus-icon-theme
+servetls:
+	mkdir -p tmp
+	sudo cp /var/cache/pacman/pkg/nano* tmp
+	openssl req -x509 -newkey rsa:4096 -keyout tmp/key.pem -out tmp/cert.pem -sha256 -days 3650 -nodes -subj "/C=XX/ST=StateName/L=CityName/O=CompanyName/OU=CompanySectionName/CN=CommonNameOrHostname"
+	go run . serve --serve-dir tmp --serve-key tmp/key.pem --serve-cert tmp/cert.pem
