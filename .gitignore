@@ -6,3 +6,4 @@ packbin
 tmp/**
 **.conf
 users.db
+users

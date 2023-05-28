@@ -6,11 +6,7 @@
 package db
 
 type Database interface {
-	List() ([]User, error)
-	Update(u User) error
-}
-
-type User struct {
-	Name     string `json:"name"`
-	Password string `json:"password"`
+	List() ([]string, error)
+	Validate(name string, password string) bool
+	Add(name string, password string) error
 }

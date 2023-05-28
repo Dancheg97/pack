@@ -10,7 +10,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/nightlyone/lockfile"
@@ -55,7 +54,7 @@ func Execute() {
 // Herlper function to exit on unexpected errors.
 func CheckErr(err error) {
 	if err != nil {
-		log.Println(err.Error())
+		fmt.Println(err.Error())
 		os.Exit(1)
 	}
 }

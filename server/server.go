@@ -21,16 +21,16 @@ import (
 // You can add custom endpoints to mux, they will be added to server.
 type Server struct {
 	http.Server
-	Mux         *http.ServeMux
-	Db          db.Database
-	ServeDir    string
-	RepoName    string
-	Cert        string
-	Key         string
-	LevelDbPath string
-	Autocert    bool
-	Users       []string
-	Handlers    []Handler
+	Mux      *http.ServeMux
+	Db       db.Database
+	ServeDir string
+	RepoName string
+	Cert     string
+	Key      string
+	DbPath   string
+	Autocert bool
+	Users    []string
+	Handlers []Handler
 }
 
 // Additional handlers that can be added to server.
@@ -42,12 +42,12 @@ type Handler struct {
 // This function runs a server on a specified directory. This directory will be
 // exposed to public.
 func (s *Server) Serve() error {
-	err := s.initDir()
+	err := s.initDatabase()
 	if err != nil {
 		return err
 	}
 
-	err = s.initDatabase()
+	err = s.initDirs()
 	if err != nil {
 		return err
 	}
@@ -65,39 +65,47 @@ func (s *Server) Serve() error {
 	return s.runServer()
 }
 
-// If directory is not provided by user, set up current process dir.
-func (s *Server) initDir() error {
-	if s.ServeDir == `` {
-		d, err := os.Getwd()
-		if err != nil {
-			return err
-		}
-		err = os.MkdirAll("public", 0644)
-		if err != nil {
-			return err
-		}
-		s.ServeDir = path.Join(d, "public")
-	}
-	return nil
-}
-
 // Initialize server database.
 func (s *Server) initDatabase() error {
-	ldb, err := db.GetLevelDB(s.LevelDbPath)
+	fdb, err := db.GetFileDb(s.DbPath)
 	if err != nil {
 		return err
 	}
 	for _, u := range s.Users {
 		splt := strings.Split(u, "|")
-		err = ldb.Update(db.User{
-			Name:     splt[0],
-			Password: splt[1],
-		})
+		err = fdb.Add(splt[0], splt[1])
 		if err != nil {
 			return err
 		}
 	}
-	s.Db = ldb
+	s.Db = fdb
+	return nil
+}
+
+// If directory is not provided by user, set up current process dir and
+// directories for user packages.
+func (s *Server) initDirs() error {
+	if s.ServeDir == `` {
+		d, err := os.Getwd()
+		if err != nil {
+			return err
+		}
+		err = os.MkdirAll("public", 0777)
+		if err != nil {
+			return err
+		}
+		s.ServeDir = path.Join(d, "public")
+	}
+	users, err := s.Db.List()
+	if err != nil {
+		return err
+	}
+	for _, u := range users {
+		err = os.MkdirAll(path.Join(s.ServeDir, u), 0777)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -128,7 +136,7 @@ func (s *Server) initPkgs(dir string, userprefix string) error {
 		return err
 	}
 	for _, u := range users {
-		err = s.initPkgs(path.Join(s.ServeDir, u.Name), "."+u.Name)
+		err = s.initPkgs(path.Join(s.ServeDir, u), "."+u)
 		if err != nil {
 			return err
 		}
@@ -139,8 +147,8 @@ func (s *Server) initPkgs(dir string, userprefix string) error {
 // Generate certificates for secure connection with server.
 func (s *Server) generateCerts() error {
 	fmt.Println(":: Generating certificates...")
-	cert := path.Join(s.LevelDbPath, "key.pem")
-	key := path.Join(s.LevelDbPath, "cert.pem")
+	cert := path.Join(s.DbPath, "key.pem")
+	key := path.Join(s.DbPath, "cert.pem")
 	cmd := exec.Command(
 		"openssl", "req", "-x509", "-newkey", "rsa:4096",
 		"-keyout", key, "-out", cert,

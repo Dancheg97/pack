@@ -6,8 +6,9 @@
 package server
 
 import (
-	"context"
+	"fmt"
 	"net/http"
+	"os"
 )
 
 // Initialize default handlers for server.
@@ -19,7 +20,7 @@ func (s *Server) initDefaultHandlers() error {
 	s.Mux.Handle("/pacman/", http.StripPrefix("/pacman/", fs))
 
 	s.Handlers = append(s.Handlers, Handler{
-		HandlerFunc: s.pushHandler,
+		HandlerFunc: s.push,
 		Path:        "/push",
 	})
 
@@ -30,15 +31,24 @@ func (s *Server) initDefaultHandlers() error {
 	return nil
 }
 
-// Functions with additional adjustments that are easier to write.
-type RPCFunc func(RPCtx, any) (any, error)
+// Handler that can be used to upload packages.
+func (s *Server) push(w http.ResponseWriter, r *http.Request) {
+	u := r.Header.Get("login")
+	p := r.Header.Get("password")
+	if !s.Db.Validate(u, p) {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
 
-// Extended context to
-type RPCtx struct {
-	context.Context
-}
-
-// Wrapper function to transform rpc-like function to http.Handler format.
-func RpcTransform(f RPCFunc) http.HandlerFunc {
-	return nil
+	file := r.Header.Get("file")
+	f, err := os.Create(fmt.Sprintf("%s/%s/%s", s.ServeDir, u, file))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	_, err = f.ReadFrom(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }

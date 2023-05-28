@@ -32,6 +32,13 @@ func init() {
 		Default: "localhost:8080",
 		Env:     "PACK_SERVE_PORT",
 	})
+	AddStringListFlag(&FlagParameters{
+		Cmd:   serveCmd,
+		Name:  "serve-users",
+		Short: "u",
+		Desc:  "😀 initial users, format: name|pwd",
+		Env:   "PACK_SERVE_USERS",
+	})
 	AddStringFlag(&FlagParameters{
 		Cmd:  serveCmd,
 		Name: "serve-dir",
@@ -62,13 +69,6 @@ func init() {
 		Desc: "🔒 automatically generate certs in db dir (depends on openssl)",
 		Env:  "PACK_SERVE_AUTO_CERT",
 	})
-	AddStringListFlag(&FlagParameters{
-		Cmd:   serveCmd,
-		Name:  "serve-users",
-		Short: "u",
-		Desc:  "😀 initial users that can manipulate repo, format: name|pwd",
-		Env:   "PACK_SERVE_USERS",
-	})
 	rootCmd.AddCommand(serveCmd)
 }
 
@@ -87,13 +87,13 @@ func Serve(cmd *cobra.Command, pkgs []string) {
 			ReadTimeout:  time.Minute,
 			WriteTimeout: time.Minute,
 		},
-		ServeDir:    viper.GetString("serve-dir"),
-		RepoName:    viper.GetString("serve-repo"),
-		Cert:        viper.GetString("serve-cert"),
-		Key:         viper.GetString("serve-key"),
-		LevelDbPath: viper.GetString("serve-db-path"),
-		Autocert:    viper.GetBool("serve-auto-tls"),
-		Users:       viper.GetStringSlice("serve-users"),
+		ServeDir: viper.GetString("serve-dir"),
+		RepoName: viper.GetString("serve-repo"),
+		Cert:     viper.GetString("serve-cert"),
+		Key:      viper.GetString("serve-key"),
+		DbPath:   viper.GetString("serve-db-path"),
+		Autocert: viper.GetBool("serve-auto-tls"),
+		Users:    viper.GetStringSlice("serve-users"),
 	}
 	CheckErr(s.Serve())
 }
