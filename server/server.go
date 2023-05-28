@@ -72,8 +72,8 @@ func (s *Server) initDatabase() error {
 		return err
 	}
 	for _, u := range s.Users {
-		splt := strings.Split(u, "|")
-		err = fdb.Add(splt[0], splt[1])
+		splt := strings.Split(u, ":")
+		err = fdb.Update(splt[0], splt[1])
 		if err != nil {
 			return err
 		}
@@ -90,7 +90,7 @@ func (s *Server) initDirs() error {
 		if err != nil {
 			return err
 		}
-		err = os.MkdirAll("public", 0777)
+		err = os.MkdirAll("public", 0755)
 		if err != nil {
 			return err
 		}
@@ -101,7 +101,7 @@ func (s *Server) initDirs() error {
 		return err
 	}
 	for _, u := range users {
-		err = os.MkdirAll(path.Join(s.ServeDir, u), 0777)
+		err = os.MkdirAll(path.Join(s.ServeDir, u), 0755)
 		if err != nil {
 			return err
 		}
@@ -131,14 +131,16 @@ func (s *Server) initPkgs(dir string, userprefix string) error {
 			}
 		}
 	}
-	users, err := s.Db.List()
-	if err != nil {
-		return err
-	}
-	for _, u := range users {
-		err = s.initPkgs(path.Join(s.ServeDir, u), "."+u)
+	if userprefix == `` {
+		users, err := s.Db.List()
 		if err != nil {
 			return err
+		}
+		for _, u := range users {
+			err = s.initPkgs(path.Join(s.ServeDir, u), "."+u)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil

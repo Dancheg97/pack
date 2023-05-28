@@ -8,5 +8,5 @@ package db
 type Database interface {
 	List() ([]string, error)
 	Validate(name string, password string) bool
-	Add(name string, password string) error
+	Update(name string, password string) error
 }
