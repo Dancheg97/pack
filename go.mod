@@ -3,7 +3,6 @@ module fmnx.su/core/pack
 go 1.20
 
 require (
-	github.com/google/uuid v1.1.2
 	github.com/nightlyone/lockfile v1.0.0
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.15.0

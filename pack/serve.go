@@ -16,7 +16,6 @@ import (
 
 	"fmnx.su/core/pack/db"
 	"fmnx.su/core/pack/pacman"
-	"github.com/google/uuid"
 )
 
 // Server that will provide access to packages.
@@ -92,19 +91,11 @@ func (s *Server) prepareDirectories() error {
 // packages then will be added to root repository.
 func (s *Server) pullMirrors() error {
 	for _, mirr := range s.PullMirr {
-		splt := strings.Split(mirr, "::")
-		mirrName := splt[0]
-		mirrDir := path.Join(s.ServeDir, mirrName)
-		mirrLink := splt[1]
-		err := s.Db.Update(mirrName, uuid.New().String())
-		if err != nil {
-			return err
-		}
 		go LaunchMirrorDaemon(&MirrorParams{
-			Dir:    mirrDir,
-			Link:   mirrLink,
-			Dbname: s.Addr + "." + mirrName,
-			Dur:    time.Hour * 12,
+			Dir:    s.ServeDir,
+			Link:   mirr,
+			Dbname: s.Addr,
+			Dur:    time.Hour * 36,
 		})
 	}
 	return nil

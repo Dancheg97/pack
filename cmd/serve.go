@@ -44,7 +44,7 @@ func init() {
 		Cmd:   serveCmd,
 		Name:  "serve-pull-mirr",
 		Short: "m",
-		Desc:  "🪞 list of pull mirrors, format - dbname::link",
+		Desc:  "🪞 list of pull mirrors, just provide links (depends on wget)",
 		Env:   "PACK_SERVE_PULL_MIRR",
 	})
 	AddStringFlag(&FlagParameters{
