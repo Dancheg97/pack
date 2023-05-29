@@ -33,7 +33,7 @@ func (s *Server) initDefaultHandlers() error {
 
 // Handler that can be used to upload packages.
 func (s *Server) push(w http.ResponseWriter, r *http.Request) {
-	u := r.Header.Get("login")
+	u := r.Header.Get("user")
 	p := r.Header.Get("password")
 	if !s.Db.Validate(u, p) {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -51,4 +51,10 @@ func (s *Server) push(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	err = s.initPkgs(s.ServeDir, u)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
 }
