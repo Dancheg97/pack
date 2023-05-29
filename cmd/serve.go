@@ -47,6 +47,13 @@ func init() {
 		Desc:  "🪞 list of pull mirrors, just provide links (depends on wget)",
 		Env:   "PACK_SERVE_PULL_MIRR",
 	})
+	AddStringListFlag(&FlagParameters{
+		Cmd:   serveCmd,
+		Name:  "serve-build-git",
+		Short: "b",
+		Desc:  "🛠️ list of git repositories, that will be pulled and built",
+		Env:   "PACK_SERVE_BUILD_GIT",
+	})
 	AddStringFlag(&FlagParameters{
 		Cmd:  serveCmd,
 		Name: "serve-log-file",
@@ -111,6 +118,7 @@ func Serve(cmd *cobra.Command, pkgs []string) {
 		Key:      viper.GetString("serve-key"),
 		Autocert: viper.GetBool("serve-autocert"),
 		PullMirr: viper.GetStringSlice("serve-pull-mirr"),
+		BuildGit: viper.GetStringSlice("server-build-git"),
 		Db:       db,
 	}
 	err = server.Serve()

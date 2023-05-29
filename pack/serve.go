@@ -14,7 +14,6 @@ import (
 	"strings"
 	"time"
 
-	"fmnx.su/core/pack/db"
 	"fmnx.su/core/pack/pacman"
 )
 
@@ -22,21 +21,49 @@ import (
 // You can add custom endpoints to mux, they will be added to server.
 type Server struct {
 	http.Server
-	Mux      *http.ServeMux
-	Db       db.Database
+	Mux *http.ServeMux
+
+	// Simple database to store user credentials.
+	Db Database
+
+	// Publicly exposed directory with packages and pacman repository files.
 	ServeDir string
+
+	// Repository name: should match the domain name.
 	RepoName string
-	Cert     string
-	Key      string
+
+	// TLS certificate file path, don't store it in serve-dir.
+	Cert string
+	// TLS key file path, don't store it in serve-dir.
+	Key string
+
+	// If true, certificate will be generated automatically by openssl.
 	Autocert bool
+
+	// Additional handlers that will be registered under /pacman/ path.
 	Handlers []Handler
+
+	// Mirror links which will be pulled by 24h timeout with wget.
 	PullMirr []string
+
+	// Links to git repositories, which should contain valid PKGBUILD files,
+	// (for example AUR links), they will be built and provided as packages.
+	BuildGit []string
 }
 
 // Additional handlers that can be added to server.
 type Handler struct {
 	http.HandlerFunc
 	Path string
+}
+
+// By default, just a simple file which stores information about users, but you
+// can use any database for your specific use case to integrate this system in
+// your personal workflow.
+type Database interface {
+	List() ([]string, error)
+	Validate(name string, password string) bool
+	Update(name string, password string) error
 }
 
 // This function runs a server on a specified directory. This directory will be
