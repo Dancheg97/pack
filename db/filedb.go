@@ -17,8 +17,19 @@ type FileDB struct {
 	Path string
 }
 
-func GetFileDb(p string) (Database, error) {
+func GetFileDb(p string) (*FileDB, error) {
 	return &FileDB{Path: path.Join(p, "users")}, nil
+}
+
+func (d *FileDB) Fill(users []string) error {
+	for _, u := range users {
+		splt := strings.Split(u, ":")
+		err := d.Update(splt[0], splt[1])
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (d *FileDB) List() ([]string, error) {

@@ -10,7 +10,6 @@ package cmd
 
 import (
 	"fmnx.su/core/pack/pack"
-	"fmnx.su/core/pack/tmpl"
 	"github.com/spf13/cobra"
 )
 
@@ -21,7 +20,7 @@ func init() {
 var installCmd = &cobra.Command{
 	Use:     "install",
 	Aliases: []string{"i"},
-	Short:   tmpl.InstallShort,
+	Short:   "📥 install packages",
 	Run:     Install,
 }
 

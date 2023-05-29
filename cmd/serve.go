@@ -12,7 +12,8 @@ import (
 	"net/http"
 	"time"
 
-	"fmnx.su/core/pack/server"
+	"fmnx.su/core/pack/db"
+	"fmnx.su/core/pack/pack"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -22,7 +23,7 @@ func init() {
 		Cmd:     serveCmd,
 		Name:    "serve-addr",
 		Desc:    "🌐 server adress",
-		Default: ":8080",
+		Default: "localhost:8080",
 		Env:     "PACK_SERVE_ADDR",
 	})
 	AddStringFlag(&FlagParameters{
@@ -36,8 +37,21 @@ func init() {
 		Cmd:   serveCmd,
 		Name:  "serve-users",
 		Short: "u",
-		Desc:  "😀 initial users, format - name:password",
+		Desc:  "😀 initial users, format - user:password",
 		Env:   "PACK_SERVE_USERS",
+	})
+	AddStringListFlag(&FlagParameters{
+		Cmd:   serveCmd,
+		Name:  "serve-pull-mirr",
+		Short: "m",
+		Desc:  "🪞 list of pull mirrors, format - user:link",
+		Env:   "PACK_SERVE_PULL_MIRR",
+	})
+	AddStringFlag(&FlagParameters{
+		Cmd:  serveCmd,
+		Name: "serve-log-file",
+		Desc: "📝 file for server logs",
+		Env:  "PACK_SERVE_LOG_FILE",
 	})
 	AddStringFlag(&FlagParameters{
 		Cmd:  serveCmd,
@@ -81,7 +95,11 @@ var serveCmd = &cobra.Command{
 
 // Cli command installing packages into system.
 func Serve(cmd *cobra.Command, pkgs []string) {
-	s := server.Server{
+	db, err := db.GetFileDb(viper.GetString("serve-db-file"))
+	CheckErr(err)
+	err = db.Fill(viper.GetStringSlice("serve-users"))
+	CheckErr(err)
+	server := pack.Server{
 		Server: http.Server{
 			Addr:         viper.GetString("serve-addr"),
 			ReadTimeout:  time.Minute,
@@ -91,9 +109,10 @@ func Serve(cmd *cobra.Command, pkgs []string) {
 		RepoName: viper.GetString("serve-repo"),
 		Cert:     viper.GetString("serve-cert"),
 		Key:      viper.GetString("serve-key"),
-		DbPath:   viper.GetString("serve-db-file"),
 		Autocert: viper.GetBool("serve-auto-tls"),
-		Users:    viper.GetStringSlice("serve-users"),
+		PullMirr: viper.GetStringSlice("serve-pull-mirr"),
+		Db:       db,
 	}
-	CheckErr(s.Serve())
+	err = server.Serve()
+	CheckErr(err)
 }
