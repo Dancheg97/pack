@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"path"
 )
 
 // Initialize default handlers for server.
@@ -51,7 +52,7 @@ func (s *Server) push(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	err = s.initPkgs(s.ServeDir, u)
+	err = s.initPkgs(path.Join(s.ServeDir, u), u)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return

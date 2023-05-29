@@ -112,7 +112,7 @@ func (s *Server) initDirs() error {
 // Initializes packages, will recursively walk throw provided dir and add all
 // .pkg.tar.zst packages to in each specified repository. Userprefix is used
 // to add use names in nested folders.
-func (s *Server) initPkgs(dir string, userprefix string) error {
+func (s *Server) initPkgs(dir string, prefix string) error {
 	rootFileInfo, err := os.ReadDir(dir)
 	if err != nil {
 		return err
@@ -122,22 +122,27 @@ func (s *Server) initPkgs(dir string, userprefix string) error {
 			continue
 		}
 		if strings.HasSuffix(fi.Name(), ".pkg.tar.zst") {
+			dbStrings := []string{s.RepoName}
+			if prefix != `` {
+				dbStrings = append(dbStrings, prefix)
+			}
+			dbStrings = append(dbStrings, "db.tar.gz")
 			err = pacman.RepoAdd(
-				path.Join(s.ServeDir, fi.Name()),
-				path.Join(s.ServeDir, userprefix+s.RepoName+".db.tar.gz"),
+				path.Join(dir, fi.Name()),
+				path.Join(dir, strings.Join(dbStrings, ".")),
 			)
 			if err != nil {
 				return err
 			}
 		}
 	}
-	if userprefix == `` {
+	if prefix == `` {
 		users, err := s.Db.List()
 		if err != nil {
 			return err
 		}
 		for _, u := range users {
-			err = s.initPkgs(path.Join(s.ServeDir, u), "."+u)
+			err = s.initPkgs(path.Join(dir, u), u)
 			if err != nil {
 				return err
 			}

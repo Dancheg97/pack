@@ -7,3 +7,4 @@ tmp/**
 **.conf
 users.db
 users
+public/**
