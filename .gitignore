@@ -8,3 +8,5 @@ tmp/**
 users.db
 users
 public/**
+key.pem
+cert.pem

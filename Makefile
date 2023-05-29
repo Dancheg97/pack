@@ -1,6 +1,4 @@
 pwd := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
 serve:
-	mkdir -p tmp/public
-	sudo cp /var/cache/pacman/pkg/nano* tmp/public
-	go run . serve --serve-auto-tls --serve-db-path tmp --serve-dir tmp/public
+	go run . serve --serve-autocert -u 'user::password' -m 'core::https://de.arch.mirror.kescher.at/core/os/x86_64/'

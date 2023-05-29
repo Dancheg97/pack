@@ -15,6 +15,7 @@ import (
 
 	"fmnx.su/core/pack/db"
 	"fmnx.su/core/pack/pacman"
+	"github.com/google/uuid"
 )
 
 // Server that will provide access to packages.
@@ -90,9 +91,32 @@ func (s *Server) prepareDirectories() error {
 // packages then will be added to root repository.
 func (s *Server) pullMirrors() error {
 	for _, mirr := range s.PullMirr {
-		_ = mirr
+		splt := strings.Split(mirr, "::")
+		mirrName := splt[0]
+		mirrDir := path.Join(s.ServeDir, mirrName)
+		mirrLink := splt[1]
+		err := s.Db.Update(mirrName, uuid.New().String())
+		if err != nil {
+			return err
+		}
+		err = os.MkdirAll(mirrDir, 0755)
+		if err != nil {
+			return err
+		}
+		go launchMirror(mirrDir, mirrLink)
 	}
 	return nil
+}
+
+// Start mirroring specified repository.
+func launchMirror(path string, link string) {
+	cmd := exec.Command("wget", "-nd", "-np", "-P", path, "--recursive", link)
+	cmd.Stderr = os.Stderr
+	cmd.Stdin = os.Stdin
+	err := cmd.Run()
+	if err != nil {
+		fmt.Println("[closing] Error in mirror occured: ", link)
+	}
 }
 
 // Function is used to initialize database and all nested user databases with

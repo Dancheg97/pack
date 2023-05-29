@@ -37,14 +37,14 @@ func init() {
 		Cmd:   serveCmd,
 		Name:  "serve-users",
 		Short: "u",
-		Desc:  "😀 initial users, format - user:password",
+		Desc:  "😀 initial users, format - user::password",
 		Env:   "PACK_SERVE_USERS",
 	})
 	AddStringListFlag(&FlagParameters{
 		Cmd:   serveCmd,
 		Name:  "serve-pull-mirr",
 		Short: "m",
-		Desc:  "🪞 list of pull mirrors, format - user:link",
+		Desc:  "🪞 list of pull mirrors, format - dbname::link",
 		Env:   "PACK_SERVE_PULL_MIRR",
 	})
 	AddStringFlag(&FlagParameters{
@@ -79,7 +79,7 @@ func init() {
 	})
 	AddBoolFlag(&FlagParameters{
 		Cmd:  serveCmd,
-		Name: "serve-auto-tls",
+		Name: "serve-autocert",
 		Desc: "🔒 automatically generate certs in db dir (depends on openssl)",
 		Env:  "PACK_SERVE_AUTO_CERT",
 	})
@@ -109,7 +109,7 @@ func Serve(cmd *cobra.Command, pkgs []string) {
 		RepoName: viper.GetString("serve-repo"),
 		Cert:     viper.GetString("serve-cert"),
 		Key:      viper.GetString("serve-key"),
-		Autocert: viper.GetBool("serve-auto-tls"),
+		Autocert: viper.GetBool("serve-autocert"),
 		PullMirr: viper.GetStringSlice("serve-pull-mirr"),
 		Db:       db,
 	}

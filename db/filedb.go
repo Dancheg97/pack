@@ -23,7 +23,7 @@ func GetFileDb(p string) (*FileDB, error) {
 
 func (d *FileDB) Fill(users []string) error {
 	for _, u := range users {
-		splt := strings.Split(u, ":")
+		splt := strings.Split(u, "::")
 		err := d.Update(splt[0], splt[1])
 		if err != nil {
 			return err
@@ -42,7 +42,7 @@ func (d *FileDB) List() ([]string, error) {
 	}
 	var users []string
 	for _, u := range strings.Split(string(b), "\n") {
-		users = append(users, strings.Split(u, ":")[0])
+		users = append(users, strings.Split(u, "::")[0])
 	}
 	return users, nil
 }
@@ -53,7 +53,7 @@ func (d *FileDB) Validate(name string, password string) bool {
 		return false
 	}
 	for _, u := range strings.Split(string(b), "\n") {
-		splt := strings.Split(u, ":")
+		splt := strings.Split(u, "::")
 		if name == splt[0] && password == splt[1] {
 			return true
 		}
@@ -62,16 +62,16 @@ func (d *FileDB) Validate(name string, password string) bool {
 }
 
 func (d *FileDB) Update(name string, password string) error {
-	usr := []byte(name + ":" + password)
+	usr := []byte(name + "::" + password)
 	b, err := os.ReadFile(d.Path)
 	if err != nil {
 		return os.WriteFile(d.Path, usr, 0600)
 	}
 	splt := strings.Split(string(b), "\n")
 	for i, v := range splt {
-		usplt := strings.Split(v, ":")
+		usplt := strings.Split(v, "::")
 		if usplt[0] == name {
-			splt[i] = name + ":" + password
+			splt[i] = name + "::" + password
 			return os.WriteFile(d.Path, []byte(strings.Join(splt, "\n")), 0600)
 		}
 	}
