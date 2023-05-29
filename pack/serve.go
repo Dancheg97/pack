@@ -12,6 +12,7 @@ import (
 	"os/exec"
 	"path"
 	"strings"
+	"time"
 
 	"fmnx.su/core/pack/db"
 	"fmnx.su/core/pack/pacman"
@@ -99,23 +100,45 @@ func (s *Server) pullMirrors() error {
 		if err != nil {
 			return err
 		}
-		err = os.MkdirAll(mirrDir, 0755)
-		if err != nil {
-			return err
-		}
-		go launchMirror(mirrDir, mirrLink)
+		go LaunchMirrorDaemon(&MirrorParams{
+			Dir:    mirrDir,
+			Link:   mirrLink,
+			Dbname: s.Addr + "." + mirrName,
+			Dur:    time.Hour * 12,
+		})
 	}
 	return nil
 }
 
+type MirrorParams struct {
+	Dir    string
+	Link   string
+	Dbname string
+	Dur    time.Duration
+}
+
 // Start mirroring specified repository.
-func launchMirror(path string, link string) {
-	cmd := exec.Command("wget", "-nd", "-np", "-P", path, "--recursive", link)
-	cmd.Stderr = os.Stderr
-	cmd.Stdin = os.Stdin
-	err := cmd.Run()
+func LaunchMirrorDaemon(p *MirrorParams) {
+	err := os.MkdirAll(p.Dir, 0755)
 	if err != nil {
-		fmt.Println("[closing] Error in mirror occured: ", link)
+		fmt.Println("[MIRROR] Failed to create mirr dir: ", p.Dir)
+		return
+	}
+	for {
+		err := exec.Command( //nolint:gosec
+			"wget", "-nd", "-np", "-P",
+			p.Dir, "--recursive", p.Link,
+		).Run()
+		if err != nil {
+			fmt.Println("[MIRROR] Error in mirror occured: ", p.Link)
+		}
+
+		err = prepareDirRepo(p.Dir, p.Dbname)
+		if err != nil {
+			fmt.Println("[MIRROR] Failed to create mirror DB", p.Dbname)
+		}
+
+		time.Sleep(p.Dur)
 	}
 }
 
@@ -172,17 +195,14 @@ func (s *Server) prepareCertificates() error {
 	if err != nil {
 		return err
 	}
-	cert := path.Join(d, "key.pem")
-	key := path.Join(d, "cert.pem")
-	cmd := exec.Command(
+	s.Key = path.Join(d, "key.pem")
+	s.Cert = path.Join(d, "cert.pem")
+	return exec.Command( //nolint:gosec
 		"openssl", "req", "-x509", "-newkey", "rsa:4096",
-		"-keyout", key, "-out", cert,
+		"-keyout", s.Key, "-out", s.Cert,
 		"-sha256", "-days", "3650", "-nodes", "-subj",
 		"/C=XX/ST=_/L=_/O=_/OU=_/CN=_",
-	)
-	s.Key = key
-	s.Cert = cert
-	return cmd.Run()
+	).Run()
 }
 
 // Initialize default handlers for server.

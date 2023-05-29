@@ -18,13 +18,12 @@ import (
 )
 
 var (
-	RootShort = "📦 decentralized package manager based on pacman"
-	lock      lockfile.Lockfile
+	lock lockfile.Lockfile
 )
 
 var rootCmd = &cobra.Command{
 	Use:          "pack",
-	Short:        RootShort,
+	Short:        "📦 decentralized package manager based on pacman",
 	SilenceUsage: true,
 	CompletionOptions: cobra.CompletionOptions{
 		DisableDefaultCmd:   true,
