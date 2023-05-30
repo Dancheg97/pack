@@ -26,7 +26,12 @@ type Server struct {
 	// Simple database to store user credentials.
 	Db Database
 
+	// Working directory for operations, by default it will use current
+	// directory.
+	WorkDir string
+
 	// Publicly exposed directory with packages and pacman repository files.
+	// By default it creates `public` directory in current location.
 	ServeDir string
 
 	// Repository name: should match the domain name.
@@ -48,7 +53,7 @@ type Server struct {
 
 	// Links to git repositories, which should contain valid PKGBUILD files,
 	// (for example AUR links), they will be built and provided as packages.
-	BuildGit []string
+	GitPkgs []string
 }
 
 // Additional handlers that can be added to server.
@@ -61,8 +66,11 @@ type Handler struct {
 // can use any database for your specific use case to integrate this system in
 // your personal workflow.
 type Database interface {
+	// List users stored in database.
 	List() ([]string, error)
+	// Validate, that password is correct for provided user.
 	Validate(name string, password string) bool
+	// Update information about user.
 	Update(name string, password string) error
 }
 
@@ -71,7 +79,8 @@ type Database interface {
 func (s *Server) Serve() error {
 	var startFuncs []func() error = []func() error{
 		s.prepareDirectories,
-		s.pullMirrors,
+		s.launchMirrorDaemons,
+		s.launchGitPkgDaemons,
 		s.prepareRepositories,
 		s.prepareCertificates,
 		s.initRoutes,
@@ -91,15 +100,11 @@ func (s *Server) Serve() error {
 // otherwise it will create them.
 func (s *Server) prepareDirectories() error {
 	if s.ServeDir == `` {
-		d, err := os.Getwd()
+		err := os.MkdirAll("public", 0755)
 		if err != nil {
 			return err
 		}
-		err = os.MkdirAll("public", 0755)
-		if err != nil {
-			return err
-		}
-		s.ServeDir = path.Join(d, "public")
+		s.ServeDir = path.Join(s.WorkDir, "public")
 	}
 	users, err := s.Db.List()
 	if err != nil {
@@ -116,47 +121,84 @@ func (s *Server) prepareDirectories() error {
 
 // Pull all packages and signatures from specified mirrors to root folder,
 // packages then will be added to root repository.
-func (s *Server) pullMirrors() error {
+func (s *Server) launchMirrorDaemons() error {
 	for _, mirr := range s.PullMirr {
-		go LaunchMirrorDaemon(&MirrorParams{
-			Dir:    s.ServeDir,
-			Link:   mirr,
-			Dbname: s.Addr,
-			Dur:    time.Hour * 36,
-		})
+		go s.LaunchMirrorDaemon(mirr)
 	}
 	return nil
 }
 
-type MirrorParams struct {
-	Dir    string
-	Link   string
-	Dbname string
-	Dur    time.Duration
-}
-
 // Start mirroring specified repository.
-func LaunchMirrorDaemon(p *MirrorParams) {
-	err := os.MkdirAll(p.Dir, 0755)
+func (s *Server) LaunchMirrorDaemon(link string) {
+	err := os.MkdirAll(s.ServeDir, 0755)
 	if err != nil {
-		fmt.Println("[MIRROR] Failed to create mirr dir: ", p.Dir)
+		fmt.Println("[MIRROR] Failed to create mirr dir: ", s.ServeDir)
 		return
 	}
 	for {
 		err := exec.Command( //nolint:gosec
 			"wget", "-nd", "-np", "-P",
-			p.Dir, "--recursive", p.Link,
+			s.ServeDir, "--recursive", link,
 		).Run()
 		if err != nil {
-			fmt.Println("[MIRROR] Error in mirror occured: ", p.Link)
+			fmt.Println("[MIRROR] Failed to pull mirror: ", link)
+			time.Sleep(time.Hour * 24)
+			continue
 		}
 
-		err = prepareDirRepo(p.Dir, p.Dbname)
+		err = prepareDirRepo(s.ServeDir, s.RepoName)
 		if err != nil {
-			fmt.Println("[MIRROR] Failed to create mirror DB", p.Dbname)
+			fmt.Println("[MIRROR] Failed to create mirror DB", s.RepoName)
+			time.Sleep(time.Hour * 24)
+			continue
 		}
 
-		time.Sleep(p.Dur)
+		time.Sleep(time.Hour * 24)
+	}
+}
+
+// This function will pull repositories with PKGBUILD's and launch daemons to
+// watch for updates, rebuild them and provide in repository.
+func (s *Server) launchGitPkgDaemons() error {
+	for _, link := range s.GitPkgs {
+		go s.LaunchGitDaemon(link)
+	}
+	return nil
+}
+
+// Function that will periodically pull changes to git package, rebuild it and
+// add to resulting database.
+func (s *Server) LaunchGitDaemon(link string) {
+	splt := strings.Split(link, "/")
+	repodir := path.Join(s.WorkDir, splt[len(splt)-1])
+	if _, err := os.Stat(repodir); os.IsNotExist(err) {
+		err := exec.Command("git", "clone", link).Run()
+		if err != nil {
+			fmt.Println("[GITPKG] Failed to clone git repo", link)
+			return
+		}
+	}
+	for {
+		err := pacman.Makepkg(pacman.MakepkgOptions{
+			SyncDeps:  true,
+			Clean:     true,
+			Force:     true,
+			Log:       true,
+			HoldVer:   true,
+			Needed:    true,
+			NoConfirm: true,
+			Stdout:    os.Stdout,
+			Stderr:    os.Stderr,
+			Stdin:     os.Stdin,
+			Dir:       path.Join(s.WorkDir, splt[len(splt)-1]),
+		})
+		if err != nil {
+			fmt.Println("[GITPKG] Failed to build pacman - makepkg: ", link)
+			time.Sleep(time.Hour * 24)
+			continue
+		}
+
+		time.Sleep(time.Hour * 24)
 	}
 }
 
@@ -209,12 +251,8 @@ func (s *Server) prepareCertificates() error {
 		return nil
 	}
 	fmt.Println(":: Generating certificates...")
-	d, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-	s.Key = path.Join(d, "key.pem")
-	s.Cert = path.Join(d, "cert.pem")
+	s.Key = path.Join(s.WorkDir, "key.pem")
+	s.Cert = path.Join(s.WorkDir, "cert.pem")
 	return exec.Command( //nolint:gosec
 		"openssl", "req", "-x509", "-newkey", "rsa:4096",
 		"-keyout", s.Key, "-out", s.Cert,
@@ -273,7 +311,7 @@ func (s *Server) push(w http.ResponseWriter, r *http.Request) {
 
 // Initialize server for packages.
 func (s *Server) runServer() error {
-	fmt.Print(":: Listening on " + s.Addr + "...")
+	fmt.Println(":: Listening on " + s.Addr + "...")
 	if s.Cert != `` && s.Key != `` {
 		return s.Server.ListenAndServeTLS(s.Cert, s.Key)
 	}

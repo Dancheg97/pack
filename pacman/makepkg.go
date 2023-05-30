@@ -219,15 +219,17 @@ func Makepkg(opts ...MakepkgOptions) error {
 // Get parameters from a shell file (might be usefull to resolve dependencies
 // before package build/installation process).
 func GetShellParams(file string, arg string) ([]string, error) {
-	const tmpl = "source %s; for i in ${%s[@]}; do \necho $i\ndone"
+	const tmpl = "source %s; for i in ${%s[@]}; do echo $i;done"
 	command := fmt.Sprintf(tmpl, file, arg)
 
 	var b bytes.Buffer
 	cmd := exec.Command("sh", "-c", command)
 	cmd.Stdout = &b
+	cmd.Stderr = &b
 
 	err := cmd.Run()
 	if err != nil {
+		fmt.Println(b.String())
 		return nil, err
 	}
 	return strings.Split(strings.Trim(b.String(), "\n"), "\n"), nil

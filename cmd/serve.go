@@ -10,6 +10,7 @@ package cmd
 
 import (
 	"net/http"
+	"os"
 	"time"
 
 	"fmnx.su/core/pack/db"
@@ -49,8 +50,8 @@ func init() {
 	})
 	AddStringListFlag(&FlagParameters{
 		Cmd:   serveCmd,
-		Name:  "serve-build-git",
-		Short: "b",
+		Name:  "serve-git-pkgs",
+		Short: "g",
 		Desc:  "🛠️ list of git repositories, that will be pulled and built",
 		Env:   "PACK_SERVE_BUILD_GIT",
 	})
@@ -62,9 +63,15 @@ func init() {
 	})
 	AddStringFlag(&FlagParameters{
 		Cmd:  serveCmd,
-		Name: "serve-dir",
+		Name: "serve-public-dir",
 		Desc: "📂 directory with packages, publicly exposed",
-		Env:  "PACK_SERVE_DIR",
+		Env:  "PACK_SERVE_PUBLIC_DIR",
+	})
+	AddStringFlag(&FlagParameters{
+		Cmd:  serveCmd,
+		Name: "serve-work-dir",
+		Desc: "🗃️ directory with private files required for server",
+		Env:  "PACK_SERVE_WORK_DIR",
 	})
 	AddStringFlag(&FlagParameters{
 		Cmd:  serveCmd,
@@ -106,19 +113,25 @@ func Serve(cmd *cobra.Command, pkgs []string) {
 	CheckErr(err)
 	err = db.Fill(viper.GetStringSlice("serve-users"))
 	CheckErr(err)
+	if viper.GetString("serve-work-dir") == "" {
+		d, err := os.Getwd()
+		CheckErr(err)
+		viper.Set("serve-work-dir", d)
+	}
 	server := pack.Server{
 		Server: http.Server{
 			Addr:         viper.GetString("serve-addr"),
 			ReadTimeout:  time.Minute,
 			WriteTimeout: time.Minute,
 		},
-		ServeDir: viper.GetString("serve-dir"),
+		WorkDir:  viper.GetString("serve-work-dir"),
+		ServeDir: viper.GetString("serve-public-dir"),
 		RepoName: viper.GetString("serve-repo"),
 		Cert:     viper.GetString("serve-cert"),
 		Key:      viper.GetString("serve-key"),
 		Autocert: viper.GetBool("serve-autocert"),
 		PullMirr: viper.GetStringSlice("serve-pull-mirr"),
-		BuildGit: viper.GetStringSlice("server-build-git"),
+		GitPkgs:  viper.GetStringSlice("serve-git-pkgs"),
 		Db:       db,
 	}
 	err = server.Serve()
