@@ -8,7 +8,6 @@ package db
 import (
 	"errors"
 	"os"
-	"path"
 	"strings"
 )
 
@@ -18,7 +17,7 @@ type FileDB struct {
 }
 
 func GetFileDb(p string) (*FileDB, error) {
-	return &FileDB{Path: path.Join(p, "users")}, nil
+	return &FileDB{Path: p}, nil
 }
 
 func (d *FileDB) Fill(users []string) error {

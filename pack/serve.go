@@ -50,10 +50,6 @@ type Server struct {
 
 	// Mirror links which will be pulled by 24h timeout with wget.
 	PullMirr []string
-
-	// Links to git repositories, which should contain valid PKGBUILD files,
-	// (for example AUR links), they will be built and provided as packages.
-	GitPkgs []string
 }
 
 // Additional handlers that can be added to server.
@@ -80,7 +76,6 @@ func (s *Server) Serve() error {
 	var startFuncs []func() error = []func() error{
 		s.prepareDirectories,
 		s.launchMirrorDaemons,
-		s.launchGitPkgDaemons,
 		s.prepareRepositories,
 		s.prepareCertificates,
 		s.initRoutes,
@@ -149,51 +144,6 @@ func (s *Server) LaunchMirrorDaemon(link string) {
 		err = prepareDirRepo(s.ServeDir, s.RepoName)
 		if err != nil {
 			fmt.Println("[MIRROR] Failed to create mirror DB", s.RepoName)
-			time.Sleep(time.Hour * 24)
-			continue
-		}
-
-		time.Sleep(time.Hour * 24)
-	}
-}
-
-// This function will pull repositories with PKGBUILD's and launch daemons to
-// watch for updates, rebuild them and provide in repository.
-func (s *Server) launchGitPkgDaemons() error {
-	for _, link := range s.GitPkgs {
-		go s.LaunchGitDaemon(link)
-	}
-	return nil
-}
-
-// Function that will periodically pull changes to git package, rebuild it and
-// add to resulting database.
-func (s *Server) LaunchGitDaemon(link string) {
-	splt := strings.Split(link, "/")
-	repodir := path.Join(s.WorkDir, splt[len(splt)-1])
-	if _, err := os.Stat(repodir); os.IsNotExist(err) {
-		err := exec.Command("git", "clone", link).Run()
-		if err != nil {
-			fmt.Println("[GITPKG] Failed to clone git repo", link)
-			return
-		}
-	}
-	for {
-		err := pacman.Makepkg(pacman.MakepkgOptions{
-			SyncDeps:  true,
-			Clean:     true,
-			Force:     true,
-			Log:       true,
-			HoldVer:   true,
-			Needed:    true,
-			NoConfirm: true,
-			Stdout:    os.Stdout,
-			Stderr:    os.Stderr,
-			Stdin:     os.Stdin,
-			Dir:       path.Join(s.WorkDir, splt[len(splt)-1]),
-		})
-		if err != nil {
-			fmt.Println("[GITPKG] Failed to build pacman - makepkg: ", link)
 			time.Sleep(time.Hour * 24)
 			continue
 		}

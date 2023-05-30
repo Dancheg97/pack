@@ -32,7 +32,7 @@ func init() {
 		Name:    "serve-repo",
 		Desc:    "📋 name of repository, should match the domain",
 		Default: "localhost:8080",
-		Env:     "PACK_SERVE_PORT",
+		Env:     "PACK_SERVE_REPO",
 	})
 	AddStringListFlag(&FlagParameters{
 		Cmd:   serveCmd,
@@ -48,13 +48,6 @@ func init() {
 		Desc:  "🪞 list of pull mirrors, just provide links (depends on wget)",
 		Env:   "PACK_SERVE_PULL_MIRR",
 	})
-	AddStringListFlag(&FlagParameters{
-		Cmd:   serveCmd,
-		Name:  "serve-git-pkgs",
-		Short: "g",
-		Desc:  "🛠️ list of git repositories, that will be pulled and built",
-		Env:   "PACK_SERVE_BUILD_GIT",
-	})
 	AddStringFlag(&FlagParameters{
 		Cmd:  serveCmd,
 		Name: "serve-log-file",
@@ -63,15 +56,15 @@ func init() {
 	})
 	AddStringFlag(&FlagParameters{
 		Cmd:  serveCmd,
-		Name: "serve-public-dir",
-		Desc: "📂 directory with packages, publicly exposed",
-		Env:  "PACK_SERVE_PUBLIC_DIR",
-	})
-	AddStringFlag(&FlagParameters{
-		Cmd:  serveCmd,
 		Name: "serve-work-dir",
 		Desc: "🗃️ directory with private files required for server",
 		Env:  "PACK_SERVE_WORK_DIR",
+	})
+	AddStringFlag(&FlagParameters{
+		Cmd:  serveCmd,
+		Name: "serve-public-dir",
+		Desc: "📂 directory with packages, publicly exposed",
+		Env:  "PACK_SERVE_PUBLIC_DIR",
 	})
 	AddStringFlag(&FlagParameters{
 		Cmd:  serveCmd,
@@ -86,10 +79,11 @@ func init() {
 		Env:  "PACK_SERVE_KEY",
 	})
 	AddStringFlag(&FlagParameters{
-		Cmd:  serveCmd,
-		Name: "serve-db-file",
-		Desc: "💾 path to local file with user info",
-		Env:  "PACK_SERVE_DB_PATH",
+		Cmd:     serveCmd,
+		Name:    "serve-db-file",
+		Desc:    "💾 path to local file with user info",
+		Default: "users",
+		Env:     "PACK_SERVE_DB_FILE",
 	})
 	AddBoolFlag(&FlagParameters{
 		Cmd:  serveCmd,
@@ -131,7 +125,6 @@ func Serve(cmd *cobra.Command, pkgs []string) {
 		Key:      viper.GetString("serve-key"),
 		Autocert: viper.GetBool("serve-autocert"),
 		PullMirr: viper.GetStringSlice("serve-pull-mirr"),
-		GitPkgs:  viper.GetStringSlice("serve-git-pkgs"),
 		Db:       db,
 	}
 	err = server.Serve()

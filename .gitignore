@@ -10,3 +10,4 @@ users
 public/**
 key.pem
 cert.pem
+docker/**
