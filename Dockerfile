@@ -18,7 +18,11 @@ FROM archlinux/archlinux:base-devel
 
 LABEL maintainer="dancheg <dancheg@fmnx.su>"
 
+RUN pacman -Syu --noconfirm --needed git openssl wget
+
+WORKDIR /home
+
 COPY --from=build /src/packbin /usr/bin/pack
 
 ENTRYPOINT ["pack"]
-CMD ["-h"]
+CMD ["serve"]

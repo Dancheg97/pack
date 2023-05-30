@@ -50,12 +50,6 @@ func init() {
 	})
 	AddStringFlag(&FlagParameters{
 		Cmd:  serveCmd,
-		Name: "serve-log-file",
-		Desc: "📝 file for server logs",
-		Env:  "PACK_SERVE_LOG_FILE",
-	})
-	AddStringFlag(&FlagParameters{
-		Cmd:  serveCmd,
 		Name: "serve-work-dir",
 		Desc: "🗃️ directory with private files required for server",
 		Env:  "PACK_SERVE_WORK_DIR",
@@ -78,18 +72,18 @@ func init() {
 		Desc: "🔑 key file for TLS server",
 		Env:  "PACK_SERVE_KEY",
 	})
+	AddBoolFlag(&FlagParameters{
+		Cmd:  serveCmd,
+		Name: "serve-autocert",
+		Desc: "🔒 automatically generate certs in db dir (depends on openssl)",
+		Env:  "PACK_SERVE_AUTO_CERT",
+	})
 	AddStringFlag(&FlagParameters{
 		Cmd:     serveCmd,
 		Name:    "serve-db-file",
 		Desc:    "💾 path to local file with user info",
 		Default: "users",
 		Env:     "PACK_SERVE_DB_FILE",
-	})
-	AddBoolFlag(&FlagParameters{
-		Cmd:  serveCmd,
-		Name: "serve-autocert",
-		Desc: "🔒 automatically generate certs in db dir (depends on openssl)",
-		Env:  "PACK_SERVE_AUTO_CERT",
 	})
 	rootCmd.AddCommand(serveCmd)
 }
