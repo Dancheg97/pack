@@ -131,10 +131,13 @@ func (s *Server) LaunchMirrorDaemon(link string) {
 		return
 	}
 	for {
-		err := exec.Command( //nolint:gosec
+		cmd := exec.Command( //nolint:gosec
 			"wget", "-nd", "-np", "-P",
 			s.ServeDir, "--recursive", link,
-		).Run()
+		)
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		err = cmd.Run()
 		if err != nil {
 			fmt.Println("[MIRROR] Failed to pull mirror: ", link)
 			time.Sleep(time.Hour * 24)
