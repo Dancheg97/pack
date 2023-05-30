@@ -14,20 +14,9 @@
 
 > **Warning!** Project is in alpha stage, API's are very likely to be changed.
 
-Decentralized package manager based on `pacman` and `git`. Provides the ability to install packages using web links, aims to provide the easiest way for arch package distribution.
+Pack is a tool that aims to simplify process of arch package creation and allows to access them in docker-like manner from compatible pack repositories. Pack has docker version, that allows you to serve your packages and embed pack server into another go projects.
 
-You can use pack to:
+Pack can be used to:
 
-- install packages from compatible pacman repositories
-- build packages from compatible git repositories
-- set up personal pack repository to provide your packages for others
-
-This application can be installed with:
-
-- git&pacman
-- go
-- docker
-
-<!--
-Add emoji to help command, mb add pull req to cobra.
--->
+- install packages from compatible git repositories
+- 
