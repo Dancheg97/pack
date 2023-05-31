@@ -8,6 +8,7 @@ package pack
 import (
 	"bufio"
 	"fmt"
+	"net/http"
 	"os"
 	"os/user"
 	"path"
@@ -19,17 +20,46 @@ import (
 
 // This command will push provided package to pack server using existing pack
 // credentials, otherwise it will ask to create them.
-// func Push(pkgs ...string) error {
-// 	u, p, err := getCreads()
-// 	if err != nil {
-// 		return err
-// 	}
-// 	for _, pkg := range pkgs {
-// 		fmt.Println(":: Pushing package", pkg)
-// 		os.read
-// 	}
-// 	return nil
-// }
+func Push(repo string, pkgs ...string) error {
+	u, p, err := getCreads()
+	if err != nil {
+		return err
+	}
+	for _, pkg := range pkgs {
+		fmt.Println(":: Pushing package", pkg)
+		des, err := os.ReadDir("/var/cache/pacman/pkg")
+		if err != nil {
+			return err
+		}
+		for _, de := range des {
+			if strings.HasSuffix(de.Name(), ".pkg.tar.zst") {
+				splt := strings.Split(de.Name(), "-")
+				filepkg := strings.Join(splt[0:len(splt)-3], "-")
+				if pkg == filepkg {
+					f, err := os.Open(de.Name())
+					if err != nil {
+						return err
+					}
+					r, err := http.NewRequest(
+						"POST", "https://"+repo+"/pacman/push", f,
+					)
+					if err != nil {
+						return err
+					}
+					r.Header.Set("user", u)
+					r.Header.Set("password", p)
+					r.Header.Set("file", de.Name())
+					c := http.Client{}
+					_, err = c.Do(r)
+					if err != nil {
+						return err
+					}
+				}
+			}
+		}
+	}
+	return nil
+}
 
 func getCreads() (string, string, error) {
 	u, err := user.Current()
@@ -43,7 +73,7 @@ func getCreads() (string, string, error) {
 		if err != nil {
 			return "", "", err
 		}
-		err = os.WriteFile(".packcfg", []byte(n+" "+p), 0644)
+		err = os.WriteFile(".packcfg", []byte(n+" "+p), 0600)
 		if err != nil {
 			return "", "", err
 		}
