@@ -74,9 +74,9 @@ type Database interface {
 // exposed to public.
 func (s *Server) Serve() error {
 	var startFuncs []func() error = []func() error{
-		s.prepareDirectories,
+		s.prepareServeDir,
 		s.launchMirrorDaemons,
-		s.prepareRepositories,
+		s.prepareRepo,
 		s.prepareCertificates,
 		s.initRoutes,
 		s.runServer,
@@ -93,23 +93,13 @@ func (s *Server) Serve() error {
 // Used to create all directories, that are required for operating server.
 // Fucntion will ensure, that root directory and nested user directories exist,
 // otherwise it will create them.
-func (s *Server) prepareDirectories() error {
+func (s *Server) prepareServeDir() error {
 	if s.ServeDir == `` {
 		err := os.MkdirAll("public", 0755)
 		if err != nil {
 			return err
 		}
 		s.ServeDir = path.Join(s.WorkDir, "public")
-	}
-	users, err := s.Db.List()
-	if err != nil {
-		return err
-	}
-	for _, u := range users {
-		err = os.MkdirAll(path.Join(s.ServeDir, u), 0755)
-		if err != nil {
-			return err
-		}
 	}
 	return nil
 }
@@ -157,20 +147,10 @@ func (s *Server) LaunchMirrorDaemon(link string) {
 
 // Function is used to initialize database and all nested user databases with
 // pacman packages.
-func (s *Server) prepareRepositories() error {
+func (s *Server) prepareRepo() error {
 	err := prepareDirRepo(s.ServeDir, s.Addr)
 	if err != nil {
 		return err
-	}
-	users, err := s.Db.List()
-	if err != nil {
-		return err
-	}
-	for _, user := range users {
-		err = prepareDirRepo(path.Join(s.ServeDir, user), s.Addr+"."+user)
-		if err != nil {
-			return err
-		}
 	}
 	return nil
 }
@@ -244,7 +224,7 @@ func (s *Server) push(w http.ResponseWriter, r *http.Request) {
 	}
 
 	file := r.Header.Get("file")
-	f, err := os.Create(fmt.Sprintf("%s/%s/%s", s.ServeDir, u, file))
+	f, err := os.Create(path.Join(s.ServeDir, file))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -254,7 +234,7 @@ func (s *Server) push(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	err = prepareDirRepo(path.Join(s.ServeDir, u), s.Addr+"."+u)
+	err = prepareDirRepo(s.ServeDir, s.Addr+"."+u)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
