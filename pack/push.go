@@ -93,7 +93,7 @@ func askForCreds() (string, string, error) {
 	}
 
 	fmt.Print("Enter password: ")
-	bytePassword, err := term.ReadPassword(int(syscall.Stdin))
+	bytePassword, err := term.ReadPassword(syscall.Stdin)
 	if err != nil {
 		return "", "", err
 	}

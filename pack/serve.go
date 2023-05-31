@@ -95,11 +95,11 @@ func (s *Server) Serve() error {
 // otherwise it will create them.
 func (s *Server) prepareServeDir() error {
 	if s.ServeDir == `` {
-		err := os.MkdirAll("public", 0755)
-		if err != nil {
-			return err
-		}
 		s.ServeDir = path.Join(s.WorkDir, "public")
+	}
+	err := os.MkdirAll(s.ServeDir, 0755)
+	if err != nil {
+		return err
 	}
 	return nil
 }
@@ -148,7 +148,7 @@ func (s *Server) LaunchMirrorDaemon(link string) {
 // Function is used to initialize database and all nested user databases with
 // pacman packages.
 func (s *Server) prepareRepo() error {
-	err := prepareDirRepo(s.ServeDir, s.Addr)
+	err := prepareDirRepo(s.ServeDir, s.RepoName)
 	if err != nil {
 		return err
 	}
@@ -223,8 +223,8 @@ func (s *Server) push(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	file := r.Header.Get("file")
-	f, err := os.Create(path.Join(s.ServeDir, file))
+	file := path.Join(s.ServeDir, r.Header.Get("file"))
+	f, err := os.Create(file)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -234,7 +234,7 @@ func (s *Server) push(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	err = prepareDirRepo(s.ServeDir, s.Addr+"."+u)
+	err = pacman.RepoAdd(file, path.Join(s.ServeDir, s.RepoName+".db.tar.gz"))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
