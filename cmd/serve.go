@@ -24,14 +24,14 @@ func init() {
 		Cmd:     serveCmd,
 		Name:    "serve-addr",
 		Desc:    "🌐 server adress",
-		Default: ":80",
+		Default: ":8080",
 		Env:     "PACK_SERVE_ADDR",
 	})
 	AddStringFlag(&FlagParameters{
 		Cmd:     serveCmd,
 		Name:    "serve-repo",
 		Desc:    "📋 name of repository, should match the domain",
-		Default: "localhost",
+		Default: "localhost:8080",
 		Env:     "PACK_SERVE_REPO",
 	})
 	AddStringListFlag(&FlagParameters{
@@ -71,12 +71,6 @@ func init() {
 		Name: "serve-key",
 		Desc: "🔑 key file for TLS server",
 		Env:  "PACK_SERVE_KEY",
-	})
-	AddBoolFlag(&FlagParameters{
-		Cmd:  serveCmd,
-		Name: "serve-autocert",
-		Desc: "🔒 automatically generate certs in db dir (depends on openssl)",
-		Env:  "PACK_SERVE_AUTO_CERT",
 	})
 	AddStringFlag(&FlagParameters{
 		Cmd:     serveCmd,
@@ -124,7 +118,6 @@ func Serve(cmd *cobra.Command, pkgs []string) {
 		RepoName: viper.GetString("serve-repo"),
 		Cert:     viper.GetString("serve-cert"),
 		Key:      viper.GetString("serve-key"),
-		Autocert: viper.GetBool("serve-autocert"),
 		PullMirr: viper.GetStringSlice("serve-pull-mirr"),
 		Db:       db,
 	}

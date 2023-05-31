@@ -18,7 +18,7 @@ FROM archlinux/archlinux:base-devel
 
 LABEL maintainer="dancheg <dancheg@fmnx.su>"
 
-RUN pacman -Syu --noconfirm --needed git openssl wget
+RUN pacman -Syu --noconfirm --needed git wget
 
 WORKDIR /home
 

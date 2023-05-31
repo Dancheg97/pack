@@ -42,9 +42,6 @@ type Server struct {
 	// TLS key file path, don't store it in serve-dir.
 	Key string
 
-	// If true, certificate will be generated automatically by openssl.
-	Autocert bool
-
 	// Additional handlers that will be registered under /pacman/ path.
 	Handlers []Handler
 
@@ -77,7 +74,6 @@ func (s *Server) Serve() error {
 		s.prepareServeDir,
 		s.launchMirrorDaemons,
 		s.prepareRepo,
-		s.prepareCertificates,
 		s.initRoutes,
 		s.runServer,
 	}
@@ -175,23 +171,6 @@ func prepareDirRepo(dir string, db string) error {
 		}
 	}
 	return nil
-}
-
-// Initialize server secutrity, if autosert is provided - generating
-// certs.
-func (s *Server) prepareCertificates() error {
-	if !s.Autocert {
-		return nil
-	}
-	fmt.Println(":: Generating certificates...")
-	s.Key = path.Join(s.WorkDir, "key.pem")
-	s.Cert = path.Join(s.WorkDir, "cert.pem")
-	return exec.Command( //nolint:gosec
-		"openssl", "req", "-x509", "-newkey", "rsa:4096",
-		"-keyout", s.Key, "-out", s.Cert,
-		"-sha256", "-days", "3650", "-nodes", "-subj",
-		"/C=XX/ST=_/L=_/O=_/OU=_/CN=_",
-	).Run()
 }
 
 // Initialize default handlers for server.

@@ -41,7 +41,7 @@ func Push(repo string, pkgs ...string) error {
 						return err
 					}
 					r, err := http.NewRequest(
-						"POST", "https://"+repo+"/pacman/push", f,
+						"POST", repo+"/pacman/push", f,
 					)
 					if err != nil {
 						return err

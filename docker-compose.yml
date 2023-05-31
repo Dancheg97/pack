@@ -5,12 +5,11 @@ services:
     volumes:
       - ./docker:/home
     ports:
-      - 80:80
+      - 8080:8080
     environment:
-      PACK_SERVE_ADDR: :80
+      PACK_SERVE_ADDR: :8080
       PACK_SERVE_REPO: localhost
       PACK_SERVE_USERS: user1::password1 user2::password2
       # PACK_SERVE_PULL_MIRR: https://de.arch.mirror.kescher.at/core/os/x86_64/
       PACK_SERVE_WORK_DIR: /home
       PACK_SERVE_PUBLIC_DIR: /home/public
-      PACK_SERVE_AUTO_CERT: true
