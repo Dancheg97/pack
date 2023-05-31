@@ -36,6 +36,14 @@ func checkDependency(p string) {
 	}
 }
 
+func SudoCommand(sudo bool, command string, args ...string) *exec.Cmd {
+	if sudo {
+		args = append([]string{command}, args...)
+		return exec.Command(`sudo`, args...)
+	}
+	return exec.Command(command, args...)
+}
+
 func formOptions[Options any](arr []Options, dv *Options) *Options {
 	if len(arr) != 1 {
 		return dv

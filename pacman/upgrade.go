@@ -8,7 +8,6 @@ package pacman
 import (
 	"io"
 	"os"
-	"os/exec"
 	"strings"
 )
 
@@ -56,7 +55,7 @@ func Upgrade(files string, opts ...UpgradeOptions) error {
 func UpgradeList(files []string, opts ...UpgradeOptions) error {
 	o := formOptions(opts, &UpgradeDefault)
 
-	args := []string{"-U"}
+	args := []string{pacman, "-U"}
 	if o.Needed {
 		args = append(args, "--needed")
 	}
@@ -78,7 +77,7 @@ func UpgradeList(files []string, opts ...UpgradeOptions) error {
 	args = append(args, o.AdditionalParams...)
 	args = append(args, files...)
 
-	cmd := exec.Command(pacman, args...)
+	cmd := SudoCommand(o.Sudo, pacman, args...)
 	cmd.Stdout = o.Stdout
 	cmd.Stderr = o.Stderr
 	cmd.Stdin = o.Stdin

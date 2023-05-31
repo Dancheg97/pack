@@ -69,7 +69,7 @@ func Sync(pkgs string, opts ...SyncOptions) error {
 func SyncList(pkgs []string, opts ...SyncOptions) error {
 	o := formOptions(opts, &SyncDefault)
 
-	args := []string{"-S"}
+	args := []string{pacman, "-S"}
 	if o.Needed {
 		args = append(args, "--needed")
 	}
@@ -109,7 +109,7 @@ func SyncList(pkgs []string, opts ...SyncOptions) error {
 	args = append(args, o.AdditionalParams...)
 	args = append(args, pkgs...)
 
-	cmd := exec.Command(pacman, args...)
+	cmd := exec.Command("sudo", args...)
 	cmd.Stdout = o.Stdout
 	cmd.Stderr = o.Stderr
 	cmd.Stdin = o.Stdin

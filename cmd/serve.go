@@ -24,7 +24,7 @@ func init() {
 		Cmd:     serveCmd,
 		Name:    "serve-addr",
 		Desc:    "🌐 server adress",
-		Default: "localhost:8080",
+		Default: ":8080",
 		Env:     "PACK_SERVE_ADDR",
 	})
 	AddStringFlag(&FlagParameters{
@@ -91,8 +91,16 @@ func init() {
 var serveCmd = &cobra.Command{
 	Use:     "serve",
 	Aliases: []string{"s"},
-	Short:   `🌐 run pack server`,
-	Run:     Serve,
+	Short:   `🌐 run pack registry`,
+	Long: `🌐 run pack registry
+
+This command allows you to run pack registry. Pack registry can be used to 
+accept packages from registered users and provide access to them via standart
+pacman repository interface.
+
+Pack users will be able to install packages from registry using pack install
+command.`,
+	Run: Serve,
 }
 
 // Cli command installing packages into system.

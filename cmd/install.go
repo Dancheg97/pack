@@ -20,7 +20,7 @@ func init() {
 var installCmd = &cobra.Command{
 	Use:     "install",
 	Aliases: []string{"i"},
-	Short:   "📥 install packages",
+	Short:   "⬇ install packages",
 	Run:     Install,
 }
 

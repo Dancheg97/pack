@@ -9,6 +9,7 @@ package cmd
 // Each file contains a single command, including root cmd.
 
 import (
+	"fmnx.su/core/pack/pack"
 	"github.com/spf13/cobra"
 )
 
@@ -22,13 +23,20 @@ var createCmd = &cobra.Command{
 	Short:   "📦 create new package",
 	Long: `📦 create new package
 
-This command will generate PKGBUILD file and create initialize git submodule 
-for your package. After you set up build scripts, you can use pack build to
-build your package.`,
+This command will create template, containing files required for arch desktop
+applications:
+
+- PKGBUILD
+- app.desktop
+- app.sh`,
 	Run: Create,
 }
 
 // Cli command installing packages into system.
 func Create(cmd *cobra.Command, args []string) {
-
+	if len(args) == 0 {
+		args = append(args, "")
+	}
+	err := pack.Create(args[0])
+	CheckErr(err)
 }
