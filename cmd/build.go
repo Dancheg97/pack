@@ -8,9 +8,16 @@ package cmd
 import (
 	"fmnx.su/core/pack/pack"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 func init() {
+	AddBoolFlag(&FlagParameters{
+		Cmd:   buildCmd,
+		Name:  "install",
+		Short: "i",
+		Desc:  "install package after build",
+	})
 	rootCmd.AddCommand(buildCmd)
 }
 
@@ -29,6 +36,6 @@ package with 'push' command to pack registry.`,
 func Build(cmd *cobra.Command, args []string) {
 	err := lock.TryLock()
 	CheckErr(err)
-	err = pack.Build()
+	err = pack.Build(viper.GetBool("install"))
 	CheckErr(err)
 }

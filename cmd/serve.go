@@ -103,7 +103,6 @@ command.`,
 	Run: Serve,
 }
 
-// Cli command installing packages into system.
 func Serve(cmd *cobra.Command, pkgs []string) {
 	db, err := db.GetFileDb(viper.GetString("serve-db-file"))
 	CheckErr(err)

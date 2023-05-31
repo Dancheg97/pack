@@ -14,7 +14,7 @@ import (
 
 // This command builds package in current directory and stores it in pacman
 // cache directory.
-func Build() error {
+func Build(install bool) error {
 	err := pacman.Makepkg(pacman.MakepkgOptions{
 		Clean:     true,
 		Force:     true,
@@ -22,6 +22,7 @@ func Build() error {
 		HoldVer:   true,
 		Needed:    true,
 		NoConfirm: true,
+		Install:   install,
 		Stdout:    os.Stdout,
 		Stderr:    os.Stderr,
 		Stdin:     os.Stdin,
