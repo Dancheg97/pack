@@ -66,14 +66,15 @@ func getCreads() (string, string, error) {
 	if err != nil {
 		return "", "", err
 	}
-	b, err := os.ReadFile(path.Join(u.HomeDir, ".packcfg"))
+	cfgpath := path.Join(u.HomeDir, ".packcfg")
+	b, err := os.ReadFile(cfgpath)
 	if err != nil {
 		fmt.Println(":: Unable to find pack credentials.")
 		n, p, err := askForCreds()
 		if err != nil {
 			return "", "", err
 		}
-		err = os.WriteFile(".packcfg", []byte(n+" "+p), 0600)
+		err = os.WriteFile(cfgpath, []byte(n+" "+p), 0600)
 		if err != nil {
 			return "", "", err
 		}

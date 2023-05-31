@@ -24,14 +24,14 @@ func init() {
 		Cmd:     serveCmd,
 		Name:    "serve-addr",
 		Desc:    "🌐 server adress",
-		Default: ":8080",
+		Default: ":80",
 		Env:     "PACK_SERVE_ADDR",
 	})
 	AddStringFlag(&FlagParameters{
 		Cmd:     serveCmd,
 		Name:    "serve-repo",
 		Desc:    "📋 name of repository, should match the domain",
-		Default: "localhost:8080",
+		Default: "localhost",
 		Env:     "PACK_SERVE_REPO",
 	})
 	AddStringListFlag(&FlagParameters{

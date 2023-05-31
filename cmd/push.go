@@ -5,7 +5,10 @@
 
 package cmd
 
-import "github.com/spf13/cobra"
+import (
+	"fmnx.su/core/pack/pack"
+	"github.com/spf13/cobra"
+)
 
 func init() {
 	rootCmd.AddCommand(pushCmd)
@@ -17,6 +20,8 @@ var pushCmd = &cobra.Command{
 	Short:   "⬆ push package",
 	Long: `⬆ push packages
 
+Provide repository name and packages you want to push.
+
 This command will search for built package in cache, then it will try to upload
 this package to compatible pack repo.
 
@@ -25,5 +30,6 @@ You can provide multiple packge names, all of them will be installed.`,
 }
 
 func Push(cmd *cobra.Command, args []string) {
-
+	err := pack.Push(args[0], args[1:]...)
+	CheckErr(err)
 }
