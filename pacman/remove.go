@@ -52,7 +52,7 @@ func Remove(pkgs string, opts ...RemoveOptions) error {
 func RemoveList(pkgs []string, opts ...RemoveOptions) error {
 	o := formOptions(opts, &RemoveDefault)
 
-	var args []string
+	var args = []string{"-R"}
 	if o.NoConfirm {
 		args = append(args, "--noconfirm")
 	}

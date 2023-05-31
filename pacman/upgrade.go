@@ -55,7 +55,7 @@ func Upgrade(files string, opts ...UpgradeOptions) error {
 func UpgradeList(files []string, opts ...UpgradeOptions) error {
 	o := formOptions(opts, &UpgradeDefault)
 
-	args := []string{pacman, "-U"}
+	args := []string{"-U"}
 	if o.Needed {
 		args = append(args, "--needed")
 	}

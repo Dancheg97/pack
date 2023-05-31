@@ -5,9 +5,6 @@
 
 package cmd
 
-// This package contains all CLI commands that might be executed by user.
-// Each file contains a single command, including root cmd.
-
 import (
 	"fmt"
 	"os"

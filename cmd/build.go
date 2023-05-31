@@ -5,18 +5,18 @@
 
 package cmd
 
-import "github.com/spf13/cobra"
-
-// This package contains all CLI commands that might be executed by user.
-// Each file contains a single command, including root cmd.
+import (
+	"fmnx.su/core/pack/pack"
+	"github.com/spf13/cobra"
+)
 
 func init() {
 	rootCmd.AddCommand(buildCmd)
 }
 
 var buildCmd = &cobra.Command{
-	Use:     "create",
-	Aliases: []string{"c"},
+	Use:     "build",
+	Aliases: []string{"b"},
 	Short:   "🛠️ build package",
 	Long: `🛠️ build package
 
@@ -28,5 +28,7 @@ package with 'push' command to pack registry.`,
 
 func Build(cmd *cobra.Command, args []string) {
 	err := lock.TryLock()
+	CheckErr(err)
+	err = pack.Build()
 	CheckErr(err)
 }
