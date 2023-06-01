@@ -8,13 +8,14 @@ package pacman
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"strings"
 )
 
 // String template for adding new databases to pacman configuration
 const dbtmpl = `
 [%s]
-Server = %s://%s
+Server = %s://%s/pacman
 %s
 `
 
@@ -38,27 +39,30 @@ func GetConfigDatabases() ([]string, error) {
 // pacman.conf file.
 type RepositoryParameters struct {
 	Database string
-	HTTPS    bool
+	HTTP     bool
 	TrustAll bool
 }
 
 // Add database to pacman configuration.
 func AddConfigDatabase(p *RepositoryParameters) error {
-	f, err := os.OpenFile(ConfigPath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
-	if err != nil {
-		return err
+	protocol := "https"
+	if p.HTTP {
+		protocol = "http"
 	}
-	link := p.Database + "/"
-	p.Database = strings.Replace(p.Database, "/", ".", 1)
-	trust := ``
+	trust := ""
 	if p.TrustAll {
-		trust = `SigLevel = Optional TrustAll`
+		trust = "SigLevel = Optional TrustAll"
 	}
-	protocol := `http`
-	if p.HTTPS {
-		protocol = `https`
+	tmpl := fmt.Sprintf(dbtmpl, p.Database, protocol, p.Database, trust)
+	for _, line := range strings.Split(tmpl, "\n") {
+		cmd := exec.Command( //nolint:gosec
+			"sudo", "bash", "-c",
+			"echo "+line+" >> /etc/pacman.conf",
+		)
+		err := cmd.Run()
+		if err != nil {
+			return err
+		}
 	}
-	tmpl := fmt.Sprintf(dbtmpl, p.Database, protocol, link, trust)
-	_, err = f.Write([]byte(tmpl))
-	return err
+	return nil
 }

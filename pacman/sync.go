@@ -56,6 +56,7 @@ var SyncDefault = SyncOptions{
 	Refresh:   true,
 	Stdout:    os.Stdout,
 	Stderr:    os.Stderr,
+	Stdin:     os.Stdin,
 }
 
 // Executes pacman sync command. This command will read sync options and form

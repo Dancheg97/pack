@@ -12,13 +12,23 @@ import (
 	"fmnx.su/core/pack/pacman"
 )
 
+// Parameters for new packages that will be installed.
+type InstallParameters struct {
+	// List of packages for installation.
+	Packages []string
+	// Set optional+trust all flag to new database.
+	TrustAll bool
+	// Use http connection instead of https.
+	HTTP bool
+}
+
 // This function can be used to install additional packages into the system.
-func Install(pkgs []string) error {
+func Install(p *InstallParameters) error {
 	confDbs, err := pacman.GetConfigDatabases()
 	if err != nil {
 		return err
 	}
-	pkgDbs, err := PackagesDatabases(pkgs)
+	pkgDbs, err := PackagesDatabases(p.Packages)
 	if err != nil {
 		return err
 	}
@@ -26,14 +36,14 @@ func Install(pkgs []string) error {
 	for _, missdb := range missing {
 		err = pacman.AddConfigDatabase(&pacman.RepositoryParameters{
 			Database: missdb,
-			HTTPS:    false,
-			TrustAll: true,
+			TrustAll: p.TrustAll,
+			HTTP:     p.HTTP,
 		})
 		if err != nil {
 			return err
 		}
 	}
-	return pacman.SyncList(FormatPkgs(pkgs))
+	return pacman.SyncList(FormatPkgs(p.Packages))
 }
 
 // Get list of pacman databases, that have to be inluded in configuration to
@@ -47,8 +57,6 @@ func PackagesDatabases(pkgs []string) ([]string, error) {
 			continue
 		case 2:
 			dbs = append(dbs, splt[0])
-		case 3:
-			dbs = append(dbs, splt[0]+"/"+splt[1])
 		default:
 			return nil, fmt.Errorf("bad package format: %s", pkg)
 		}
