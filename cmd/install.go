@@ -13,16 +13,14 @@ import (
 
 func init() {
 	AddBoolFlag(&FlagParameters{
-		Cmd:   installCmd,
-		Name:  "http",
-		Short: "p",
-		Desc:  "📍 use http instead of https",
+		Cmd:  installCmd,
+		Name: "install-http",
+		Desc: "📍 use http instead of https",
 	})
 	AddBoolFlag(&FlagParameters{
-		Cmd:   installCmd,
-		Name:  "trust-all",
-		Short: "t",
-		Desc:  "📌 set optioanl and trust-all mode to new database",
+		Cmd:  installCmd,
+		Name: "install-trust-all",
+		Desc: "📌 set optioanl and trust-all mode to new database",
 	})
 	rootCmd.AddCommand(installCmd)
 }
@@ -40,8 +38,8 @@ func Install(cmd *cobra.Command, pkgs []string) {
 	CheckErr(err)
 	err = pack.Install(&pack.InstallParameters{
 		Packages: pkgs,
-		TrustAll: viper.GetBool("trust-all"),
-		HTTP:     viper.GetBool("http"),
+		TrustAll: viper.GetBool("install-trust-all"),
+		HTTP:     viper.GetBool("install-http"),
 	})
 	CheckErr(err)
 }

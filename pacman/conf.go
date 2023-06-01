@@ -60,6 +60,8 @@ func AddConfigDatabase(p *RepositoryParameters) error {
 			"sudo", "bash", "-c",
 			"echo "+line+" >> /etc/pacman.conf",
 		)
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
 		err := cmd.Run()
 		if err != nil {
 			return err

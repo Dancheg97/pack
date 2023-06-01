@@ -22,17 +22,17 @@ import (
 func init() {
 	AddStringFlag(&FlagParameters{
 		Cmd:     serveCmd,
-		Name:    "serve-addr",
-		Desc:    "🌐 server adress",
-		Default: ":8080",
-		Env:     "PACK_SERVE_ADDR",
+		Name:    "serve-port",
+		Desc:    "🌐 server port",
+		Default: "8080",
+		Env:     "PACK_SERVE_PORT",
 	})
 	AddStringFlag(&FlagParameters{
 		Cmd:     serveCmd,
-		Name:    "serve-repo",
-		Desc:    "📋 name of repository, should match the domain",
+		Name:    "serve-registry",
+		Desc:    "📋 name of registry, should match the domain",
 		Default: "localhost:8080",
-		Env:     "PACK_SERVE_REPO",
+		Env:     "PACK_SERVE_REGISTRY",
 	})
 	AddStringListFlag(&FlagParameters{
 		Cmd:   serveCmd,
@@ -45,7 +45,7 @@ func init() {
 		Cmd:   serveCmd,
 		Name:  "serve-pull-mirr",
 		Short: "m",
-		Desc:  "🪞 list of pull mirrors, just provide links (depends on wget)",
+		Desc:  "🪞 list of pull mirrors, provide links (depends on wget)",
 		Env:   "PACK_SERVE_PULL_MIRR",
 	})
 	AddStringFlag(&FlagParameters{
@@ -57,7 +57,7 @@ func init() {
 	AddStringFlag(&FlagParameters{
 		Cmd:  serveCmd,
 		Name: "serve-public-dir",
-		Desc: "📂 directory with packages, publicly exposed",
+		Desc: "📂 directory with packages and database, publicly exposed",
 		Env:  "PACK_SERVE_PUBLIC_DIR",
 	})
 	AddStringFlag(&FlagParameters{
@@ -76,7 +76,7 @@ func init() {
 		Cmd:     serveCmd,
 		Name:    "serve-db-file",
 		Desc:    "💾 path to local file with user info",
-		Default: "users",
+		Default: "users.db",
 		Env:     "PACK_SERVE_DB_FILE",
 	})
 	rootCmd.AddCommand(serveCmd)
@@ -109,13 +109,13 @@ func Serve(cmd *cobra.Command, pkgs []string) {
 	}
 	server := pack.Server{
 		Server: http.Server{
-			Addr:         viper.GetString("serve-addr"),
+			Addr:         ":" + viper.GetString("serve-port"),
 			ReadTimeout:  time.Minute,
 			WriteTimeout: time.Minute,
 		},
 		WorkDir:  viper.GetString("serve-work-dir"),
 		ServeDir: viper.GetString("serve-public-dir"),
-		RepoName: viper.GetString("serve-repo"),
+		RepoName: viper.GetString("serve-registry"),
 		Cert:     viper.GetString("serve-cert"),
 		Key:      viper.GetString("serve-key"),
 		PullMirr: viper.GetStringSlice("serve-pull-mirr"),

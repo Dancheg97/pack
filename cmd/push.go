@@ -13,10 +13,9 @@ import (
 
 func init() {
 	AddBoolFlag(&FlagParameters{
-		Cmd:   pushCmd,
-		Name:  "http",
-		Short: "p",
-		Desc:  "📍 use http instead of https",
+		Cmd:  pushCmd,
+		Name: "push-http",
+		Desc: "📍 use http instead of https",
 	})
 	rootCmd.AddCommand(pushCmd)
 }

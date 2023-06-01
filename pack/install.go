@@ -24,6 +24,7 @@ type InstallParameters struct {
 
 // This function can be used to install additional packages into the system.
 func Install(p *InstallParameters) error {
+	fmt.Println(p)
 	confDbs, err := pacman.GetConfigDatabases()
 	if err != nil {
 		return err
