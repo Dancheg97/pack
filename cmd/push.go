@@ -8,9 +8,16 @@ package cmd
 import (
 	"fmnx.su/core/pack/pack"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 func init() {
+	AddBoolFlag(&FlagParameters{
+		Cmd:   pushCmd,
+		Name:  "http",
+		Short: "p",
+		Desc:  "📍 use http instead of https",
+	})
 	rootCmd.AddCommand(pushCmd)
 }
 
@@ -30,6 +37,10 @@ You can provide multiple packge names, all of them will be installed.`,
 }
 
 func Push(cmd *cobra.Command, args []string) {
-	err := pack.Push(args[0], args[1:]...)
+	err := pack.Push(&pack.PushParameters{
+		Registry: args[0],
+		Packages: args[1:],
+		HTTP:     viper.GetBool("http"),
+	})
 	CheckErr(err)
 }

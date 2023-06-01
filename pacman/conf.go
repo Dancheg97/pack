@@ -45,6 +45,7 @@ type RepositoryParameters struct {
 
 // Add database to pacman configuration.
 func AddConfigDatabase(p *RepositoryParameters) error {
+	fmt.Println(":: Adding database:", p.Database)
 	protocol := "https"
 	if p.HTTP {
 		protocol = "http"

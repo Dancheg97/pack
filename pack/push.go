@@ -18,15 +18,25 @@ import (
 	"golang.org/x/term"
 )
 
+// Parameters that will be used to push packages to database.
+type PushParameters struct {
+	// Remote registry.
+	Registry string
+	// Packages that you will push.
+	Packages []string
+	// Use http protocol instead of https.
+	HTTP bool
+}
+
 // This command will push provided package to pack server using existing pack
 // credentials, otherwise it will ask to create them.
-func Push(repo string, pkgs ...string) error {
-	u, p, err := getCreads()
+func Push(p *PushParameters) error {
+	usr, pwd, err := getCreds()
 	if err != nil {
 		return err
 	}
-	for _, pkg := range pkgs {
-		fmt.Println(":: Pushing package", pkg)
+	for _, pkg := range p.Packages {
+		fmt.Println("Pushing package", pkg)
 		des, err := os.ReadDir("/var/cache/pacman/pkg")
 		if err != nil {
 			return err
@@ -40,14 +50,18 @@ func Push(repo string, pkgs ...string) error {
 					if err != nil {
 						return err
 					}
+					protocol := "https://"
+					if p.HTTP {
+						protocol = "http://"
+					}
 					r, err := http.NewRequest(
-						"POST", repo+"/pacman/push", f,
+						"POST", protocol+p.Registry+"/pacman/push", f,
 					)
 					if err != nil {
 						return err
 					}
-					r.Header.Set("user", u)
-					r.Header.Set("password", p)
+					r.Header.Set("user", usr)
+					r.Header.Set("password", pwd)
 					r.Header.Set("file", de.Name())
 					c := http.Client{}
 					_, err = c.Do(r)
@@ -57,11 +71,12 @@ func Push(repo string, pkgs ...string) error {
 				}
 			}
 		}
+		fmt.Println("Push complete")
 	}
 	return nil
 }
 
-func getCreads() (string, string, error) {
+func getCreds() (string, string, error) {
 	u, err := user.Current()
 	if err != nil {
 		return "", "", err
