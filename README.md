@@ -13,15 +13,3 @@
 [![Build Status](https://ci.fmnx.su/api/badges/core/pack/status.svg)](https://ci.fmnx.su/core/pack)
 
 > **Warning!** Project is in alpha stage, API's are very likely to be changed.
-
-Pack is a tool that aims to simplify process of pacman package creation and allows to access them in docker-like manner from compatible pack repositories. Pack has docker version, that allows you to serve your packages and embed pack server into another go projects.
-
-Pack can be used to:
-
-- install packages from compatible pack repositories
-- build your own pack packages and push them to repositories
-- start server with to provide access with your packages to others
-
-<!--
-Provide additional command to launch git watcher.
--->

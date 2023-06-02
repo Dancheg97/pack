@@ -89,15 +89,17 @@ type MakepkgOptions struct {
 }
 
 var MakepkgDefault = MakepkgOptions{
-	Clean:     true,
-	Force:     true,
-	Log:       true,
-	HoldVer:   true,
-	Needed:    true,
-	NoConfirm: true,
-	Stdout:    os.Stdout,
-	Stderr:    os.Stderr,
-	Stdin:     os.Stdin,
+	Clean:      true,
+	Force:      true,
+	Log:        true,
+	HoldVer:    true,
+	Needed:     true,
+	NoConfirm:  true,
+	Sign:       true,
+	CleanBuild: true,
+	Stdout:     os.Stdout,
+	Stderr:     os.Stderr,
+	Stdin:      os.Stdin,
 }
 
 // This command will build a package in directory provided in options.

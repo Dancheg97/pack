@@ -10,16 +10,16 @@ import (
 )
 
 func init() {
-	rootCmd.AddCommand(serveCmd)
+	rootCmd.AddCommand(watchCmd)
 }
 
-var serveCmd = &cobra.Command{
-	Use:     "serve",
-	Aliases: []string{"s"},
-	Short:   "🌐 run package registry",
-	Run:     Serve,
+var watchCmd = &cobra.Command{
+	Use:     "gitsync",
+	Aliases: []string{"gitsync"},
+	Short:   "🧿 rebuild git repositories",
+	Run:     Watch,
 }
 
-func Serve(cmd *cobra.Command, args []string) {
+func Watch(cmd *cobra.Command, args []string) {
 
 }
