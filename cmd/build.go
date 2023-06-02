@@ -35,8 +35,8 @@ package and signature in /var/cache/pacman/pkg.
 func Build(cmd *cobra.Command, args []string) {
 	CheckGnupg()
 	CheckErr(pacman.Makepkg())
-	ValideSignature()
-	CacheBuiltPackage()
+	CheckErr(ValideSignature(""))
+	CheckErr(CacheBuiltPackage(""))
 }
 
 const gnupgerr = `Before installation you should create GPG key.
@@ -58,20 +58,21 @@ func CheckGnupg() {
 	}
 }
 
-func ValideSignature() {
-	command := "gpg --keyserver-options auto-key-retrieve --verify *.sig"
+// Validates all file signatures in provided directory.
+func ValideSignature(dir string) error {
+	sigloc := dir + "/*.sig"
+	command := "gpg --keyserver-options auto-key-retrieve --verify " + sigloc
 	cmd := exec.Command("bash", "-c", command)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	cmd.Stdin = os.Stdin
-	CheckErr(cmd.Run())
+	return cmd.Run()
 }
 
-func CacheBuiltPackage() {
+// Puts all packages and signatures from provided dir to pacakge cache.
+func CacheBuiltPackage(dir string) error {
 	command := "sudo mv *.pkg.tar.zst* /var/cache/pacman/pkg"
 	cmd := exec.Command("bash", "-c", command)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	cmd.Stdin = os.Stdin
-	CheckErr(cmd.Run())
+	return cmd.Run()
 }
