@@ -54,17 +54,22 @@ packages to your database. Signatures will be validated with gnupg.`,
 }
 
 func Serve(cmd *cobra.Command, args []string) {
+	var (
+		name = viper.GetString("name")
+		port = viper.GetString("port")
+	)
 	mux := http.NewServeMux()
 	fs := http.FileServer(http.Dir(pacmancache))
 	mux.Handle("/pack/", http.StripPrefix("/pack/", fs))
 	mux.HandleFunc("/pack/push", PushHandler)
 	s := http.Server{
-		Addr:         ":" + viper.GetString("port"),
+		Addr:         ":" + port,
 		Handler:      mux,
 		ReadTimeout:  time.Minute * 15,
 		WriteTimeout: time.Minute * 15,
 	}
-	go RunDbDaemon(path.Join(pacmancache, viper.GetString("name")+dbext))
+	go RunDbDaemon(path.Join(pacmancache, name+dbext))
+	fmt.Printf("Launching database %s on port %s...\n", name, port)
 	CheckErr(s.ListenAndServe())
 }
 
