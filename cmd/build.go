@@ -60,7 +60,7 @@ func CheckGnupg() {
 
 // Validates all file signatures in provided directory.
 func ValideSignature(dir string) error {
-	sigloc := dir + "/*.sig"
+	sigloc := path.Join(dir, "*.sig")
 	command := "gpg --keyserver-options auto-key-retrieve --verify " + sigloc
 	cmd := exec.Command("bash", "-c", command)
 	cmd.Stdout = os.Stdout
