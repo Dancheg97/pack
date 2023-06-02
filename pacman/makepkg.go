@@ -91,7 +91,6 @@ type MakepkgOptions struct {
 var MakepkgDefault = MakepkgOptions{
 	Clean:      true,
 	Force:      true,
-	Log:        true,
 	HoldVer:    true,
 	Needed:     true,
 	NoConfirm:  true,

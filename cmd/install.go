@@ -6,6 +6,7 @@
 package cmd
 
 import (
+	"fmnx.su/core/pack/pacman"
 	"github.com/spf13/cobra"
 )
 
@@ -21,5 +22,6 @@ var installCmd = &cobra.Command{
 }
 
 func Install(cmd *cobra.Command, args []string) {
-
+	err := pacman.SyncList(args)
+	CheckErr(err)
 }
