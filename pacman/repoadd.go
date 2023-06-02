@@ -49,7 +49,7 @@ var RepoAddDefault = RepoAddOptions{
 }
 
 // This function will add new packages to database.
-func RepoAdd(f string, db string, opts ...RepoAddOptions) error {
+func RepoAdd(db, f string, opts ...RepoAddOptions) error {
 	o := formOptions(opts, &RepoAddDefault)
 
 	var args []string

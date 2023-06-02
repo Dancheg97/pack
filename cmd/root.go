@@ -13,7 +13,11 @@ import (
 	"github.com/spf13/viper"
 )
 
-const pacmancache = "/var/cache/pacman/pkg"
+const (
+	pacmancache = "/var/cache/pacman/pkg"
+	pkgext      = ".pkg.tar.zst"
+	dbext       = ".db.tar.gz"
+)
 
 var rootCmd = &cobra.Command{
 	Use:          "pack",

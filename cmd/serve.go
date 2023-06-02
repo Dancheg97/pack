@@ -7,13 +7,16 @@ package cmd
 
 import (
 	"encoding/base64"
+	"fmt"
 	"net/http"
 	"os"
 	"path"
 	"strings"
 	"time"
 
+	"fmnx.su/core/pack/pacman"
 	"github.com/google/uuid"
+	"github.com/radovskyb/watcher"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -61,13 +64,30 @@ func Serve(cmd *cobra.Command, args []string) {
 		ReadTimeout:  time.Minute * 15,
 		WriteTimeout: time.Minute * 15,
 	}
+	go RunDbDaemon(path.Join(pacmancache, viper.GetString("name")+dbext))
 	CheckErr(s.ListenAndServe())
+}
+
+// Run package database daemon, that will add new packages to database.
+func RunDbDaemon(dbpath string) {
+	w := watcher.New()
+	err := w.Add(pacmancache)
+	CheckErr(err)
+	for event := range w.Event {
+		file := event.FileInfo.Name()
+		if strings.HasSuffix(file, pkgext) {
+			err = pacman.RepoAdd(dbpath, path.Join(pacmancache, file))
+			if err != nil {
+				fmt.Println("error: unable to add package to database")
+			}
+		}
+	}
 }
 
 // Handler that can be used to upload user packages.
 func PushHandler(w http.ResponseWriter, r *http.Request) {
 	file := r.Header.Get("file")
-	if !strings.HasSuffix(file, ".pkg.tar.zst") {
+	if !strings.HasSuffix(file, pkgext) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
