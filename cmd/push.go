@@ -23,3 +23,9 @@ var pushCmd = &cobra.Command{
 func Push(cmd *cobra.Command, args []string) {
 
 }
+
+// This function will find the latest version of package in cache direcotry and
+// then push it to registry specified in package name.
+func PushPackage(pkg string) error {
+	return nil
+}

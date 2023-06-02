@@ -6,6 +6,9 @@
 package cmd
 
 import (
+	"os"
+
+	"fmnx.su/core/pack/pacman"
 	"github.com/spf13/cobra"
 )
 
@@ -21,5 +24,14 @@ var upgradeCmd = &cobra.Command{
 }
 
 func Upgrade(cmd *cobra.Command, args []string) {
-
+	err := pacman.SyncList(nil, pacman.SyncOptions{
+		Sudo:    true,
+		Needed:  true,
+		Refresh: true,
+		Upgrade: true,
+		Stdout:  os.Stdout,
+		Stderr:  os.Stderr,
+		Stdin:   os.Stdin,
+	})
+	CheckErr(err)
 }
