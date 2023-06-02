@@ -31,6 +31,14 @@ package and signature in /var/cache/pacman/pkg.
 	Run: Build,
 }
 
+// Build package with pack.
+func Build(cmd *cobra.Command, args []string) {
+	CheckGnupg()
+	CheckErr(pacman.Makepkg())
+	ValideSignature()
+	CacheBuiltPackage()
+}
+
 const gnupgerr = `Before installation you should create GPG key.
 It is required for package signing, run:
 
@@ -40,21 +48,30 @@ gpg --gen-key
 Complete documentation can be found here:
 https://wiki.archlinux.org/title/DeveloperWiki:Signing_Packages`
 
-func Build(cmd *cobra.Command, args []string) {
+func CheckGnupg() {
 	hd, err := os.UserHomeDir()
 	CheckErr(err)
-	_, err = os.Stat(path.Join(hd, ".gnupgx"))
+	_, err = os.Stat(path.Join(hd, ".gnupg"))
 	if err != nil {
 		fmt.Println(gnupgerr)
 		os.Exit(1)
 	}
+}
 
-	err = pacman.Makepkg()
-	CheckErr(err)
-	mv := "sudo mv *.pkg.tar.zst* /var/cache/pacman/pkg"
-	c := exec.Command("bash", "-c", mv)
-	c.Stdout = os.Stdout
-	c.Stderr = os.Stderr
-	c.Stdin = os.Stdin
-	CheckErr(c.Run())
+func ValideSignature() {
+	command := "gpg --keyserver-options auto-key-retrieve --verify *.sig"
+	cmd := exec.Command("bash", "-c", command)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Stdin = os.Stdin
+	CheckErr(cmd.Run())
+}
+
+func CacheBuiltPackage() {
+	command := "sudo mv *.pkg.tar.zst* /var/cache/pacman/pkg"
+	cmd := exec.Command("bash", "-c", command)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Stdin = os.Stdin
+	CheckErr(cmd.Run())
 }
