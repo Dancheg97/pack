@@ -10,16 +10,16 @@ import (
 )
 
 func init() {
-	rootCmd.AddCommand(serveCmd)
+	rootCmd.AddCommand(mirrCmd)
 }
 
-var serveCmd = &cobra.Command{
-	Use:     "serve",
-	Aliases: []string{"s"},
-	Short:   "🌐 serve package registry",
-	Run:     Serve,
+var mirrCmd = &cobra.Command{
+	Use:     "mirror",
+	Aliases: []string{"m"},
+	Short:   "🪞 launch fs mirror",
+	Run:     Mirror,
 }
 
-func Serve(cmd *cobra.Command, args []string) {
+func Mirror(cmd *cobra.Command, args []string) {
 
 }

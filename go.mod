@@ -3,10 +3,8 @@ module fmnx.su/core/pack
 go 1.20
 
 require (
-	github.com/nightlyone/lockfile v1.0.0
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.15.0
-	golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1
 )
 
 require (

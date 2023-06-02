@@ -9,13 +9,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/nightlyone/lockfile"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-)
-
-var (
-	lock lockfile.Lockfile
 )
 
 var rootCmd = &cobra.Command{
@@ -34,9 +29,6 @@ var rootCmd = &cobra.Command{
 func init() {
 	rootCmd.SetHelpCommand(&cobra.Command{})
 	rootCmd.SetUsageTemplate(CobraTmpl)
-	var err error
-	lock, err = lockfile.New("/tmp/pack.lock")
-	CheckErr(err)
 }
 
 // Main execution of cobra command.

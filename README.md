@@ -21,3 +21,7 @@ Pack can be used to:
 - install packages from compatible pack repositories
 - build your own pack packages and push them to repositories
 - start server with to provide access with your packages to others
+
+<!--
+Provide additional command to launch git watcher.
+-->

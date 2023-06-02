@@ -35,7 +35,6 @@ type RemoveOptions struct {
 
 var RemoveDefault = RemoveOptions{
 	Sudo:        true,
-	NoConfirm:   true,
 	Recursive:   true,
 	WithConfigs: true,
 	Stdout:      os.Stdout,

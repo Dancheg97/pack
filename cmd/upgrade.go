@@ -10,16 +10,16 @@ import (
 )
 
 func init() {
-	rootCmd.AddCommand(serveCmd)
+	rootCmd.AddCommand(upgradeCmd)
 }
 
-var serveCmd = &cobra.Command{
-	Use:     "serve",
-	Aliases: []string{"s"},
-	Short:   "🌐 serve package registry",
-	Run:     Serve,
+var upgradeCmd = &cobra.Command{
+	Use:     "upgrade",
+	Aliases: []string{"u"},
+	Short:   "〽️ upgrade system",
+	Run:     Upgrade,
 }
 
-func Serve(cmd *cobra.Command, args []string) {
+func Upgrade(cmd *cobra.Command, args []string) {
 
 }

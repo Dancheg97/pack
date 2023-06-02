@@ -19,12 +19,8 @@ func init() {
 var describeCmd = &cobra.Command{
 	Use:     "describe",
 	Aliases: []string{"d"},
-	Short:   "📃 describe package",
-	Long: `📃 describe package
-
-This command will show package description from pacman, you can provide 
-multiple packages.`,
-	Run: Describe,
+	Short:   "📃 describe packages",
+	Run:     Describe,
 }
 
 func Describe(cmd *cobra.Command, args []string) {

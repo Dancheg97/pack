@@ -6,36 +6,20 @@
 package cmd
 
 import (
-	"fmnx.su/core/pack/pack"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 func init() {
-	AddBoolFlag(&FlagParameters{
-		Cmd:   buildCmd,
-		Name:  "install",
-		Short: "i",
-		Desc:  "install package after build",
-	})
 	rootCmd.AddCommand(buildCmd)
 }
 
 var buildCmd = &cobra.Command{
 	Use:     "build",
 	Aliases: []string{"b"},
-	Short:   "🛠️ build package",
-	Long: `🛠️ build package
-
-This command will build package in current directory and move it to pacman cache 
-directory (/var/cache/pacman/pkg), after build you will be able to upload this 
-package with 'push' command to pack registry.`,
-	Run: Build,
+	Short:   "🛠️ build packages",
+	Run:     Build,
 }
 
 func Build(cmd *cobra.Command, args []string) {
-	err := lock.TryLock()
-	CheckErr(err)
-	err = pack.Build(viper.GetBool("install"))
-	CheckErr(err)
+
 }
