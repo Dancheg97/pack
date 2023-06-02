@@ -3,14 +3,14 @@
 pkgname=pack
 pkgver=0.1
 pkgrel=1
-pkgdesc="Speed up your package related operations."
+pkgdesc="Another way of arch package distribution"
 arch=('x86_64')
 url="https://fmnx.su/core/pack"
 license=('GPL')
 depends=(
   'pacman'
+  'gnupg'
   'git'
-  'wget'
 )
 makedepends=('go')
 
