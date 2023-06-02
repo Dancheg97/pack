@@ -13,6 +13,8 @@ import (
 	"github.com/spf13/viper"
 )
 
+const pacmancache = "/var/cache/pacman/pkg"
+
 var rootCmd = &cobra.Command{
 	Use:          "pack",
 	Short:        "📦 decentralized package manager based on pacman",

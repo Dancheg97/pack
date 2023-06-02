@@ -42,14 +42,17 @@ var serveCmd = &cobra.Command{
 	Short:   "🌐 run package registry",
 	Long: `🌐 run package registry
 
-This command will expose your /var/cache/pacman/pkg directory, create database
-and provide access to your packages for other users.`,
+This command will expose your pacman cache directory, create database and
+provide access to your packages for other users.
+
+Also this command will create endpoint, which allows users to upload signed 
+packages to your database. Signatures will be validated with gnupg.`,
 	Run: Serve,
 }
 
 func Serve(cmd *cobra.Command, args []string) {
 	mux := http.NewServeMux()
-	fs := http.FileServer(http.Dir("/var/cache/pacman/pkg"))
+	fs := http.FileServer(http.Dir(pacmancache))
 	mux.Handle("/pack/", http.StripPrefix("/pack/", fs))
 	mux.HandleFunc("/pack/push", PushHandler)
 	s := http.Server{
