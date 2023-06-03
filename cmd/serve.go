@@ -105,7 +105,7 @@ func PushHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sign := r.Header.Get(sign)
-	if file == "" {
+	if sign == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
