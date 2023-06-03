@@ -103,7 +103,7 @@ func AddStringListFlag(p *FlagParameters) {
 
 const CobraTmpl = `Usage:{{if .Runnable}}
 {{.UseLine}}{{end}}{{if .HasAvailableSubCommands}}
-{{.CommandPath}} [command]{{end}}{{if gt (len .Aliases) 0}}
+{{.CommandPath}} [command]{{end}}{{if gt (len .Aliases) 0}} <pkgs>
 
 Aliases:
 {{.NameAndAliases}}{{end}}{{if .HasExample}}

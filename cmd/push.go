@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"os/exec"
 	"path"
 	"strings"
 
@@ -25,8 +26,13 @@ var pushCmd = &cobra.Command{
 	Use:     "push",
 	Aliases: []string{"p"},
 	Short:   "📨 push packages",
-	Long:    `📨 push packages`,
-	Run:     Push,
+	Long: `📨 push packages
+
+This command will find package and sign in package cache directory and push it
+to provided registry. Registry should be included with package name, example:
+
+pack p localhost:4572/linux-zen`,
+	Run: Push,
 }
 
 func Push(cmd *cobra.Command, args []string) {
@@ -90,6 +96,14 @@ func FormPackage(pkg string) (*Package, error) {
 // This function pushes package to registry via http.
 func PushPkg(p *Package) error {
 	packagefile, err := os.Open(p.PkgFile)
+	if err != nil {
+		return err
+	}
+	fmt.Println(":: Retrieving package signature access.")
+	err = exec.Command( // nolint:gosec
+		"bash", "-c",
+		"sudo chmod 0777 "+p.SigFile,
+	).Run()
 	if err != nil {
 		return err
 	}

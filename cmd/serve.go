@@ -74,14 +74,14 @@ func Serve(cmd *cobra.Command, args []string) {
 }
 
 // Run package database daemon, that will add new packages to database.
-func RunDbDaemon(dbpath string) {
+func RunDbDaemon(dbname string) {
 	w := watcher.New()
 	err := w.Add(pacmancache)
 	CheckErr(err)
 	for event := range w.Event {
 		file := event.FileInfo.Name()
 		if strings.HasSuffix(file, pkgext) {
-			err = pacman.RepoAdd(dbpath, path.Join(pacmancache, file))
+			err = pacman.RepoAdd(dbname, path.Join(pacmancache, file))
 			if err != nil {
 				fmt.Println("error: unable to add package to database")
 			}
