@@ -60,8 +60,8 @@ func Serve(cmd *cobra.Command, args []string) {
 	)
 	mux := http.NewServeMux()
 	fs := http.FileServer(http.Dir(pacmancache))
-	mux.Handle("/pack/", http.StripPrefix("/pack/", fs))
-	mux.HandleFunc("/pack/push", PushHandler)
+	mux.Handle(fsendpoint, http.StripPrefix(fsendpoint, fs))
+	mux.HandleFunc(pushendpoint, PushHandler)
 	s := http.Server{
 		Addr:         ":" + port,
 		Handler:      mux,
@@ -91,24 +91,24 @@ func RunDbDaemon(dbpath string) {
 
 // Handler that can be used to upload user packages.
 func PushHandler(w http.ResponseWriter, r *http.Request) {
-	file := r.Header.Get("file")
+	file := r.Header.Get(file)
 	if !strings.HasSuffix(file, pkgext) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	sign := r.Header.Get("sign")
+	sign := r.Header.Get(sign)
 	if file == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	tmpdir := path.Join("/tmp", uuid.New().String())
+	tmpdir := path.Join("/tmp", "pack-"+uuid.New().String())
 	err := os.MkdirAll(tmpdir, 0644)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	defer os.RemoveAll(tmpdir)
+	// defer os.RemoveAll(tmpdir)
 
 	f, err := os.Create(path.Join(tmpdir, file))
 	if err != nil {
@@ -121,15 +121,12 @@ func PushHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	f, err = os.Create(path.Join(tmpdir, file+".sig"))
+	sigdata, err := base64.StdEncoding.DecodeString(sign)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	_, err = f.ReadFrom(base64.NewDecoder(
-		base64.RawStdEncoding,
-		strings.NewReader(sign)),
-	)
+	err = os.WriteFile(path.Join(tmpdir, file+".sig"), sigdata, 0600)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -141,10 +138,11 @@ func PushHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = CacheBuiltPackage(tmpdir)
+	err = CacheBuiltPackage(tmpdir + "/")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	fmt.Println("[PUSH] - package accepted: " + file)
 	w.WriteHeader(http.StatusOK)
 }

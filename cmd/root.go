@@ -14,9 +14,14 @@ import (
 )
 
 const (
-	pacmancache = "/var/cache/pacman/pkg"
-	pkgext      = ".pkg.tar.zst"
-	dbext       = ".db.tar.gz"
+	pacmancache  = "/var/cache/pacman/pkg"
+	pkgext       = ".pkg.tar.zst"
+	dbext        = ".db.tar.gz"
+	protocol     = "http://"
+	fsendpoint   = "/pack"
+	pushendpoint = "/pack/push"
+	file         = "file"
+	sign         = "sign"
 )
 
 var rootCmd = &cobra.Command{

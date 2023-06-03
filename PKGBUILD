@@ -10,7 +10,6 @@ license=('GPL')
 depends=(
   'pacman'
   'gnupg'
-  'git'
 )
 makedepends=('go')
 

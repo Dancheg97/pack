@@ -6,8 +6,10 @@
 package cmd
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"path"
 	"strings"
@@ -23,10 +25,8 @@ var pushCmd = &cobra.Command{
 	Use:     "push",
 	Aliases: []string{"p"},
 	Short:   "📨 push packages",
-	Long: `📨 push packages
-
-`,
-	Run: Push,
+	Long:    `📨 push packages`,
+	Run:     Push,
 }
 
 func Push(cmd *cobra.Command, args []string) {
@@ -36,12 +36,16 @@ func Push(cmd *cobra.Command, args []string) {
 		CheckErr(err)
 		pkgs = append(pkgs, p)
 	}
-	fmt.Println(pkgs[0])
+	for _, pkg := range pkgs {
+		err := PushPkg(pkg)
+		CheckErr(err)
+	}
 }
 
 type Package struct {
 	Registry string
 	PkgName  string
+	Filename string
 	PkgFile  string
 	SigFile  string
 }
@@ -61,22 +65,60 @@ func FormPackage(pkg string) (*Package, error) {
 		return nil, err
 	}
 	for _, de := range des {
-		if !strings.HasSuffix(de.Name(), pkgext) {
+		filename := de.Name()
+		if !strings.HasSuffix(filename, pkgext) {
 			continue
 		}
-		pkgsplt := strings.Split(de.Name(), "-")
+		pkgsplt := strings.Split(filename, "-")
 		if len(pkgsplt) < 4 {
-			return nil, errors.New("invalid package in cache: " + de.Name())
+			return nil, errors.New("invalid package in cache: " + filename)
 		}
 		namecheck := strings.Join(pkgsplt[:len(pkgsplt)-3], "-")
 		if pkgname == namecheck {
 			return &Package{
 				Registry: registry,
 				PkgName:  pkgname,
-				PkgFile:  path.Join(pacmancache, de.Name()),
-				SigFile:  path.Join(pacmancache, de.Name()+".sig"),
+				Filename: filename,
+				PkgFile:  path.Join(pacmancache, filename),
+				SigFile:  path.Join(pacmancache, filename+".sig"),
 			}, err
 		}
 	}
 	return nil, errors.New("package not found in cache: " + pkgname)
+}
+
+// This function pushes package to registry via http.
+func PushPkg(p *Package) error {
+	packagefile, err := os.Open(p.PkgFile)
+	if err != nil {
+		return err
+	}
+	sigbytes, err := os.ReadFile(p.SigFile)
+	if err != nil {
+		return err
+	}
+
+	req, err := http.NewRequest(
+		http.MethodPut,
+		protocol+p.Registry+pushendpoint,
+		packagefile,
+	)
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add(file, p.Filename)
+	req.Header.Add(sign, base64.StdEncoding.EncodeToString(sigbytes))
+
+	var client http.Client
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return errors.New(resp.Status)
+	}
+
+	fmt.Println("[PUSH] - package delivered: " + p.PkgFile)
+	return nil
 }
