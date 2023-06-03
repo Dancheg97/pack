@@ -6,7 +6,6 @@
 package cmd
 
 import (
-	"crypto/tls"
 	"encoding/base64"
 	"errors"
 	"fmt"
@@ -125,13 +124,7 @@ func PushPkg(p *Package) error {
 	req.Header.Add(file, p.Filename)
 	req.Header.Add(sign, base64.StdEncoding.EncodeToString(sigbytes))
 
-	client := http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true, // nolint:gosec
-			},
-		},
-	}
+	var client http.Client
 	resp, err := client.Do(req)
 	if err != nil {
 		return err
