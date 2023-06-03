@@ -16,9 +16,9 @@ RUN go build -o packbin .
 
 FROM archlinux/archlinux:base-devel
 
-LABEL maintainer="dancheg <dancheg@fmnx.su>"
+LABEL maintainer="Danila Fominykh <dancheg97@fmnx.su>"
 
-RUN pacman -Syu --noconfirm --needed git wget
+RUN pacman -Syu --noconfirm --needed gnupg
 
 WORKDIR /home
 
