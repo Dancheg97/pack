@@ -98,6 +98,12 @@ func PushHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+
+	if _, err := os.Stat(path.Join(pacmancache, file)); err == nil {
+		w.WriteHeader(http.StatusConflict)
+		return
+	}
+
 	sign := r.Header.Get(sign)
 	if file == "" {
 		w.WriteHeader(http.StatusBadRequest)
@@ -112,13 +118,7 @@ func PushHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer os.RemoveAll(tmpdir)
 
-	filepath := path.Join(pacmancache, file)
-	if _, err := os.Stat(filepath); err == nil {
-		w.WriteHeader(http.StatusConflict)
-		return
-	}
-
-	f, err := os.Create(filepath)
+	f, err := os.Create(path.Join(tmpdir, file))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
