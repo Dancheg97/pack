@@ -36,6 +36,18 @@ func init() {
 		Desc:    "database name, should match the domain",
 		Default: "localhost:4572",
 	})
+	AddStringFlag(&FlagParameters{
+		Cmd:   serveCmd,
+		Name:  "key",
+		Short: "k",
+		Desc:  "key file path for TLS connection",
+	})
+	AddStringFlag(&FlagParameters{
+		Cmd:   serveCmd,
+		Name:  "cert",
+		Short: "c",
+		Desc:  "certificate file path for TLS connection",
+	})
 	rootCmd.AddCommand(serveCmd)
 }
 
@@ -46,10 +58,14 @@ var serveCmd = &cobra.Command{
 	Long: `🌐 run package registry
 
 This command will expose your pacman cache directory, create database and
-provide access to your packages for other users.
+provide access to your packages for other users. Command should be runned in
+as root, because it is modifying contents of pacman cache directory.
 
 Also this command will create endpoint, which allows users to upload signed 
-packages to your database. Signatures will be validated with gnupg.`,
+packages to your database. Signatures will be validated with gnupg.
+
+By default pack client uses HTTPS, so you should provide valid certificates or
+set them up in reverse-proxy (nginx/traefik).`,
 	Run: Serve,
 }
 
@@ -57,19 +73,28 @@ func Serve(cmd *cobra.Command, args []string) {
 	var (
 		name = viper.GetString("name")
 		port = viper.GetString("port")
+		cert = viper.GetString("cert")
+		key  = viper.GetString("key")
 	)
+	go RunDbDaemon(path.Join(pacmancache, name+dbext))
+
+	fmt.Printf("Launching database %s on port %s...\n", name, port)
+
 	mux := http.NewServeMux()
 	fs := http.FileServer(http.Dir(pacmancache))
 	mux.Handle(fsendpoint, http.StripPrefix(fsendpoint, fs))
 	mux.HandleFunc(pushendpoint, PushHandler)
+
 	s := http.Server{
 		Addr:         ":" + port,
 		Handler:      mux,
 		ReadTimeout:  time.Minute * 15,
 		WriteTimeout: time.Minute * 15,
 	}
-	go RunDbDaemon(path.Join(pacmancache, name+dbext))
-	fmt.Printf("Launching database %s on port %s...\n", name, port)
+
+	if cert != "" && key != "" {
+		CheckErr(s.ListenAndServeTLS(cert, key))
+	}
 	CheckErr(s.ListenAndServe())
 }
 

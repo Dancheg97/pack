@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	pacconf = "/etc/pacman.conf"
-	rgtmpl  = "cat <<EOF >> /etc/pacman.conf\n[%s]\nServer=http://%s/pack\nEOF"
+	conf = "/etc/pacman.conf"
+	tmpl = "cat <<EOF >> /etc/pacman.conf\n[%s]\nServer=https://%s/pack\nEOF"
 )
 
 // This function will read pacman.conf and add missing registries, that can
@@ -30,7 +30,7 @@ func AddRegistries(pkgs []string) (*string, error) {
 		registries = append(registries, splt[0])
 	}
 
-	f, err := os.ReadFile(pacconf)
+	f, err := os.ReadFile(conf)
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +38,7 @@ func AddRegistries(pkgs []string) (*string, error) {
 
 	for _, registry := range registries {
 		if !strings.Contains(fstr, fmt.Sprintf("\n[%s]\n", registry)) {
-			addstr := fmt.Sprintf(rgtmpl, registry, registry)
+			addstr := fmt.Sprintf(tmpl, registry, registry)
 			err := exec.Command("sudo", "bash", "-c", addstr).Run()
 			if err != nil {
 				return nil, errors.New("unable to add config with: " + addstr)
