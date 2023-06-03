@@ -13,3 +13,8 @@
 [![Build Status](https://ci.fmnx.su/api/badges/core/pack/status.svg)](https://ci.fmnx.su/core/pack)
 
 > **Warning!** Project is in alpha stage, API's are very likely to be changed.
+
+<!--
+When doing operations overwrite flags related to that operation.
+Add description to already used flags in executed commands.
+-->

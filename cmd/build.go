@@ -27,6 +27,8 @@ var buildCmd = &cobra.Command{
 	
 This command will build package in current directory and store the resulting
 package and signature in pacman cache directory.
+
+// TODO add links to related documentation.
 `,
 	Run: Build,
 }
@@ -71,8 +73,9 @@ func ValideSignature(dir string) error {
 	return cmd.Run()
 }
 
-// Puts all packages and signatures from provided dir to pacakge cachegpg --with-colons -k | awk -F: '$1=="uid" {print $10; exit}'.
+// Puts all packages and signatures from provided dir to pacakge cache.
 func CacheBuiltPackage(dir string) error {
+	fmt.Println("Moving package to cache...")
 	command := "sudo mv *.pkg.tar.zst* " + pacmancache
 	cmd := exec.Command("bash", "-c", command)
 	cmd.Stdout = os.Stdout

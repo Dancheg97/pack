@@ -92,11 +92,10 @@ type MakepkgOptions struct {
 var MakepkgDefault = MakepkgOptions{
 	Clean:      true,
 	Force:      true,
-	HoldVer:    true,
 	Needed:     true,
-	NoConfirm:  true,
 	Sign:       true,
 	CleanBuild: true,
+	Install:    true,
 	Stdout:     os.Stdout,
 	Stderr:     os.Stderr,
 	Stdin:      os.Stdin,
