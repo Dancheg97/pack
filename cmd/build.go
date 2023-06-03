@@ -42,11 +42,17 @@ func Build(cmd *cobra.Command, args []string) {
 const gnupgerr = `GPG key is not found in user directory ~/.gnupg
 It is required for package signing, run:
 
+1) Install gnupg:
 pack i gnupg
+
+2) Generate a key:
 gpg --gen-key
 
-Complete documentation can be found here:
-https://wiki.archlinux.org/title/DeveloperWiki:Signing_Packages`
+3) Get key id:
+gpg -k
+
+4) Send it to key server:
+gpg --send-keys KEY-ID`
 
 // Ensure, that user have created gnupg keys for package signing before package
 // is built and cached.
