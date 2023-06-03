@@ -78,6 +78,8 @@ func RunDbDaemon(dbname string) {
 	w := watcher.New()
 	err := w.Add(pacmancache)
 	CheckErr(err)
+	w.FilterOps(watcher.Create, watcher.Move)
+	go w.Start(time.Second) //nolint:errcheck
 	for event := range w.Event {
 		file := event.FileInfo.Name()
 		if strings.HasSuffix(file, pkgext) {

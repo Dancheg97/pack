@@ -41,6 +41,7 @@ type RepoAddOptions struct {
 }
 
 var RepoAddDefault = RepoAddOptions{
+	Sudo:             true,
 	New:              true,
 	PreventDowngrade: true,
 	Stdout:           os.Stdout,
