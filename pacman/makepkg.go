@@ -7,6 +7,7 @@ package pacman
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -234,4 +235,40 @@ func GetShellParams(file string, arg string) ([]string, error) {
 		return nil, err
 	}
 	return strings.Split(strings.Trim(b.String(), "\n"), "\n"), nil
+}
+
+// Validate, that packager defined in /etc/makepkg.conf matches signer
+// authority in GnuPG.
+func ValidatePackager() error {
+	gnukey := `gpg --with-colons -k | awk -F: '$1=="uid" {print $10; exit}'`
+	cmd := exec.Command("bash", "-c", gnukey)
+	var b bytes.Buffer
+	cmd.Stdout = &b
+	cmd.Stderr = &b
+	err := cmd.Run()
+	if err != nil {
+		return errors.New(b.String())
+	}
+	f, err := os.ReadFile("/etc/makepkg.conf")
+	if err != nil {
+		return err
+	}
+	splt := strings.Split(string(f), "\nPACKAGER=\"")
+	if len(splt) != 2 {
+		return errors.New(
+			"Packager is not defined in /etc/makepkg.conf. " +
+				"Add PACKAGER variable matching your GnuPG authority " +
+				"in /etc/makepkg.conf\n" +
+				"Example: PACKAGER=\"John Doe <john@doe.com>\"\n",
+		)
+	}
+	confPackager := strings.Split(splt[1], "\"\n")[0]
+	keySigner := strings.ReplaceAll(b.String(), "\n", "")
+	if confPackager != keySigner {
+		return fmt.Errorf(
+			"Gnu key signer should match makepkg packager: %s / %s",
+			keySigner, confPackager,
+		)
+	}
+	return nil
 }

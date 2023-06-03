@@ -33,13 +33,14 @@ package and signature in pacman cache directory.
 
 // Build package with pack.
 func Build(cmd *cobra.Command, args []string) {
-	CheckGnupg()
+	CheckErr(CheckGnupg())
+	CheckErr(pacman.ValidatePackager())
 	CheckErr(pacman.Makepkg())
 	CheckErr(ValideSignature(""))
 	CheckErr(CacheBuiltPackage(""))
 }
 
-const gnupgerr = `Before installation you should create GPG key.
+const gnupgerr = `GPG key is not found in user directory ~/.gnupg
 It is required for package signing, run:
 
 pack i gnupg
@@ -48,14 +49,16 @@ gpg --gen-key
 Complete documentation can be found here:
 https://wiki.archlinux.org/title/DeveloperWiki:Signing_Packages`
 
-func CheckGnupg() {
+// Ensure, that user have created gnupg keys for package signing before package
+// is built and cached.
+func CheckGnupg() error {
 	hd, err := os.UserHomeDir()
 	CheckErr(err)
 	_, err = os.Stat(path.Join(hd, ".gnupg"))
 	if err != nil {
 		fmt.Println(gnupgerr)
-		os.Exit(1)
 	}
+	return err
 }
 
 // Validates all file signatures in provided directory.
@@ -68,7 +71,7 @@ func ValideSignature(dir string) error {
 	return cmd.Run()
 }
 
-// Puts all packages and signatures from provided dir to pacakge cache.
+// Puts all packages and signatures from provided dir to pacakge cachegpg --with-colons -k | awk -F: '$1=="uid" {print $10; exit}'.
 func CacheBuiltPackage(dir string) error {
 	command := "sudo mv *.pkg.tar.zst* " + pacmancache
 	cmd := exec.Command("bash", "-c", command)

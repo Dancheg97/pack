@@ -11,6 +11,12 @@ import (
 )
 
 func init() {
+	AddBoolFlag(&FlagParameters{
+		Cmd:   installCmd,
+		Name:  "keep",
+		Short: "k",
+		Desc:  "do not remove database after package installation",
+	})
 	rootCmd.AddCommand(installCmd)
 }
 
@@ -18,7 +24,10 @@ var installCmd = &cobra.Command{
 	Use:     "install",
 	Aliases: []string{"i"},
 	Short:   "🪛 install packages",
-	Run:     Install,
+	Long: `🪛 install packages
+
+This command is split into 2 pa...`,
+	Run: Install,
 }
 
 func Install(cmd *cobra.Command, args []string) {

@@ -6,8 +6,6 @@
 package pacman
 
 import (
-	"log"
-	"os"
 	"os/exec"
 	"sync"
 )
@@ -21,20 +19,6 @@ const (
 
 // Global lock for operations with pacman database.
 var mu sync.Mutex
-
-func init() {
-	checkDependency(pacman)
-	checkDependency(makepkg)
-	checkDependency(repoadd)
-}
-
-func checkDependency(p string) {
-	_, err := exec.LookPath(p)
-	if err != nil {
-		log.Printf("unable to find %s in system\n", p)
-		os.Exit(1)
-	}
-}
 
 func SudoCommand(sudo bool, command string, args ...string) *exec.Cmd {
 	if sudo {
