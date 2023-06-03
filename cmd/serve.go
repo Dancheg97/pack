@@ -112,7 +112,7 @@ func PushHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer os.RemoveAll(tmpdir)
 
-	filepath := path.Join(tmpdir, file)
+	filepath := path.Join(pacmancache, file)
 	if _, err := os.Stat(filepath); err == nil {
 		w.WriteHeader(http.StatusConflict)
 		return
