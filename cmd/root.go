@@ -18,7 +18,7 @@ const (
 	pkgext       = ".pkg.tar.zst"
 	dbext        = ".db.tar.gz"
 	protocol     = "http://"
-	fsendpoint   = "/pack"
+	fsendpoint   = "/pack/"
 	pushendpoint = "/pack/push"
 	file         = "file"
 	sign         = "sign"
