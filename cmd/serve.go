@@ -110,7 +110,13 @@ func PushHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer os.RemoveAll(tmpdir)
 
-	f, err := os.Create(path.Join(tmpdir, file))
+	filepath := path.Join(tmpdir, file)
+	if _, err := os.Stat(filepath); err == nil {
+		w.WriteHeader(http.StatusConflict)
+		return
+	}
+
+	f, err := os.Create(filepath)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return

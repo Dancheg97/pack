@@ -6,8 +6,12 @@
 package cmd
 
 import (
+	"fmt"
+	"os/exec"
+
 	"fmnx.su/core/pack/pacman"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 func init() {
@@ -26,11 +30,20 @@ var installCmd = &cobra.Command{
 	Short:   "🪛 install packages",
 	Long: `🪛 install packages
 
-This command is split into 2 pa...`,
+This command will automtically connect registries adding them to pacman.conf
+and install provided packages. After installation it will remove registry 
+from pacman configuration.`,
 	Run: Install,
 }
 
 func Install(cmd *cobra.Command, args []string) {
-	err := pacman.SyncList(args)
+	rgs, err := pacman.AddRegistries(args)
+	CheckErr(err)
+	err = pacman.SyncList(args)
+	if !viper.GetBool("keep") || err != nil {
+		cmd := fmt.Sprintf("cat <<EOF > /etc/pacman.conf\n%sEOF", *rgs)
+		err = exec.Command("sudo", "bash", "-c", cmd).Run()
+		CheckErr(err)
+	}
 	CheckErr(err)
 }
