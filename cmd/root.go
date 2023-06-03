@@ -26,7 +26,7 @@ const (
 
 var rootCmd = &cobra.Command{
 	Use:          "pack",
-	Short:        "📦 decentralized package manager based on pacman",
+	Short:        "📦 Simplified version of pacman with extended functionality",
 	SilenceUsage: true,
 	CompletionOptions: cobra.CompletionOptions{
 		DisableDefaultCmd:   true,

@@ -4,11 +4,5 @@ src/**
 **.pkg.tar.zst.sig
 .vscode
 packbin
-tmp/**
-**.conf
-users.db
-users
-public/**
 key.pem
 cert.pem
-docker/**

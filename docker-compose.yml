@@ -2,5 +2,9 @@
 services:
   pack:
     image: fmnx.su/core/pack
+    volumes:
+      - ./cert.pem:/cert.pem
+      - ./key.pem:/key.pem
+    command: s -c /cert.pem -k /key.pem
     ports:
       - 4572:4572
