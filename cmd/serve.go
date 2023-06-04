@@ -135,6 +135,7 @@ func PkgDirDaemon(name string) {
 func FsMirrDaemon(links []string) {
 	for {
 		for _, link := range links {
+			fmt.Println("[MIRR] - Loading: " + link)
 			err := exec.Command( //nolint:gosec
 				"sudo", "wget", "-nd", "-np", "-P",
 				pacmancache, "--recursive", link,

@@ -5,6 +5,13 @@ services:
     volumes:
       - ./cert.pem:/cert.pem
       - ./key.pem:/key.pem
-    command: s -c /cert.pem -k /key.pem
+    command: | 
+      serve 
+      -c /cert.pem
+      -k /key.pem
+      -m https://de.arch.mirror.kescher.at/core/os/x86_64/
+      -m https://de.arch.mirror.kescher.at/extra/os/x86_64/
+      -m https://de.arch.mirror.kescher.at/multilib/os/x86_64/
+      -m https://de.arch.mirror.kescher.at/extra/os/x86_64/
     ports:
       - 4572:4572
