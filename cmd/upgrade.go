@@ -28,7 +28,7 @@ versions from connected registries.`,
 }
 
 func Upgrade(cmd *cobra.Command, args []string) {
-	err := pacman.SyncList(nil, pacman.SyncOptions{
+	CheckErr(pacman.SyncList(nil, pacman.SyncOptions{
 		Sudo:    true,
 		Needed:  true,
 		Refresh: true,
@@ -36,6 +36,5 @@ func Upgrade(cmd *cobra.Command, args []string) {
 		Stdout:  os.Stdout,
 		Stderr:  os.Stderr,
 		Stdin:   os.Stdin,
-	})
-	CheckErr(err)
+	}))
 }

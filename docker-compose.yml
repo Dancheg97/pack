@@ -2,17 +2,19 @@
 services:
   pack:
     image: fmnx.su/core/pack
+    container_name: pack
+    ports:
+      - 4572:4572
     volumes:
-      # Run `make certs` to generate certificates.
+      - ./pkgs:/pkgs
       - ./cert.pem:/cert.pem
       - ./key.pem:/key.pem
     command: | 
       serve 
       --cert /cert.pem
       --key /key.pem
-      --mirr https://de.arch.mirror.kescher.at/core/os/x86_64/
-      --mirr https://de.arch.mirror.kescher.at/extra/os/x86_64/
-      --mirr https://de.arch.mirror.kescher.at/multilib/os/x86_64/
-      --mirr https://de.arch.mirror.kescher.at/community/os/x86_64/
-    ports:
-      - 4572:4572
+      --dir /pkgs
+      --mirror https://mirror.f4st.host/archlinux/core/os/x86_64
+      --mirror https://mirror.f4st.host/archlinux/extra/os/x86_64
+      --mirror https://mirror.f4st.host/archlinux/multilib/os/x86_64
+      --mirror https://mirror.f4st.host/archlinux/community/os/x86_64

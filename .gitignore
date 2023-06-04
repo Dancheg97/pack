@@ -1,5 +1,6 @@
 pkg/**
 src/**
+pkgs/**
 **.pkg.tar.zst
 **.pkg.tar.zst.sig
 .vscode

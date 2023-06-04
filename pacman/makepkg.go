@@ -12,6 +12,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"path"
 	"strings"
 )
 
@@ -270,4 +271,23 @@ func ValidatePackager() error {
 		)
 	}
 	return nil
+}
+
+// Validates all file signatures in provided directory.
+func ValideSignature(dirs string) error {
+	sigloc := path.Join(dirs, "*.sig")
+	command := "gpg --keyserver-options auto-key-retrieve --verify " + sigloc
+	cmd := exec.Command("bash", "-c", command)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+// Puts all packages and signatures from provided dir to pacakge cache.
+func CacheBuiltPackage(src string, dst string) error {
+	command := "sudo mv " + path.Join(src, "*.pkg.tar.zst*") + " " + dst
+	cmd := exec.Command("bash", "-c", command)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
 }

@@ -18,3 +18,6 @@
 When doing operations overwrite flags related to that operation.
 Add description to already used flags in executed commands.
 -->
+
+https://mirror.f4st.host/archlinux/core/os/x86_64/acl-2.3.1-3-x86_64.pkg.tar.zst
+https:/mirror.f4st.host/archlinux/core/os/x86_64/acl-2.3.1-3-x86_64.pkg.tar.zst

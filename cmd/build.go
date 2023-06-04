@@ -8,7 +8,6 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"path"
 
 	"fmnx.su/core/pack/pacman"
@@ -35,8 +34,8 @@ func Build(cmd *cobra.Command, args []string) {
 	CheckErr(CheckGnupg())
 	CheckErr(pacman.ValidatePackager())
 	CheckErr(pacman.Makepkg())
-	CheckErr(ValideSignature(""))
-	CheckErr(CacheBuiltPackage(""))
+	CheckErr(pacman.ValideSignature(""))
+	CheckErr(pacman.CacheBuiltPackage("", pacmancache))
 }
 
 const gnupgerr = `GPG key is not found in user directory ~/.gnupg
@@ -64,24 +63,4 @@ func CheckGnupg() error {
 		fmt.Println(gnupgerr)
 	}
 	return err
-}
-
-// Validates all file signatures in provided directory.
-func ValideSignature(dir string) error {
-	sigloc := path.Join(dir, "*.sig")
-	command := "gpg --keyserver-options auto-key-retrieve --verify " + sigloc
-	cmd := exec.Command("bash", "-c", command)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	return cmd.Run()
-}
-
-// Puts all packages and signatures from provided dir to pacakge cache.
-func CacheBuiltPackage(dir string) error {
-	fmt.Println("Moving package to cache...")
-	command := "sudo mv " + dir + "*.pkg.tar.zst* " + pacmancache
-	cmd := exec.Command("bash", "-c", command)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	return cmd.Run()
 }
