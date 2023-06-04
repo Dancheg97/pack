@@ -18,7 +18,7 @@ FROM archlinux/archlinux:base-devel
 
 LABEL maintainer="Danila Fominykh <dancheg97@fmnx.su>"
 
-RUN pacman -Syu --noconfirm --needed gnupg
+RUN pacman -Syu --noconfirm --needed gnupg wget
 
 WORKDIR /home
 
