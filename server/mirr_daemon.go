@@ -19,6 +19,7 @@ import (
 
 const (
 	sigext = ".pkg.tar.zst.sig"
+	href   = "href=\""
 )
 
 // Parameters required to launch FS watcher for remote server mirroring.
@@ -28,10 +29,11 @@ type MirrFsParams struct {
 	Link string
 	// Directory, where resulting packages will be stored.
 	Dir string
-	// Logger, that will be used to log errors.
-	Logger Logger
 	// Syncronization duration.
 	Dur time.Duration
+
+	ErrorLogger Logger
+	InfoLogger  Logger
 }
 
 // Starts a daemon, loading files from remote file server and putting them into
@@ -42,49 +44,55 @@ func MirrFsDaemon(p MirrFsParams) error {
 
 		resp, err := client.Get(p.Link)
 		if err != nil {
-			p.Logger.Printf("unable to get data from url: %s, %v", p.Link, err)
+			p.ErrorLogger.Printf("unable to get data from url: %s, %v", p.Link, err)
 			return err
 		}
 		defer resp.Body.Close()
 
 		b, err := io.ReadAll(resp.Body)
 		if err != nil {
-			p.Logger.Printf("unable to read resp: %s, %v", p.Link, err)
+			p.ErrorLogger.Printf("unable to read resp: %s, %v", p.Link, err)
 			return err
 		}
 
-		splt := strings.Split(string(b), sigext)
+		splt := strings.Split(string(b), href)
 		if len(splt) < 2 {
-			p.Logger.Printf("signed packages not found: %s", p.Link)
+			p.ErrorLogger.Printf("hrefs in mirror not found: %s", p.Link)
 			return errors.New("unable to find packages with sign by link")
 		}
 
-		for i, v := range splt {
-			if i+1 == len(splt) {
-				break
+		for _, packagefile := range splt {
+			fileNoExtArr := strings.Split(packagefile, sigext+"\"")
+			if len(fileNoExtArr) < 2 {
+				continue
 			}
-			quotesplt := strings.Split(v, "\"")
-			nlsplt := strings.Split(quotesplt[len(quotesplt)-1], "\n")
+			file := fileNoExtArr[0]
 
-			pkglink := p.Link + nlsplt[len(nlsplt)-1] + pkgext
+			if _, err := os.Stat(path.Join(p.Dir, file+pkgext)); err == nil {
+				p.InfoLogger.Printf("package exists, skipping: ", file)
+				continue
+			}
+
 			err = LoadFile(LoadFileParams{
-				Link:   pkglink,
-				Dir:    p.Dir,
-				Logger: p.Logger,
+				Link:        p.Link + "/" + file + pkgext,
+				Dir:         p.Dir,
+				ErrorLogger: p.ErrorLogger,
+				InfoLogger:  p.InfoLogger,
 			})
 			if err != nil {
 				return err
 			}
 
-			siglink := p.Link + nlsplt[len(nlsplt)-1] + sigext
 			err = LoadFile(LoadFileParams{
-				Link:   siglink,
-				Dir:    p.Dir,
-				Logger: p.Logger,
+				Link:        p.Link + "/" + file + sigext,
+				Dir:         p.Dir,
+				ErrorLogger: p.ErrorLogger,
+				InfoLogger:  p.InfoLogger,
 			})
 			if err != nil {
 				return err
 			}
+			p.InfoLogger.Printf("package mirrored: ", file)
 		}
 
 		time.Sleep(p.Dur)
@@ -97,14 +105,15 @@ type LoadFileParams struct {
 	Link string
 	// Directory, where resulting packages will be stored.
 	Dir string
-	// Logger, that will be used to log errors.
-	Logger Logger
+
+	ErrorLogger Logger
+	InfoLogger  Logger
 }
 
 func LoadFile(p LoadFileParams) error {
 	fileURL, err := url.Parse(p.Link)
 	if err != nil {
-		p.Logger.Printf("unable to parse url: %s, %v", p.Link, err)
+		p.ErrorLogger.Printf("unable to parse url: %s, %v", p.Link, err)
 		return err
 	}
 	urlPath := fileURL.Path
@@ -115,7 +124,7 @@ func LoadFile(p LoadFileParams) error {
 	filepath := path.Join(p.Dir, fileName)
 	file, err := os.Create(filepath)
 	if err != nil {
-		p.Logger.Printf("unable to create file: %s, %v", filepath, err)
+		p.ErrorLogger.Printf("unable to create file: %s, %v", filepath, err)
 		return err
 	}
 	client := http.Client{}
@@ -123,18 +132,18 @@ func LoadFile(p LoadFileParams) error {
 	// Put content on file
 	resp, err := client.Get(p.Link)
 	if err != nil {
-		p.Logger.Printf("unable get file: %s, %v", p.Link, err)
+		p.ErrorLogger.Printf("unable get file: %s, %v", p.Link, err)
 		return err
 	}
 	defer resp.Body.Close()
 
 	size, err := io.Copy(file, resp.Body)
 	if err != nil {
-		p.Logger.Printf("unable to write to file: %s, %v", filepath, err)
+		p.ErrorLogger.Printf("unable to write to file: %s, %v", filepath, err)
 		return err
 	}
 	defer file.Close()
 
-	p.Logger.Printf("Downloaded a file %s with size %d", fileName, size)
+	p.InfoLogger.Printf("Downloaded a file %s with size %d", fileName, size)
 	return nil
 }

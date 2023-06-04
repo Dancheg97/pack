@@ -5,13 +5,6 @@
 
 package server
 
-func formOptions[Options any](arr []Options, dv *Options) *Options {
-	if len(arr) != 1 {
-		return dv
-	}
-	return &arr[0]
-}
-
 type Logger interface {
 	Printf(format string, v ...interface{})
 }

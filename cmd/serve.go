@@ -101,10 +101,11 @@ func Serve(cmd *cobra.Command, args []string) {
 	go func() {
 		for _, link := range mirr {
 			err := server.MirrFsDaemon(server.MirrFsParams{
-				Link:   link,
-				Dir:    dir,
-				Logger: log.Default(),
-				Dur:    time.Hour * 24,
+				Link:        link,
+				Dir:         dir,
+				Dur:         time.Hour * 24,
+				ErrorLogger: log.Default(),
+				InfoLogger:  log.Default(),
 			})
 			CheckErr(err)
 		}
@@ -114,7 +115,12 @@ func Serve(cmd *cobra.Command, args []string) {
 
 	mux := http.NewServeMux()
 	fs := http.FileServer(http.Dir(pacmancache))
-	pushHandler := server.PushHandler{CacheDir: dir}
+	pushHandler := server.PushHandler{
+		CacheDir:   dir,
+		TmpDir:     "/tmp",
+		ErrLogger:  log.Default(),
+		InfoLogger: log.Default(),
+	}
 
 	mux.Handle(fsendpoint, http.StripPrefix(fsendpoint, fs))
 	mux.HandleFunc(pushendpoint, pushHandler.Push)

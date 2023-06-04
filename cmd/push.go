@@ -9,6 +9,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"os/exec"
@@ -130,7 +131,11 @@ func PushPkg(p *Package) error {
 		return err
 	}
 	if resp.StatusCode != http.StatusOK {
-		return errors.New(resp.Status)
+		b, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return errors.Join(err, errors.New(resp.Status))
+		}
+		return errors.New(resp.Status + " " + string(b))
 	}
 
 	fmt.Println("[PUSH] - package delivered: " + p.PkgFile)

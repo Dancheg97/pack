@@ -39,9 +39,7 @@ var PkgDirDefault = PkgDirParams{
 
 // This function is launching watcher for pacman cache directory, and constatly
 // adding new arch packages to database in watched directory.
-func PkgDirDaemon(params ...PkgDirParams) error {
-	p := formOptions(params, &PkgDirDefault)
-
+func PkgDirDaemon(p PkgDirParams) error {
 	if err := os.MkdirAll(p.WatchDir, os.ModePerm); err != nil {
 		return err
 	}
