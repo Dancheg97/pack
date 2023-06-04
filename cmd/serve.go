@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"os/exec"
 	"path"
 	"strings"
 	"time"
@@ -81,8 +82,11 @@ func Serve(cmd *cobra.Command, args []string) {
 		port = viper.GetString("port")
 		cert = viper.GetString("cert")
 		key  = viper.GetString("key")
+		mirr = viper.GetStringSlice("mirr")
 	)
-	go RunPkgDbDaemon(path.Join(pacmancache, name+dbext))
+
+	go PkgDirDaemon(name)
+	go FsMirrDaemon(mirr)
 
 	fmt.Printf("Launching database %s on port %s...\n", name, port)
 
@@ -106,7 +110,7 @@ func Serve(cmd *cobra.Command, args []string) {
 
 // This function is launching watcher for pacman cache directory, and constatly
 // adding new packages to database.
-func RunPkgDbDaemon(dbname string) {
+func PkgDirDaemon(name string) {
 	w := watcher.New()
 	w.FilterOps(watcher.Create, watcher.Move)
 	CheckErr(w.Add(pacmancache))
@@ -115,7 +119,10 @@ func RunPkgDbDaemon(dbname string) {
 	for event := range w.Event {
 		file := event.FileInfo.Name()
 		if strings.HasSuffix(file, pkgext) {
-			err := pacman.RepoAdd(dbname, path.Join(pacmancache, file))
+			err := pacman.RepoAdd(
+				path.Join(pacmancache, name+dbext),
+				path.Join(pacmancache, file),
+			)
 			if err != nil {
 				fmt.Println("error: unable to add package to database")
 			}
@@ -125,9 +132,17 @@ func RunPkgDbDaemon(dbname string) {
 
 // This function start mirror watcher, which loads packages from remote file
 // server to pacman cache directory every 24 hours.
-func RunFsMirrDaemon(links []string) {
+func FsMirrDaemon(links []string) {
 	for {
-
+		for _, link := range links {
+			err := exec.Command( //nolint:gosec
+				"sudo", "wget", "-nd", "-np", "-P",
+				pacmancache, "--recursive", link,
+			).Run()
+			if err != nil {
+				fmt.Println("[MIRR] - Failed to load: " + link)
+			}
+		}
 		time.Sleep(time.Hour * 24)
 	}
 }
