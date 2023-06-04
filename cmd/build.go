@@ -22,8 +22,8 @@ func init() {
 var buildCmd = &cobra.Command{
 	Use:     "build",
 	Aliases: []string{"b"},
-	Short:   "🛠️ build package",
-	Long: `🛠️ build package
+	Short:   "🧰 build package",
+	Long: `🧰 build package
 	
 This command will build, install and sign package in current directory, then
 store the resulting package and signature in pacman cache directory.`,

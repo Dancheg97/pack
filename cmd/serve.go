@@ -48,6 +48,12 @@ func init() {
 		Short: "c",
 		Desc:  "certificate file path for TLS connection",
 	})
+	AddStringListFlag(&FlagParameters{
+		Cmd:   serveCmd,
+		Name:  "mirror",
+		Short: "m",
+		Desc:  "pull mirror used to load packages every 24 hours",
+	})
 	rootCmd.AddCommand(serveCmd)
 }
 
@@ -76,7 +82,7 @@ func Serve(cmd *cobra.Command, args []string) {
 		cert = viper.GetString("cert")
 		key  = viper.GetString("key")
 	)
-	go RunDbDaemon(path.Join(pacmancache, name+dbext))
+	go RunPkgDbDaemon(path.Join(pacmancache, name+dbext))
 
 	fmt.Printf("Launching database %s on port %s...\n", name, port)
 
@@ -98,21 +104,31 @@ func Serve(cmd *cobra.Command, args []string) {
 	CheckErr(s.ListenAndServe())
 }
 
-// Run package database daemon, that will add new packages to database.
-func RunDbDaemon(dbname string) {
+// This function is launching watcher for pacman cache directory, and constatly
+// adding new packages to database.
+func RunPkgDbDaemon(dbname string) {
 	w := watcher.New()
-	err := w.Add(pacmancache)
-	CheckErr(err)
 	w.FilterOps(watcher.Create, watcher.Move)
+	CheckErr(w.Add(pacmancache))
 	go w.Start(time.Second) //nolint:errcheck
+
 	for event := range w.Event {
 		file := event.FileInfo.Name()
 		if strings.HasSuffix(file, pkgext) {
-			err = pacman.RepoAdd(dbname, path.Join(pacmancache, file))
+			err := pacman.RepoAdd(dbname, path.Join(pacmancache, file))
 			if err != nil {
 				fmt.Println("error: unable to add package to database")
 			}
 		}
+	}
+}
+
+// This function start mirror watcher, which loads packages from remote file
+// server to pacman cache directory every 24 hours.
+func RunFsMirrDaemon(links []string) {
+	for {
+
+		time.Sleep(time.Hour * 24)
 	}
 }
 

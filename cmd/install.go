@@ -27,8 +27,8 @@ func init() {
 var installCmd = &cobra.Command{
 	Use:     "install",
 	Aliases: []string{"i"},
-	Short:   "🪛 install packages",
-	Long: `🪛 install packages
+	Short:   "🔧 install packages",
+	Long: `🔧 install packages
 
 This command will automtically connect registries adding them to pacman.conf
 and install provided packages. After installation it will remove registry 

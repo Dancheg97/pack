@@ -26,7 +26,7 @@ const (
 
 var rootCmd = &cobra.Command{
 	Use:          "pack",
-	Short:        "📦 Simplified version of pacman with extended functionality",
+	Short:        "📦 Simplified version of pacman",
 	SilenceUsage: true,
 	CompletionOptions: cobra.CompletionOptions{
 		DisableDefaultCmd:   true,

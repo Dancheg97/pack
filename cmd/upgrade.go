@@ -19,8 +19,12 @@ func init() {
 var upgradeCmd = &cobra.Command{
 	Use:     "upgrade",
 	Aliases: []string{"u"},
-	Short:   "〽️ upgrade system",
-	Run:     Upgrade,
+	Short:   "💡 upgrade system",
+	Long: `💡 upgrade system
+	
+This command will update all packages in they system, installing latest 
+versions from connected registries.`,
+	Run: Upgrade,
 }
 
 func Upgrade(cmd *cobra.Command, args []string) {
