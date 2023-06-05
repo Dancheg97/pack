@@ -16,12 +16,21 @@ import (
 	"github.com/google/uuid"
 )
 
-// Structure, that allows to create handler for incoming push requests.
+// Structure, that allows to create handler for incoming arch packages
+// push requests.
 type PushHandler struct {
 	// Direcotry, where push handler will store the resulting packages.
 	CacheDir string
 	// Directory, where handler will temporarily store file to check signature.
 	TmpDir string
+
+	// Public key source, get public key related to specific user. If not
+	// provided default gnupg signature verification scheme will be used.
+	// PubkeySource
+
+	// Subdir source, if enabled packages would be created in subdirectories
+	// instead of base directory, allowing
+	// SubdirSource
 
 	ErrLogger  Logger
 	InfoLogger Logger
