@@ -37,13 +37,15 @@ type UpgradeOptions struct {
 	AdditionalParams []string
 }
 
-var UpgradeDefault = UpgradeOptions{
-	Sudo:      true,
-	Needed:    true,
-	NoConfirm: true,
-	Stdout:    os.Stdout,
-	Stderr:    os.Stderr,
-	Stdin:     os.Stdin,
+func UpgradeDefault() *UpgradeOptions {
+	return &UpgradeOptions{
+		Sudo:      true,
+		Needed:    true,
+		NoConfirm: true,
+		Stdout:    os.Stdout,
+		Stderr:    os.Stderr,
+		Stdin:     os.Stdin,
+	}
 }
 
 // Install packages from files.
@@ -53,7 +55,7 @@ func Upgrade(files string, opts ...UpgradeOptions) error {
 
 // Install packages from files.
 func UpgradeList(files []string, opts ...UpgradeOptions) error {
-	o := formOptions(opts, &UpgradeDefault)
+	o := formOptions(opts, UpgradeDefault)
 
 	args := []string{"-U"}
 	if o.Needed {

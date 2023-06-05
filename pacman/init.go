@@ -28,9 +28,9 @@ func SudoCommand(sudo bool, command string, args ...string) *exec.Cmd {
 	return exec.Command(command, args...)
 }
 
-func formOptions[Options any](arr []Options, dv *Options) *Options {
+func formOptions[Options any](arr []Options, getdefault func() *Options) *Options {
 	if len(arr) != 1 {
-		return dv
+		return getdefault()
 	}
 	return &arr[0]
 }

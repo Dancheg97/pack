@@ -49,14 +49,16 @@ type SyncOptions struct {
 	AdditionalParams []string
 }
 
-var SyncDefault = SyncOptions{
-	Sudo:      true,
-	Needed:    true,
-	NoConfirm: true,
-	Refresh:   true,
-	Stdout:    os.Stdout,
-	Stderr:    os.Stderr,
-	Stdin:     os.Stdin,
+func SyncDefault() *SyncOptions {
+	return &SyncOptions{
+		Sudo:      true,
+		Needed:    true,
+		NoConfirm: true,
+		Refresh:   true,
+		Stdout:    os.Stdout,
+		Stderr:    os.Stderr,
+		Stdin:     os.Stdin,
+	}
 }
 
 // Executes pacman sync command. This command will read sync options and form
@@ -67,7 +69,7 @@ func Sync(pkgs string, opts ...SyncOptions) error {
 
 // Sync command for package string list.
 func SyncList(pkgs []string, opts ...SyncOptions) error {
-	o := formOptions(opts, &SyncDefault)
+	o := formOptions(opts, SyncDefault)
 
 	args := []string{"-S"}
 	if o.Needed {
@@ -137,15 +139,17 @@ type SearchResult struct {
 	Desc    string
 }
 
-var SearchDefault = SearchOptions{
-	Sudo:    true,
-	Refresh: true,
-	Stdin:   os.Stdin,
+func SearchDefault() *SearchOptions {
+	return &SearchOptions{
+		Sudo:    true,
+		Refresh: true,
+		Stdin:   os.Stdin,
+	}
 }
 
 // Search for packages.
 func Search(re string, opts ...SearchOptions) ([]SearchResult, error) {
-	o := formOptions(opts, &SearchDefault)
+	o := formOptions(opts, SearchDefault)
 
 	args := []string{"-Ss"}
 	if o.Refresh {

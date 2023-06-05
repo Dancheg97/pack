@@ -69,7 +69,7 @@ func MirrFsDaemon(p MirrFsParams) error {
 			file := fileNoExtArr[0]
 
 			if _, err := os.Stat(path.Join(p.Dir, file+pkgext)); err == nil {
-				p.InfoLogger.Printf("package exists, skipping: ", file)
+				p.InfoLogger.Printf("package exists, skipping: %s", file)
 				continue
 			}
 
@@ -92,7 +92,7 @@ func MirrFsDaemon(p MirrFsParams) error {
 			if err != nil {
 				return err
 			}
-			p.InfoLogger.Printf("package mirrored: ", file)
+			p.InfoLogger.Printf("package mirrored: %s", file)
 		}
 
 		time.Sleep(p.Dur)

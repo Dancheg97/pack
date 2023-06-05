@@ -40,18 +40,20 @@ type RepoAddOptions struct {
 	Verify bool
 }
 
-var RepoAddDefault = RepoAddOptions{
-	Sudo:             true,
-	New:              true,
-	PreventDowngrade: true,
-	Stdout:           os.Stdout,
-	Stderr:           os.Stderr,
-	Stdin:            os.Stdin,
+func RepoAddDefaultOptions() *RepoAddOptions {
+	return &RepoAddOptions{
+		Sudo:             true,
+		New:              true,
+		PreventDowngrade: true,
+		Stdout:           os.Stdout,
+		Stderr:           os.Stderr,
+		Stdin:            os.Stdin,
+	}
 }
 
 // This function will add new packages to database.
 func RepoAdd(db, f string, opts ...RepoAddOptions) error {
-	o := formOptions(opts, &RepoAddDefault)
+	o := formOptions(opts, RepoAddDefaultOptions)
 
 	var args []string
 	if o.New {

@@ -33,13 +33,15 @@ type RemoveOptions struct {
 	AdditionalParams []string
 }
 
-var RemoveDefault = RemoveOptions{
-	Sudo:        true,
-	Recursive:   true,
-	WithConfigs: true,
-	Stdout:      os.Stdout,
-	Stderr:      os.Stderr,
-	Stdin:       os.Stdin,
+func RemoveDefault() *RemoveOptions {
+	return &RemoveOptions{
+		Sudo:        true,
+		Recursive:   true,
+		WithConfigs: true,
+		Stdout:      os.Stdout,
+		Stderr:      os.Stderr,
+		Stdin:       os.Stdin,
+	}
 }
 
 // Remove packages from system.
@@ -49,7 +51,7 @@ func Remove(pkgs string, opts ...RemoveOptions) error {
 
 // Remove packages from system.
 func RemoveList(pkgs []string, opts ...RemoveOptions) error {
-	o := formOptions(opts, &RemoveDefault)
+	o := formOptions(opts, RemoveDefault)
 
 	var args = []string{"-R"}
 	if o.NoConfirm {

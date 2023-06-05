@@ -28,7 +28,9 @@ type QueryOptions struct {
 	AdditionalParams []string
 }
 
-var QueryDefault = QueryOptions{}
+func QueryDefault() *QueryOptions {
+	return &QueryOptions{}
+}
 
 type PackageInfo struct {
 	Name    string
@@ -37,7 +39,7 @@ type PackageInfo struct {
 
 // Get information about installed packages.
 func Query(opts ...QueryOptions) ([]PackageInfo, error) {
-	o := formOptions(opts, &QueryDefault)
+	o := formOptions(opts, QueryDefault)
 
 	args := []string{"-Q"}
 	if o.Explicit {

@@ -90,23 +90,25 @@ type MakepkgOptions struct {
 	AsDeps bool
 }
 
-var MakepkgDefault = MakepkgOptions{
-	Clean:      true,
-	Force:      true,
-	Needed:     true,
-	Sign:       true,
-	CleanBuild: true,
-	Install:    true,
-	Stdout:     os.Stdout,
-	Stderr:     os.Stderr,
-	Stdin:      os.Stdin,
+func MakepkgDefault() *MakepkgOptions {
+	return &MakepkgOptions{
+		Clean:      true,
+		Force:      true,
+		Needed:     true,
+		Sign:       true,
+		CleanBuild: true,
+		Install:    true,
+		Stdout:     os.Stdout,
+		Stderr:     os.Stderr,
+		Stdin:      os.Stdin,
+	}
 }
 
 // This command will build a package in directory provided in options.
 // Function is safe for concurrent usage. Can be called from multiple
 // goruotines, when options Install or SyncDeps are false.
 func Makepkg(opts ...MakepkgOptions) error {
-	o := formOptions(opts, &MakepkgDefault)
+	o := formOptions(opts, MakepkgDefault)
 
 	var args []string
 	if o.IgnoreEach {
