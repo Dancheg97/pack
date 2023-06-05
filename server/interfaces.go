@@ -12,7 +12,7 @@ type Logger interface {
 
 // Source for public keys, which can be used for signature verification.
 type PubkeySource interface {
-	Get(email string) ([][]byte, error)
+	Get(email string) ([]string, error)
 }
 
 // If provided, packages would be added in subdirectories of provided base

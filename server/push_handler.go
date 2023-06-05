@@ -88,7 +88,7 @@ func (p *PushHandler) Push(w http.ResponseWriter, r *http.Request) {
 		if verified {
 			break
 		}
-		pk, err := crypto.NewKey(key)
+		pk, err := crypto.NewKeyFromArmored(key)
 		if err != nil {
 			trace = append(trace, "unable to get key from armored")
 			continue
