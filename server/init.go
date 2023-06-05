@@ -6,5 +6,5 @@
 package server
 
 type Logger interface {
-	Printf(format string, v ...interface{})
+	Printf(format string, v ...any)
 }
