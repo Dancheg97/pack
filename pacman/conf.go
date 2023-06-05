@@ -15,7 +15,7 @@ import (
 
 const (
 	conf = "/etc/pacman.conf"
-	tmpl = "cat <<EOF >> /etc/pacman.conf\n[%s]\nServer=https://%s/pack\nEOF"
+	tmpl = "cat <<EOF >> /etc/pacman.conf\n[%s]\nServer=https://%s/api/pack\nEOF"
 )
 
 // This function will read pacman.conf and add missing registries, that can

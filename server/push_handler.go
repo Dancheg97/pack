@@ -38,7 +38,7 @@ type PushHandler struct {
 
 // Handler that can be used to upload user packages.
 func (p *PushHandler) Push(w http.ResponseWriter, r *http.Request) {
-	ep := ErrProcessor{respWriter: w, logger: p.ErrLogger}
+	ep := weberrwriter{respWriter: w, logger: p.ErrLogger}
 
 	file := r.Header.Get("file")
 	if !strings.HasSuffix(file, pkgext) {
@@ -105,12 +105,12 @@ func (p *PushHandler) Push(w http.ResponseWriter, r *http.Request) {
 }
 
 // Structure that will log errors, form response bodies and send http codes.
-type ErrProcessor struct {
+type weberrwriter struct {
 	respWriter http.ResponseWriter
 	logger     Logger
 }
 
-func (e *ErrProcessor) write(status int, msg string) {
+func (e *weberrwriter) write(status int, msg string) {
 	e.logger.Printf(msg)
 	e.respWriter.WriteHeader(status)
 	e.respWriter.Write([]byte(msg)) //nolint:errcheck
