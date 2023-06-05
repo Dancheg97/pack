@@ -16,11 +16,12 @@ import (
 const (
 	pacmancache  = "/var/cache/pacman/pkg"
 	pkgext       = ".pkg.tar.zst"
-	protocol     = "https://"
+	protocol     = "http://"
 	fsendpoint   = "/api/pack/"
 	pushendpoint = "/api/pack/push"
 	file         = "file"
 	sign         = "sign"
+	email        = "email"
 )
 
 var rootCmd = &cobra.Command{

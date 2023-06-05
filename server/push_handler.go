@@ -77,7 +77,7 @@ func (p *PushHandler) Push(w http.ResponseWriter, r *http.Request) {
 
 	keys, err := p.PubkeySource.Get(email)
 	if err != nil {
-		ep.write(http.StatusUnauthorized, "no GPG keys for email: "+email)
+		ep.write(http.StatusUnauthorized, "unable to get GPG keys for: "+email+" "+err.Error())
 		return
 	}
 

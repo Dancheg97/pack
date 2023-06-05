@@ -43,7 +43,7 @@ func Push(cmd *cobra.Command, args []string) {
 	var pkgs []*Package
 	for _, pkg := range args {
 		p, err := FormPackage(pkg)
-		p.Email = strings.ReplaceAll(strings.Split(gnupgident, "<")[0], ">", "")
+		p.Email = strings.ReplaceAll(strings.Split(gnupgident, "<")[1], ">", "")
 		CheckErr(err)
 		pkgs = append(pkgs, p)
 	}
@@ -128,6 +128,7 @@ func PushPkg(p *Package) error {
 	}
 
 	req.Header.Add(file, p.Filename)
+	req.Header.Add(email, p.Email)
 	req.Header.Add(sign, base64.StdEncoding.EncodeToString(sigbytes))
 
 	var client http.Client
