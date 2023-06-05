@@ -26,8 +26,12 @@ const (
 
 // Parameters for directory db watcher.
 type PkgDirDaemon struct {
-	DbName    string
-	WatchDir  string
+	// Database name, should match the domain name.
+	DbName string
+	// Directory that will be watched, with a database, also all subdirecotries
+	// will be watched aswell.
+	WatchDir string
+	// Mode, which will be used to create watch directory if it does not exist.
 	MkDirMode fs.FileMode
 
 	InfoLogger Logger
