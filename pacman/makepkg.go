@@ -284,11 +284,21 @@ func ValideSignature(dirs string) error {
 	return cmd.Run()
 }
 
-// Puts all packages and signatures from provided dir to pacakge cache.
+// This function will find package with .pkg.tar.zst extension in directory and
+// put it into dst dir.
 func CacheBuiltPackage(src string, dst string) error {
-	command := "sudo mv " + path.Join(src, "*.pkg.tar.zst*") + " " + dst
-	cmd := exec.Command("bash", "-c", command)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	des, err := os.ReadDir(src)
+	if err != nil {
+		return err
+	}
+	for _, de := range des {
+		n := de.Name()
+		if strings.HasSuffix(n, pkgext) || strings.HasSuffix(n, pkgsig) {
+			err := os.Rename(path.Join(src, n), path.Join(dst, n))
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }

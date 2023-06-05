@@ -70,6 +70,7 @@ func (p *PushHandler) Push(w http.ResponseWriter, r *http.Request) {
 		ep.write(http.StatusInternalServerError, "unable to create file")
 		return
 	}
+	defer f.Close()
 
 	if _, err = f.ReadFrom(r.Body); err != nil {
 		ep.write(http.StatusInternalServerError, "unable read file body")
@@ -96,7 +97,6 @@ func (p *PushHandler) Push(w http.ResponseWriter, r *http.Request) {
 	err = pacman.CacheBuiltPackage(tmpdir, p.CacheDir)
 	if err != nil {
 		ep.write(http.StatusInternalServerError, "unable to move package to cache")
-		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
