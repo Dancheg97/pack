@@ -141,7 +141,6 @@ type SearchResult struct {
 
 func SearchDefault() *SearchOptions {
 	return &SearchOptions{
-		Sudo:    true,
 		Refresh: true,
 		Stdin:   os.Stdin,
 	}

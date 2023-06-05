@@ -35,7 +35,6 @@ type RemoveOptions struct {
 
 func RemoveDefault() *RemoveOptions {
 	return &RemoveOptions{
-		Sudo:        true,
 		Recursive:   true,
 		WithConfigs: true,
 		Stdout:      os.Stdout,

@@ -85,11 +85,9 @@ func (p PkgDirDaemon) Run() error {
 					path.Join(p.WatchDir, p.DbName+dbext),
 					path.Join(p.WatchDir, file),
 					pacman.RepoAddOptions{
-						Sudo:             true,
-						New:              true,
-						PreventDowngrade: true,
-						Stdout:           &b,
-						Stderr:           &b,
+						New:    true,
+						Stdout: &b,
+						Stderr: &b,
 					},
 				)
 				if err != nil {

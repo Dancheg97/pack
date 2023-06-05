@@ -39,7 +39,6 @@ type UpgradeOptions struct {
 
 func UpgradeDefault() *UpgradeOptions {
 	return &UpgradeOptions{
-		Sudo:      true,
 		Needed:    true,
 		NoConfirm: true,
 		Stdout:    os.Stdout,

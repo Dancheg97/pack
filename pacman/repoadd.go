@@ -43,7 +43,6 @@ type RepoAddOptions struct {
 
 func RepoAddDefaultOptions() *RepoAddOptions {
 	return &RepoAddOptions{
-		Sudo:             true,
 		New:              true,
 		PreventDowngrade: true,
 		Stdout:           os.Stdout,
