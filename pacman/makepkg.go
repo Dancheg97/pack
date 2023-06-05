@@ -94,7 +94,6 @@ func MakepkgDefault() *MakepkgOptions {
 	return &MakepkgOptions{
 		Clean:      true,
 		Force:      true,
-		Needed:     true,
 		Sign:       true,
 		CleanBuild: true,
 		Install:    true,

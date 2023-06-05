@@ -58,7 +58,7 @@ func (p *PushHandler) Push(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tmpdir := path.Join(p.TmpDir, "pack-"+uuid.New().String())
-	err := os.MkdirAll(tmpdir, 0644)
+	err := os.MkdirAll(tmpdir, os.ModePerm)
 	if err != nil {
 		ep.write(http.StatusInternalServerError, "unable to create cache directory")
 		return
@@ -70,8 +70,8 @@ func (p *PushHandler) Push(w http.ResponseWriter, r *http.Request) {
 		ep.write(http.StatusInternalServerError, "unable to create file")
 		return
 	}
-	_, err = f.ReadFrom(r.Body)
-	if err != nil {
+
+	if _, err = f.ReadFrom(r.Body); err != nil {
 		ep.write(http.StatusInternalServerError, "unable read file body")
 		return
 	}
@@ -81,7 +81,7 @@ func (p *PushHandler) Push(w http.ResponseWriter, r *http.Request) {
 		ep.write(http.StatusInternalServerError, "unable to decode sign base64")
 		return
 	}
-	err = os.WriteFile(path.Join(tmpdir, file+".sig"), sigdata, 0600)
+	err = os.WriteFile(path.Join(tmpdir, file+".sig"), sigdata, os.ModePerm)
 	if err != nil {
 		ep.write(http.StatusInternalServerError, "unable to write sign file")
 		return
