@@ -77,7 +77,7 @@ func (p *PushHandler) Push(w http.ResponseWriter, r *http.Request) {
 
 	keys, err := p.PubkeySource.Get(email)
 	if err != nil {
-		ep.write(http.StatusUnauthorized, "unable to get GPG keys for: "+email+" "+err.Error())
+		ep.write(http.StatusUnauthorized, "unable to get GPG keys for: "+email)
 		return
 	}
 
@@ -88,7 +88,7 @@ func (p *PushHandler) Push(w http.ResponseWriter, r *http.Request) {
 		if verified {
 			break
 		}
-		pk, err := crypto.NewKeyFromArmored(key)
+		pk, err := crypto.NewKey(key)
 		if err != nil {
 			trace = append(trace, "unable to get key from armored")
 			continue
