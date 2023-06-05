@@ -37,7 +37,7 @@ type FsMirrorDaemon struct {
 	InfoLogger  Logger
 }
 
-func (d FsMirrorDaemon) init() error {
+func (d *FsMirrorDaemon) init() error {
 	if d.Link == "" {
 		return errors.New("daemon mirror is not specified")
 	}
@@ -45,10 +45,10 @@ func (d FsMirrorDaemon) init() error {
 		return errors.New("daemon load directory is not specified")
 	}
 	if d.ErrorLogger == nil {
-		d.ErrorLogger = log.Default() //nolint:staticcheck
+		d.ErrorLogger = log.Default()
 	}
 	if d.InfoLogger == nil {
-		d.InfoLogger = log.Default() //nolint:staticcheck
+		d.InfoLogger = log.Default()
 	}
 	return nil
 }
@@ -131,7 +131,7 @@ func (d FsMirrorDaemon) LoadFile(filename string) error {
 	client := http.Client{}
 
 	// Put content on file
-	resp, err := client.Get(d.Link)
+	resp, err := client.Get(d.Link + "/" + fileName)
 	if err != nil {
 		d.ErrorLogger.Printf("unable get file: %s, %v", d.Link, err)
 		return err

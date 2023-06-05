@@ -34,7 +34,7 @@ type PkgDirDaemon struct {
 	ErrLogger  Logger
 }
 
-func (p PkgDirDaemon) init() error {
+func (p *PkgDirDaemon) init() error {
 	if p.DbName == "" {
 		return errors.New("pkg dir daemon db name is not specified")
 	}
@@ -42,13 +42,13 @@ func (p PkgDirDaemon) init() error {
 		return errors.New("pkg dir daemon watch dir is not specified")
 	}
 	if p.MkDirMode == 0 {
-		p.MkDirMode = os.ModePerm //nolint:staticcheck
+		p.MkDirMode = os.ModePerm
 	}
 	if p.InfoLogger == nil {
-		p.InfoLogger = log.Default() //nolint:staticcheck
+		p.InfoLogger = log.Default()
 	}
 	if p.ErrLogger == nil {
-		p.ErrLogger = log.Default() //nolint:staticcheck
+		p.ErrLogger = log.Default()
 	}
 	return nil
 }
