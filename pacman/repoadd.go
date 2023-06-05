@@ -8,6 +8,7 @@ package pacman
 import (
 	"io"
 	"os"
+	"sync"
 )
 
 // Parameters for adding packages to pacman repo.
@@ -51,8 +52,15 @@ func RepoAddDefaultOptions() *RepoAddOptions {
 	}
 }
 
-// This function will add new packages to database.
-func RepoAdd(db, f string, opts ...RepoAddOptions) error {
+var dbmu sync.Mutex
+
+// This function will add new packages to database. You should provide valid
+// path for database file and path to package you want to add.
+func RepoAdd(dbfile, pkgfile string, opts ...RepoAddOptions) error {
+	// Later rewrite this to mutex for only specific checked dbfile.
+	dbmu.Lock()
+	defer dbmu.Unlock()
+
 	o := formOptions(opts, RepoAddDefaultOptions)
 
 	var args []string
@@ -79,8 +87,8 @@ func RepoAdd(db, f string, opts ...RepoAddOptions) error {
 		args = append(args, o.Key)
 	}
 	args = append(args, o.AdditionalParams...)
-	args = append(args, db)
-	args = append(args, f)
+	args = append(args, dbfile)
+	args = append(args, pkgfile)
 
 	cmd := SudoCommand(o.Sudo, repoadd, args...)
 	cmd.Dir = o.Dir

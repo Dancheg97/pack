@@ -7,7 +7,9 @@ package server
 
 import (
 	"bytes"
+	"errors"
 	"io/fs"
+	"log"
 	"os"
 	"path"
 	"strings"
@@ -23,7 +25,7 @@ const (
 )
 
 // Parameters for directory db watcher.
-type PkgDirParams struct {
+type PkgDirDaemon struct {
 	DbName    string
 	WatchDir  string
 	MkDirMode fs.FileMode
@@ -32,9 +34,33 @@ type PkgDirParams struct {
 	ErrLogger  Logger
 }
 
+func (p PkgDirDaemon) init() error {
+	if p.DbName == "" {
+		return errors.New("pkg dir daemon db name is not specified")
+	}
+	if p.WatchDir == "" {
+		return errors.New("pkg dir daemon watch dir is not specified")
+	}
+	if p.MkDirMode == 0 {
+		p.MkDirMode = os.ModePerm //nolint:staticcheck
+	}
+	if p.InfoLogger == nil {
+		p.InfoLogger = log.Default() //nolint:staticcheck
+	}
+	if p.ErrLogger == nil {
+		p.ErrLogger = log.Default() //nolint:staticcheck
+	}
+	return nil
+}
+
 // This function is launching watcher for pacman cache directory, and constatly
 // adding new arch packages to database in watched directory.
-func PkgDirDaemon(p PkgDirParams) error {
+func (p PkgDirDaemon) Run() error {
+	err := p.init()
+	if err != nil {
+		return err
+	}
+
 	if err := os.MkdirAll(p.WatchDir, os.ModePerm); err != nil {
 		return err
 	}

@@ -7,7 +7,6 @@ package cmd
 
 import (
 	"fmt"
-	"io/fs"
 	"log"
 	"net/http"
 	"time"
@@ -89,26 +88,21 @@ func Serve(cmd *cobra.Command, args []string) {
 	)
 
 	go func() {
-		err := server.PkgDirDaemon(server.PkgDirParams{
-			DbName:     name,
-			WatchDir:   dir,
-			MkDirMode:  fs.ModePerm,
-			InfoLogger: log.Default(),
-			ErrLogger:  log.Default(),
-		})
-		CheckErr(err)
+		d := server.PkgDirDaemon{
+			DbName:   name,
+			WatchDir: dir,
+		}
+		CheckErr(d.Run())
 	}()
 
 	go func() {
 		for _, link := range mirr {
-			err := server.MirrFsDaemon(server.MirrFsParams{
-				Link:        link,
-				Dir:         dir,
-				Dur:         time.Hour * 24,
-				ErrorLogger: log.Default(),
-				InfoLogger:  log.Default(),
-			})
-			CheckErr(err)
+			d := server.FsMirrorDaemon{
+				Link: link,
+				Dir:  dir,
+				Dur:  time.Hour * 24,
+			}
+			CheckErr(d.Run())
 		}
 	}()
 
