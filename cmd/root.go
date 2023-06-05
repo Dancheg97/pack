@@ -17,8 +17,8 @@ const (
 	pacmancache  = "/var/cache/pacman/pkg"
 	pkgext       = ".pkg.tar.zst"
 	protocol     = "https://"
-	fsendpoint   = "/api/packages/arch/"
-	pushendpoint = "/api/packages/arch/push"
+	fsendpoint   = "/api/pack/"
+	pushendpoint = "/api/pack/push"
 	file         = "file"
 	sign         = "sign"
 )
