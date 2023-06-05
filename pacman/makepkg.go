@@ -274,16 +274,6 @@ func ValidatePackager() error {
 	return nil
 }
 
-// Validates all file signatures in provided directory.
-func ValideSignature(dirs string) error {
-	sigloc := path.Join(dirs, "*.sig")
-	command := "gpg --keyserver-options auto-key-retrieve --verify " + sigloc
-	cmd := exec.Command("bash", "-c", command)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	return cmd.Run()
-}
-
 // This function will find package with .pkg.tar.zst extension in directory and
 // put it into dst dir.
 func CacheBuiltPackage(src string, dst string) error {

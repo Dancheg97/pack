@@ -7,13 +7,13 @@ package server
 
 import (
 	"encoding/base64"
+	"io"
 	"net/http"
 	"os"
 	"path"
 	"strings"
 
-	"fmnx.su/core/pack/pacman"
-	"github.com/google/uuid"
+	"github.com/ProtonMail/gopenpgp/v2/crypto"
 )
 
 // Structure, that allows to create handler for incoming arch packages
@@ -21,12 +21,10 @@ import (
 type PushHandler struct {
 	// Direcotry, where push handler will store the resulting packages.
 	CacheDir string
-	// Directory, where handler will temporarily store file to check signature.
-	TmpDir string
 
 	// Public key source, get public key related to specific user. If not
 	// provided default gnupg signature verification scheme will be used.
-	// PubkeySource
+	PubkeySource
 
 	// Subdir source, if enabled packages would be created in subdirectories
 	// instead of base directory, allowing
@@ -57,46 +55,76 @@ func (p *PushHandler) Push(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tmpdir := path.Join(p.TmpDir, "pack-"+uuid.New().String())
-	err := os.MkdirAll(tmpdir, os.ModePerm)
-	if err != nil {
-		ep.write(http.StatusInternalServerError, "unable to create cache directory")
+	email := r.Header.Get("email")
+	if sign == "" {
+		ep.write(http.StatusConflict, "unable to get email from header")
 		return
 	}
-	defer os.RemoveAll(tmpdir)
 
-	f, err := os.Create(path.Join(tmpdir, file))
+	pkgdata, err := io.ReadAll(r.Body)
 	if err != nil {
-		ep.write(http.StatusInternalServerError, "unable to create file")
+		ep.write(http.StatusInternalServerError, "unable to read body")
 		return
 	}
-	defer f.Close()
-
-	if _, err = f.ReadFrom(r.Body); err != nil {
-		ep.write(http.StatusInternalServerError, "unable read file body")
-		return
-	}
+	pkgmes := crypto.NewPlainMessage(pkgdata)
 
 	sigdata, err := base64.StdEncoding.DecodeString(sign)
 	if err != nil {
 		ep.write(http.StatusInternalServerError, "unable to decode sign base64")
 		return
 	}
-	err = os.WriteFile(path.Join(tmpdir, file+".sig"), sigdata, os.ModePerm)
+	signature := crypto.NewPGPSignature(sigdata)
+
+	keys, err := p.PubkeySource.Get(email)
 	if err != nil {
-		ep.write(http.StatusInternalServerError, "unable to write sign file")
+		ep.write(http.StatusUnauthorized, "no GPG keys for email: "+email)
 		return
 	}
 
-	err = pacman.ValideSignature(tmpdir)
-	if err != nil {
-		ep.write(http.StatusInternalServerError, "signature is not validate with gnupg")
+	// Verification with all public keys associated to specific email adress.
+	var verified bool
+	var trace []string
+	for _, key := range keys {
+		if verified {
+			break
+		}
+		pk, err := crypto.NewKeyFromArmored(key)
+		if err != nil {
+			trace = append(trace, "unable to get key from armored")
+			continue
+		}
+		kr, err := crypto.NewKeyRing(pk)
+		if err != nil {
+			trace = append(trace, "unable to get keyring from key")
+			continue
+		}
+		for _, ident := range kr.GetIdentities() {
+			if ident.Email != email {
+				continue
+			}
+			err = kr.VerifyDetached(pkgmes, signature, crypto.GetUnixTime())
+			if err != nil {
+				trace = append(trace, "verification with key failed")
+				break
+			}
+			verified = true
+			break
+		}
+	}
+	if !verified {
+		ep.write(http.StatusUnauthorized, strings.Join(trace, " "))
 		return
 	}
 
-	err = pacman.CacheBuiltPackage(tmpdir, p.CacheDir)
+	err = os.WriteFile(path.Join(p.CacheDir, file), pkgdata, os.ModePerm)
 	if err != nil {
-		ep.write(http.StatusInternalServerError, "unable to move package to cache")
+		ep.write(http.StatusInternalServerError, "unable to write package file")
+		return
+	}
+
+	err = os.WriteFile(path.Join(p.CacheDir, file+".sig"), sigdata, os.ModePerm)
+	if err != nil {
+		ep.write(http.StatusInternalServerError, "unable to write signature file")
 		return
 	}
 

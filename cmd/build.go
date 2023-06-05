@@ -34,7 +34,6 @@ func Build(cmd *cobra.Command, args []string) {
 	CheckErr(CheckGnupg())
 	CheckErr(pacman.ValidatePackager())
 	CheckErr(pacman.Makepkg())
-	CheckErr(pacman.ValideSignature(""))
 	CheckErr(pacman.CacheBuiltPackage("", pacmancache))
 }
 
@@ -47,7 +46,7 @@ pack i gnupg
 2) Generate a key:
 gpg --gen-key
 
-3) Get key id:
+3) Get KEY-ID, paste it to next command:
 gpg -k
 
 4) Send it to key server:

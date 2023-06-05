@@ -16,7 +16,7 @@ import (
 const (
 	pacmancache  = "/var/cache/pacman/pkg"
 	pkgext       = ".pkg.tar.zst"
-	protocol     = "http://"
+	protocol     = "https://"
 	fsendpoint   = "/api/pack/"
 	pushendpoint = "/api/pack/push"
 	file         = "file"

@@ -112,7 +112,6 @@ func Serve(cmd *cobra.Command, args []string) {
 	fs := http.FileServer(http.Dir(pacmancache))
 	pushHandler := server.PushHandler{
 		CacheDir:   dir,
-		TmpDir:     "/tmp",
 		ErrLogger:  log.Default(),
 		InfoLogger: log.Default(),
 	}
