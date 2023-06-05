@@ -16,6 +16,7 @@ import (
 	"path"
 	"strings"
 
+	"fmnx.su/core/pack/pacman"
 	"github.com/spf13/cobra"
 )
 
@@ -37,9 +38,12 @@ pack p localhost:4572/linux-zen`,
 }
 
 func Push(cmd *cobra.Command, args []string) {
+	gnupgident, err := pacman.GetGnupgIdentity()
+	CheckErr(err)
 	var pkgs []*Package
 	for _, pkg := range args {
 		p, err := FormPackage(pkg)
+		p.Email = strings.ReplaceAll(strings.Split(gnupgident, "<")[0], ">", "")
 		CheckErr(err)
 		pkgs = append(pkgs, p)
 	}
@@ -55,6 +59,7 @@ type Package struct {
 	Filename string
 	PkgFile  string
 	SigFile  string
+	Email    string
 }
 
 // This function will find the latest version of package in cache direcotry and

@@ -241,14 +241,9 @@ func GetShellParams(file string, arg string) ([]string, error) {
 // Validate, that packager defined in /etc/makepkg.conf matches signer
 // authority in GnuPG.
 func ValidatePackager() error {
-	gnukey := `gpg --with-colons -k | awk -F: '$1=="uid" {print $10; exit}'`
-	cmd := exec.Command("bash", "-c", gnukey)
-	var b bytes.Buffer
-	cmd.Stdout = &b
-	cmd.Stderr = &b
-	err := cmd.Run()
+	keySigner, err := GetGnupgIdentity()
 	if err != nil {
-		return errors.New(b.String())
+		return err
 	}
 	f, err := os.ReadFile("/etc/makepkg.conf")
 	if err != nil {
@@ -264,7 +259,6 @@ func ValidatePackager() error {
 		)
 	}
 	confPackager := strings.Split(splt[1], "\"\n")[0]
-	keySigner := strings.ReplaceAll(b.String(), "\n", "")
 	if confPackager != keySigner {
 		return fmt.Errorf(
 			"Gnu key signer should match makepkg packager: %s / %s",
@@ -272,6 +266,19 @@ func ValidatePackager() error {
 		)
 	}
 	return nil
+}
+
+func GetGnupgIdentity() (string, error) {
+	gnukey := `gpg --with-colons -k | awk -F: '$1=="uid" {print $10; exit}'`
+	cmd := exec.Command("bash", "-c", gnukey)
+	var b bytes.Buffer
+	cmd.Stdout = &b
+	cmd.Stderr = &b
+	err := cmd.Run()
+	if err != nil {
+		return ``, errors.New("unable to get gnupg identity: " + b.String())
+	}
+	return strings.ReplaceAll(b.String(), "\n", ""), nil
 }
 
 // This function will find package with .pkg.tar.zst extension in directory and
