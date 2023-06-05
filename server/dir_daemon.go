@@ -27,14 +27,17 @@ type PkgDirParams struct {
 	DbName    string
 	WatchDir  string
 	MkDirMode fs.FileMode
-	Logger    Logger
+
+	InfoLogger Logger
+	ErrLogger  Logger
 }
 
 var PkgDirDefault = PkgDirParams{
-	DbName:    "localhost:4572",
-	WatchDir:  "/var/cache/pacman/pkg",
-	MkDirMode: os.ModePerm,
-	Logger:    log.Default(),
+	DbName:     "localhost:4572",
+	WatchDir:   "/var/cache/pacman/pkg",
+	MkDirMode:  os.ModePerm,
+	InfoLogger: log.Default(),
+	ErrLogger:  log.Default(),
 }
 
 // This function is launching watcher for pacman cache directory, and constatly
@@ -59,11 +62,16 @@ func PkgDirDaemon(p PkgDirParams) error {
 					path.Join(p.WatchDir, file),
 				)
 				if err != nil {
-					p.Logger.Printf(
+					p.ErrLogger.Printf(
 						"unable to add package %s to %s in %s",
 						file, p.DbName, p.WatchDir,
 					)
+					continue
 				}
+				p.InfoLogger.Printf(
+					"package %s added to db %s in dir %s",
+					file, p.DbName, p.WatchDir,
+				)
 			}
 		}
 	}()

@@ -90,10 +90,11 @@ func Serve(cmd *cobra.Command, args []string) {
 
 	go func() {
 		err := server.PkgDirDaemon(server.PkgDirParams{
-			DbName:    name,
-			WatchDir:  dir,
-			MkDirMode: fs.ModePerm,
-			Logger:    log.Default(),
+			DbName:     name,
+			WatchDir:   dir,
+			MkDirMode:  fs.ModePerm,
+			InfoLogger: log.Default(),
+			ErrLogger:  log.Default(),
 		})
 		CheckErr(err)
 	}()
