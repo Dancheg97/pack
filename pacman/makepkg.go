@@ -12,7 +12,6 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"path"
 	"strings"
 )
 
@@ -279,23 +278,4 @@ func GetGnupgIdentity() (string, error) {
 		return ``, errors.New("unable to get gnupg identity: " + b.String())
 	}
 	return strings.ReplaceAll(b.String(), "\n", ""), nil
-}
-
-// This function will find package with .pkg.tar.zst extension in directory and
-// put it into dst dir.
-func CacheBuiltPackage(src string, dst string) error {
-	des, err := os.ReadDir(src)
-	if err != nil {
-		return err
-	}
-	for _, de := range des {
-		n := de.Name()
-		if strings.HasSuffix(n, pkgext) || strings.HasSuffix(n, pkgsig) {
-			err := os.Rename(path.Join(src, n), path.Join(dst, n))
-			if err != nil {
-				return err
-			}
-		}
-	}
-	return nil
 }

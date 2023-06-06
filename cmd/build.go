@@ -8,6 +8,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path"
 
 	"fmnx.su/core/pack/pacman"
@@ -34,7 +35,10 @@ func Build(cmd *cobra.Command, args []string) {
 	CheckErr(CheckGnupg())
 	CheckErr(pacman.ValidatePackager())
 	CheckErr(pacman.Makepkg())
-	CheckErr(pacman.CacheBuiltPackage("", pacmancache))
+	CheckErr(exec.Command(
+		"bash", "-c",
+		"sudo mv *.pkg.tar.zst* /var/cache/pacman/pkg",
+	).Run())
 }
 
 const gnupgerr = `GPG key is not found in user directory ~/.gnupg
