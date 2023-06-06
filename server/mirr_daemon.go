@@ -138,13 +138,12 @@ func (d FsMirrorDaemon) LoadFile(filename string) error {
 	}
 	defer resp.Body.Close()
 
-	size, err := io.Copy(file, resp.Body)
+	_, err = io.Copy(file, resp.Body)
 	if err != nil {
 		d.ErrorLogger.Printf("unable to write to file: %s, %v", filepath, err)
 		return err
 	}
 	defer file.Close()
 
-	d.InfoLogger.Printf("Downloaded a file %s with size %d", fileName, size)
 	return nil
 }

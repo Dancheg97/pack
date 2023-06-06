@@ -7,3 +7,4 @@ pkgs/**
 packbin
 key.pem
 cert.pem
+docker/**

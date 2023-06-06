@@ -15,8 +15,6 @@ const (
 	pacman  = `pacman`
 	makepkg = `makepkg`
 	repoadd = `repo-add`
-	pkgext  = `.pkg.tar.zst`
-	pkgsig  = `.pkg.tar.zst.sig`
 )
 
 // Global lock for operations with pacman database.
