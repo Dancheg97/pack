@@ -105,6 +105,7 @@ func main() {
 		CheckErr(pack.Push(args(), pack.PushParameters{
 			Directory: opts.Dir,
 			Protocol:  opts.Protocol,
+			Endpoint:  opts.Endpoint,
 		}))
 		return
 
@@ -188,6 +189,7 @@ func main() {
 // Herlper function to exit on unexpected errors.
 func CheckErr(err error) {
 	if err != nil {
+		fmt.Println(err)
 		os.Exit(1)
 	}
 }

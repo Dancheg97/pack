@@ -29,7 +29,9 @@ type PushParameters struct {
 
 func pushdefault() *PushParameters {
 	return &PushParameters{
+		Protocol:  "https",
 		Directory: "/var/cache/pacman/pkg",
+		Endpoint:  "/api/pack/push",
 	}
 }
 
@@ -53,7 +55,7 @@ func Push(args []string, prms ...PushParameters) error {
 	email := strings.ReplaceAll(strings.Split(gnupgident, "<")[1], ">", "")
 
 	for _, pkg := range pkgs {
-		err := PushPkg(pkg, email, p.Protocol)
+		err := push(pkg, email, p.Protocol, p.Endpoint)
 		if err != nil {
 			return err
 		}
@@ -83,6 +85,7 @@ func FormPackage(dir string, pkg string) (*Package, error) {
 	if err != nil {
 		return nil, err
 	}
+	var pkgs []Package
 	for _, de := range des {
 		filename := de.Name()
 		if !strings.HasSuffix(filename, ".pkg.tar.zst") {
@@ -94,20 +97,23 @@ func FormPackage(dir string, pkg string) (*Package, error) {
 		}
 		namecheck := strings.Join(pkgsplt[:len(pkgsplt)-3], "-")
 		if pkgname == namecheck {
-			return &Package{
+			pkgs = append(pkgs, Package{
 				Registry: registry,
 				PkgName:  pkgname,
 				Filename: filename,
 				PkgFile:  path.Join(dir, filename),
 				SigFile:  path.Join(dir, filename+".sig"),
-			}, err
+			})
 		}
 	}
-	return nil, errors.New("package not found in cache: " + pkgname)
+	if len(pkgs) == 0 {
+		return nil, errors.New("package not found in cache: " + pkgname)
+	}
+	return &pkgs[len(pkgs)-1], nil
 }
 
 // This function pushes package to registry via http.
-func PushPkg(p *Package, email string, protocol string) error {
+func push(p *Package, email string, protocol string, endpoint string) error {
 	packagefile, err := os.Open(p.PkgFile)
 	if err != nil {
 		return err
@@ -127,7 +133,7 @@ func PushPkg(p *Package, email string, protocol string) error {
 
 	req, err := http.NewRequest(
 		http.MethodPut,
-		protocol+"://"+p.Registry+"/api/pack/push",
+		protocol+"://"+p.Registry+endpoint,
 		packagefile,
 	)
 	if err != nil {
