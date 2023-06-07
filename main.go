@@ -10,6 +10,7 @@ import (
 	"os"
 	"strings"
 
+	"fmnx.su/core/pack/pack"
 	"fmnx.su/core/pack/pacman"
 	"fmnx.su/core/pack/tmpl"
 	"github.com/jessevdk/go-flags"
@@ -19,7 +20,7 @@ func main() {
 	var opts struct {
 		Help bool `long:"help" short:"h"`
 
-		// Root flags.
+		// Root options.
 		Query  bool `short:"Q" long:"query"`
 		Remove bool `short:"R" long:"remove"`
 		Sync   bool `short:"S" long:"sync"`
@@ -27,31 +28,41 @@ func main() {
 		Open   bool `short:"O" long:"open"`
 		Build  bool `short:"B" long:"build"`
 
-		// Shared flags.
+		// Shared options.
 		Info []bool `short:"i" long:"info"`
 		List []bool `short:"l" long:"list"`
+		Dir  string `short:"d" long:"dir"`
 
 		// Query options.
-		Deps     bool   `short:"d" long:"deps"`
 		Explicit bool   `short:"e" long:"explicit"`
-		Foreign  bool   `short:"m" long:"foreign"`
-		Native   bool   `short:"n" long:"native"`
 		Unreq    bool   `short:"t" long:"unreq"`
-		File     string `short:"p" long:"file"`
-		Check    []bool `short:"k" long:"check"`
+		File     string `long:"file"`
+		Foreign  bool   `long:"foreign"`
+		Deps     bool   `long:"deps"`
+		Native   bool   `long:"native"`
+		Check    []bool `long:"check"`
 
 		// Remove options.
 		Confirm     bool `short:"o" long:"confirm"`
-		Cascade     bool `short:"c" long:"cascade"`
 		Norecursive bool `short:"a" long:"norecursive"`
 		Nocfgs      bool `short:"w" long:"nocfgs"`
+		Cascade     bool `long:"cascade"`
 
 		// Sync options.
-		Garbage   bool   `short:"g" long:"garbage"`
 		Refresh   bool   `short:"y" long:"refresh"`
+		Upgrade   []bool `short:"u" long:"sysupgrade"`
 		Reinstall bool   `short:"r" long:"reinstall"`
 		Quick     bool   `short:"q" long:"quick"`
-		Upgrade   []bool `short:"u" long:"sysupgrade"`
+
+		// Open options.
+		Name string   `short:"n" long:"name"`
+		Mirr []string `short:"m" long:"mirr"`
+		Port string   `short:"p" long:"port"`
+		Cert string   `short:"c" long:"cert"`
+		Key  string   `short:"k" long:"key"`
+
+		// Push options.
+		HTTP bool `long:"http"`
 	}
 
 	_, err := flags.NewParser(&opts, flags.None).Parse()
@@ -64,18 +75,20 @@ func main() {
 
 	case opts.Query:
 		CheckErr(pacman.Query(args(), pacman.QueryOptions{
-			Explicit:   opts.Explicit,
-			Deps:       opts.Deps,
-			Native:     opts.Native,
-			Foreign:    opts.Foreign,
-			Unrequired: opts.Unreq,
-			Info:       opts.Info,
-			Check:      opts.Check,
-			List:       opts.List,
-			File:       opts.File,
-			Stdout:     os.Stdout,
-			Stderr:     os.Stderr,
-			Stdin:      os.Stdin,
+			Explicit:         false,
+			Deps:             false,
+			Native:           opts.Native,
+			Foreign:          false,
+			Unrequired:       opts.Unreq,
+			Groups:           false,
+			Info:             opts.Info,
+			Check:            []bool{},
+			List:             opts.List,
+			File:             opts.File,
+			Stdout:           os.Stdout,
+			Stderr:           os.Stderr,
+			Stdin:            os.Stdin,
+			AdditionalParams: []string{},
 		}))
 		return
 
@@ -107,11 +120,22 @@ func main() {
 			Refresh:   opts.Refresh,
 			Upgrade:   opts.Upgrade,
 			List:      opts.List,
-			CleanAll:  !opts.Garbage,
 			Stdout:    os.Stdout,
 			Stderr:    os.Stderr,
 			Stdin:     os.Stdin,
 		}))
+		return
+
+	case opts.Push && opts.Help:
+		fmt.Println(tmpl.PushHelp)
+		return
+
+	case opts.Push:
+		CheckErr(pack.Push(args()))
+		return
+
+	case opts.Build && opts.Help:
+		fmt.Println(tmpl.BuildHelp)
 		return
 
 	case opts.Help:
@@ -128,6 +152,7 @@ func main() {
 // Herlper function to exit on unexpected errors.
 func CheckErr(err error) {
 	if err != nil {
+		fmt.Println(err)
 		os.Exit(1)
 	}
 }

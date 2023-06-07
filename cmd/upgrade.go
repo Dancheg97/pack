@@ -32,7 +32,6 @@ func Upgrade(cmd *cobra.Command, args []string) {
 		Sudo:    true,
 		Needed:  true,
 		Refresh: true,
-		Upgrade: true,
 		Stdout:  os.Stdout,
 		Stderr:  os.Stderr,
 		Stdin:   os.Stdin,

@@ -3,7 +3,7 @@
 // Official web page: https://fmnx.su/core/pack
 // Contact email: help@fmnx.su
 
-package cmd
+package pack
 
 import (
 	"encoding/base64"
@@ -17,40 +17,31 @@ import (
 	"strings"
 
 	"fmnx.su/core/pack/pacman"
-	"github.com/spf13/cobra"
 )
 
-func init() {
-	Command.AddCommand(pushCmd)
-}
-
-var pushCmd = &cobra.Command{
-	Use:     "push",
-	Aliases: []string{"p"},
-	Short:   "📨 push packages",
-	Long: `📨 push packages
-
-This command will find package and sign in package cache directory and push it
-to provided registry. Registry should be included with package name, example:
-
-pack p localhost:4572/linux-zen`,
-	Run: Push,
-}
-
-func Push(cmd *cobra.Command, args []string) {
+// Push your package to registry.
+func Push(args []string) error {
 	gnupgident, err := pacman.GetGnupgIdentity()
-	CheckErr(err)
+	if err != nil {
+		return err
+	}
+	email := strings.ReplaceAll(strings.Split(gnupgident, "<")[1], ">", "")
 	var pkgs []*Package
 	for _, pkg := range args {
 		p, err := FormPackage(pkg)
-		p.Email = strings.ReplaceAll(strings.Split(gnupgident, "<")[1], ">", "")
-		CheckErr(err)
+		p.Email = email
+		if err != nil {
+			return err
+		}
 		pkgs = append(pkgs, p)
 	}
 	for _, pkg := range pkgs {
 		err := PushPkg(pkg)
-		CheckErr(err)
+		if err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
 type Package struct {
@@ -72,13 +63,13 @@ func FormPackage(pkg string) (*Package, error) {
 	}
 	registry := splt[0]
 	pkgname := splt[1]
-	des, err := os.ReadDir(pacmancache)
+	des, err := os.ReadDir("/var/cache/pacman/pkg")
 	if err != nil {
 		return nil, err
 	}
 	for _, de := range des {
 		filename := de.Name()
-		if !strings.HasSuffix(filename, pkgext) {
+		if !strings.HasSuffix(filename, ".pkg.tar.zst") {
 			continue
 		}
 		pkgsplt := strings.Split(filename, "-")
@@ -91,8 +82,8 @@ func FormPackage(pkg string) (*Package, error) {
 				Registry: registry,
 				PkgName:  pkgname,
 				Filename: filename,
-				PkgFile:  path.Join(pacmancache, filename),
-				SigFile:  path.Join(pacmancache, filename+".sig"),
+				PkgFile:  path.Join("/var/cache/pacman/pkg", filename),
+				SigFile:  path.Join("/var/cache/pacman/pkg", filename+".sig"),
 			}, err
 		}
 	}
@@ -120,16 +111,16 @@ func PushPkg(p *Package) error {
 
 	req, err := http.NewRequest(
 		http.MethodPut,
-		protocol+p.Registry+pushendpoint,
+		"https://"+p.Registry+"/api/pack/push",
 		packagefile,
 	)
 	if err != nil {
 		return err
 	}
 
-	req.Header.Add(file, p.Filename)
-	req.Header.Add(email, p.Email)
-	req.Header.Add(sign, base64.StdEncoding.EncodeToString(sigbytes))
+	req.Header.Add("file", p.Filename)
+	req.Header.Add("email", p.Email)
+	req.Header.Add("sign", base64.StdEncoding.EncodeToString(sigbytes))
 
 	var client http.Client
 	resp, err := client.Do(req)
