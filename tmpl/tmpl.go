@@ -3,11 +3,14 @@
 // Official web page: https://fmnx.su/core/pack
 // Contact email: help@fmnx.su
 
-package pack
+package tmpl
 
-func formOptions[Opts any](arr []Opts, getdefault func() *Opts) *Opts {
-	if len(arr) != 1 {
-		return getdefault()
-	}
-	return &arr[0]
-}
+const RegistryRoot = `
+[%s]
+Server = https://%s/api/pack
+`
+
+const RegistryUser = `
+[%s.%s]
+Server = https://%s/api/pack
+`

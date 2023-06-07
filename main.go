@@ -30,7 +30,7 @@ var opts struct {
 
 	// Sync options.
 	Quick     bool   `short:"q" long:"quick"`
-	Refresh   bool   `short:"y" long:"refresh"`
+	Refresh   []bool `short:"y" long:"refresh"`
 	Upgrade   []bool `short:"u" long:"upgrade"`
 	Info      []bool `short:"i" long:"info"`
 	List      []bool `short:"l" long:"list"`
@@ -82,13 +82,15 @@ func main() {
 		return
 
 	case opts.Sync:
-		CheckErr(pacman.SyncList(args(), pacman.SyncOptions{
-			Sudo:      true,
-			Needed:    !opts.Force,
-			NoConfirm: opts.Quick,
+		CheckErr(pack.Sync(args(), pack.SyncParameters{
+			Quick:     opts.Quick,
 			Refresh:   opts.Refresh,
 			Upgrade:   opts.Upgrade,
+			Info:      opts.Info,
 			List:      opts.List,
+			Notimeout: opts.Notimeout,
+			Force:     opts.Force,
+			Keepcfg:   opts.Keepcfg,
 			Stdout:    os.Stdout,
 			Stderr:    os.Stderr,
 			Stdin:     os.Stdin,

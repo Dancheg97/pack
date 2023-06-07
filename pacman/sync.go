@@ -30,7 +30,7 @@ type SyncOptions struct {
 	// Install packages as explictly installed. [--asexplict]
 	AsExplict bool
 	// Download fresh package databases from the server. [--refresh]
-	Refresh bool
+	Refresh []bool
 	// Upgrade programms that are outdated. [--sysupgrade]
 	Upgrade []bool
 	// View a list of packages in a repo. [--list]
@@ -56,7 +56,7 @@ func SyncDefault() *SyncOptions {
 		Sudo:      true,
 		Needed:    true,
 		NoConfirm: true,
-		Refresh:   true,
+		Refresh:   []bool{true},
 		Stdout:    os.Stdout,
 		Stderr:    os.Stderr,
 		Stdin:     os.Stdin,
@@ -92,8 +92,8 @@ func SyncList(pkgs []string, opts ...SyncOptions) error {
 	if o.AsExplict {
 		args = append(args, "--asexplicit")
 	}
-	if o.Refresh {
-		args = append(args, "--refresh")
+	for range o.Refresh {
+		args = append(args, "-y")
 	}
 	for range o.Upgrade {
 		args = append(args, "-u")

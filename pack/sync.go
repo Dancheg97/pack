@@ -4,3 +4,188 @@
 // Contact email: help@fmnx.su
 
 package pack
+
+import (
+	"errors"
+	"fmt"
+	"io"
+	"os"
+	"os/exec"
+	"strings"
+
+	"fmnx.su/core/pack/pacman"
+	"fmnx.su/core/pack/tmpl"
+	"github.com/fatih/color"
+)
+
+// Syncronize packages with pack.
+type SyncParameters struct {
+	// Don't ask for any confirmation (--noconfirm)
+	Quick bool
+	// Download fresh package databases from the server (-yy force)
+	Refresh []bool
+	// Upgrade installed packages (-uu enables downgrade)
+	Upgrade []bool
+	// View package information (-ii for extended information)
+	Info []bool
+	// View a list of packages in a repo
+	List []bool
+	// Use relaxed timeouts for download
+	Notimeout bool
+	// Reinstall up to date targets
+	Force bool
+	// Do not save new registries in pacman.conf
+	Keepcfg bool
+	// Where command will write output text.
+	Stdout io.Writer
+	// Where command will write output text.
+	Stderr io.Writer
+	// Stdin from user is command will ask for something.
+	Stdin io.Reader
+}
+
+func syncdefault() *SyncParameters {
+	return &SyncParameters{
+		Quick:   true,
+		Refresh: []bool{true},
+		Stdout:  os.Stdout,
+		Stderr:  os.Stderr,
+		Stdin:   os.Stdin,
+	}
+}
+
+// Syncronize provided packages with provided parameters.
+func Sync(args []string, prms ...SyncParameters) error {
+	p := formOptions(prms, syncdefault)
+
+	pkgs, fmtpkgs, err := formatpkgs(args, p.Stderr)
+	if err != nil {
+		return err
+	}
+
+	initial, err := prepareconf(pkgs, p.Stderr, p.Stdout)
+	if err != nil {
+		return err
+	}
+
+	err = pacman.SyncList(fmtpkgs, pacman.SyncOptions{
+		Sudo:      true,
+		Needed:    p.Force,
+		NoConfirm: p.Quick,
+		Refresh:   p.Refresh,
+		Upgrade:   p.Upgrade,
+		List:      p.List,
+		Stdout:    p.Stdout,
+		Stderr:    p.Stderr,
+		Stdin:     p.Stdin,
+	})
+	if err != nil || p.Keepcfg {
+		rollbackconf(*initial)
+		return err
+	}
+	return nil
+}
+
+// Pakcage with owner and registry for further pack operations.
+type RegistryPkg struct {
+	Registry string
+	Owner    string
+	Package  string
+}
+
+// Format packages to pack compatible formats for operations with registries.
+func formatpkgs(pkgs []string, errw io.Writer) ([]RegistryPkg, []string, error) {
+	var rez []RegistryPkg
+	var fmtpkgs []string
+	for _, pkg := range pkgs {
+		splt := strings.Split(pkg, "/")
+		switch len(splt) {
+		case 1:
+			rez = append(rez, RegistryPkg{
+				Package: splt[0],
+			})
+			fmtpkgs = append(fmtpkgs, pkg)
+		case 2:
+			rez = append(rez, RegistryPkg{
+				Registry: splt[0],
+				Package:  splt[1],
+			})
+			fmtpkgs = append(fmtpkgs, pkg)
+		case 3:
+			rez = append(rez, RegistryPkg{
+				Registry: splt[0],
+				Owner:    splt[1],
+				Package:  splt[2],
+			})
+			fmtpkgs = append(fmtpkgs, splt[0]+"/"+splt[2])
+		default:
+			errw.Write([]byte(tmpl.BrokenPackage + pkg)) //nolint
+			return nil, nil, errors.New("broken package: " + pkg)
+		}
+	}
+	return rez, fmtpkgs, nil
+}
+
+// Add missing registries to pacman configuration file and return file before
+// modifications.
+func prepareconf(pkgs []RegistryPkg, ew io.Writer, ow io.Writer) (*string, error) {
+	f, err := os.ReadFile("/etc/pacman.conf")
+	if err != nil {
+		return nil, err
+	}
+	conf := string(f)
+
+	for _, pkg := range pkgs {
+		switch {
+		case pkg.Registry != "" && pkg.Owner != "":
+			if !checkexistowner(conf, pkg.Registry, pkg.Owner) {
+				err = addconfdb(pkg, ew, ow)
+				if err != nil {
+					return nil, err
+				}
+			}
+		case pkg.Registry != "":
+			if !checkexistsroot(conf, pkg.Registry) {
+				err = addconfdb(pkg, ew, ow)
+				if err != nil {
+					return nil, err
+				}
+			}
+		}
+	}
+	return &conf, nil
+}
+
+func checkexistowner(conf string, registry string, owner string) bool {
+	return strings.Contains(conf, "\n["+registry+"."+owner+"]\n")
+}
+
+func checkexistsroot(conf string, registry string) bool {
+	return strings.Contains(conf, "\n["+registry+"]\n")
+}
+
+func addconfdb(pkg RegistryPkg, ew io.Writer, ow io.Writer) error {
+	var t string
+	if pkg.Owner == "" {
+		t = fmt.Sprintf(tmpl.RegistryRoot, pkg.Registry, pkg.Registry)
+	} else {
+		t = fmt.Sprintf(tmpl.RegistryUser, pkg.Registry, pkg.Owner, pkg.Registry)
+	}
+	command := "cat <<EOF >> /etc/pacman.conf\n" + t + "\nEOF"
+	err := exec.Command("sudo", "bash", "-c", command).Run()
+	if err != nil {
+		ew.Write([]byte(tmpl.UnableAppendConf + t)) //nolint
+		return errors.New("unable to add database: " + t)
+	}
+	whilte := color.New(color.FgWhite).Add(color.Bold)
+	msg := color.CyanString("::") + whilte.Sprintf(" database added:") + t
+	ow.Write([]byte(msg)) //nolint
+	return nil
+}
+
+func rollbackconf(s string) {
+	exec.Command(
+		"sudo", "bash", "-c",
+		"cat <<EOF > /etc/pacman.conf\n"+s+"\nEOF",
+	).Run() //nolint
+}

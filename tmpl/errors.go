@@ -38,3 +38,7 @@ var SignerMissmatch = color.RedString("error:") + ` signer and packager are diff
 Authority you defined in GnuPG is not matching with PACKAGER variable in 
 
 ` + color.BlueString("PACKAGER") + `=` + color.HiMagentaString("John Doe <john@doe.com>\n")
+
+var BrokenPackage = color.RedString("error:") + " broken package: "
+
+var UnableAppendConf = color.RedString("error:") + " unable to add to pacman.conf: "

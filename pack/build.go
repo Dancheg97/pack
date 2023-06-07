@@ -45,6 +45,7 @@ func builddefault() *BuildParameters {
 	}
 }
 
+// Build package in current directory with provided arguements
 func Build(prms ...BuildParameters) error {
 	p := formOptions(prms, builddefault)
 
