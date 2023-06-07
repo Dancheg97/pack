@@ -5,6 +5,15 @@
 
 package pack
 
+import (
+	"bytes"
+	"errors"
+	"fmt"
+	"os"
+	"os/exec"
+	"strings"
+)
+
 // Build package with pack.
 func Build(args []string) error {
 	// CheckErr(CheckGnupg())
@@ -42,4 +51,47 @@ func CheckGnupg() error {
 	// 	fmt.Println(gnupgerr)
 	// }
 	return nil
+}
+
+// Validate, that packager defined in /etc/makepkg.conf matches signer
+// authority in GnuPG.
+func ValidatePackager() error {
+	keySigner, err := GetGnupgIdentity()
+	if err != nil {
+		return err
+	}
+	f, err := os.ReadFile("/etc/makepkg.conf")
+	if err != nil {
+		return err
+	}
+	splt := strings.Split(string(f), "\nPACKAGER=\"")
+	if len(splt) != 2 {
+		return errors.New(
+			"packager is not defined in /etc/makepkg.conf. " +
+				"Add PACKAGER variable matching your GnuPG authority " +
+				"in /etc/makepkg.conf\n" +
+				"Example: PACKAGER=\"John Doe <john@doe.com>\"",
+		)
+	}
+	confPackager := strings.Split(splt[1], "\"\n")[0]
+	if confPackager != keySigner {
+		return fmt.Errorf(
+			"gnu key signer should match makepkg packager: %s / %s",
+			keySigner, confPackager,
+		)
+	}
+	return nil
+}
+
+func GetGnupgIdentity() (string, error) {
+	gnukey := `gpg --with-colons -k | awk -F: '$1=="uid" {print $10; exit}'`
+	cmd := exec.Command("bash", "-c", gnukey)
+	var b bytes.Buffer
+	cmd.Stdout = &b
+	cmd.Stderr = &b
+	err := cmd.Run()
+	if err != nil {
+		return ``, errors.New("unable to get gnupg identity: " + b.String())
+	}
+	return strings.ReplaceAll(b.String(), "\n", ""), nil
 }

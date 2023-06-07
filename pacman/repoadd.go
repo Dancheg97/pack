@@ -89,7 +89,7 @@ func RepoAdd(dbfile, pkgfile string, opts ...RepoAddOptions) error {
 	args = append(args, dbfile)
 	args = append(args, pkgfile)
 
-	cmd := SudoCommand(o.Sudo, repoadd, args...)
+	cmd := sudoCommand(o.Sudo, repoadd, args...)
 	cmd.Dir = o.Dir
 	cmd.Stderr = o.Stderr
 	cmd.Stdout = o.Stdout

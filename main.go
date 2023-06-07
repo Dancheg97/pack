@@ -31,7 +31,7 @@ func main() {
 		// Shared options.
 		Info []bool `short:"i" long:"info"`
 		List []bool `short:"l" long:"list"`
-		Dir  string `short:"d" long:"dir"`
+		Dir  string `short:"d" long:"dir" default:"/var/cache/pacman/pkg"`
 
 		// Query options.
 		Explicit bool   `short:"e" long:"explicit"`
@@ -40,6 +40,7 @@ func main() {
 		Foreign  bool   `long:"foreign"`
 		Deps     bool   `long:"deps"`
 		Native   bool   `long:"native"`
+		Groups   bool   `long:"groups"`
 		Check    []bool `long:"check"`
 
 		// Remove options.
@@ -55,11 +56,11 @@ func main() {
 		Quick     bool   `short:"q" long:"quick"`
 
 		// Open options.
-		Name string   `short:"n" long:"name"`
-		Mirr []string `short:"m" long:"mirr"`
-		Port string   `short:"p" long:"port"`
+		Name string   `short:"n" long:"name" default:"localhost"`
+		Port string   `short:"p" long:"port" default:"80"`
 		Cert string   `short:"c" long:"cert"`
 		Key  string   `short:"k" long:"key"`
+		Mirr []string `short:"m" long:"mirr"`
 
 		// Push options.
 		HTTP bool `long:"http"`
@@ -75,20 +76,19 @@ func main() {
 
 	case opts.Query:
 		CheckErr(pacman.Query(args(), pacman.QueryOptions{
-			Explicit:         false,
-			Deps:             false,
-			Native:           opts.Native,
-			Foreign:          false,
-			Unrequired:       opts.Unreq,
-			Groups:           false,
-			Info:             opts.Info,
-			Check:            []bool{},
-			List:             opts.List,
-			File:             opts.File,
-			Stdout:           os.Stdout,
-			Stderr:           os.Stderr,
-			Stdin:            os.Stdin,
-			AdditionalParams: []string{},
+			Explicit:   opts.Explicit,
+			Deps:       opts.Deps,
+			Native:     opts.Native,
+			Foreign:    opts.Foreign,
+			Unrequired: opts.Unreq,
+			Groups:     opts.Groups,
+			Info:       opts.Info,
+			Check:      opts.Check,
+			List:       opts.List,
+			File:       opts.File,
+			Stdout:     os.Stdout,
+			Stderr:     os.Stderr,
+			Stdin:      os.Stdin,
 		}))
 		return
 
@@ -131,11 +131,18 @@ func main() {
 		return
 
 	case opts.Push:
-		CheckErr(pack.Push(args()))
+		CheckErr(pack.Push(args(), pack.PushParameters{
+			Directory: opts.Dir,
+			HTTP:      opts.HTTP,
+		}))
 		return
 
 	case opts.Build && opts.Help:
 		fmt.Println(tmpl.BuildHelp)
+		return
+
+	case opts.Build:
+		CheckErr(pack.Build(args()))
 		return
 
 	case opts.Help:

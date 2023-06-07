@@ -20,7 +20,7 @@ const (
 // Global lock for operations with pacman database.
 var mu sync.Mutex
 
-func SudoCommand(sudo bool, command string, args ...string) *exec.Cmd {
+func sudoCommand(sudo bool, command string, args ...string) *exec.Cmd {
 	if sudo {
 		args = append([]string{command}, args...)
 		return exec.Command(`sudo`, args...)

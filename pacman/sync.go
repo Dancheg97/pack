@@ -116,7 +116,7 @@ func SyncList(pkgs []string, opts ...SyncOptions) error {
 	args = append(args, o.AdditionalParams...)
 	args = append(args, pkgs...)
 
-	cmd := SudoCommand(o.Sudo, pacman, args...)
+	cmd := sudoCommand(o.Sudo, pacman, args...)
 	cmd.Stdout = o.Stdout
 	cmd.Stderr = o.Stderr
 	cmd.Stdin = o.Stdin
@@ -162,7 +162,7 @@ func Search(re string, opts ...SearchOptions) ([]SearchResult, error) {
 	args = append(args, re)
 
 	var b bytes.Buffer
-	cmd := SudoCommand(o.Sudo, pacman, args...)
+	cmd := sudoCommand(o.Sudo, pacman, args...)
 	cmd.Stdout = &b
 	cmd.Stderr = &b
 	cmd.Stdin = os.Stdin

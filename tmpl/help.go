@@ -11,6 +11,8 @@ import (
 	"strings"
 )
 
+var Color bool
+
 var Help = `📦 Simplified version of pacman
 
 operations:
@@ -35,6 +37,7 @@ options:
 	    --foreign  list installed packages not found in sync db(s) [filter]
 	    --native   list installed packages only found in sync db(s) [filter]
 	    --check    check that package files exist (-kk for file properties)
+	    --groups   view all members of a package group
 
 usage:  pack {-Q --query} [options] [package(s)]`
 
@@ -99,7 +102,8 @@ func init() {
 		fmt.Println("unable to read pacman configuration")
 		os.Exit(1)
 	}
-	if !strings.Contains(string(b), "\nColor\n") {
+	Color = strings.Contains(string(b), "\nColor\n")
+	if !Color {
 		Help = strings.Replace(Help, "📦 ", "", 1)
 		QueryHelp = strings.Replace(QueryHelp, "🔎 ", "", 1)
 		RemoveHelp = strings.Replace(RemoveHelp, "🚫 ", "", 1)

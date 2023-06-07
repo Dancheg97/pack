@@ -15,17 +15,32 @@ import (
 	"os/exec"
 	"path"
 	"strings"
-
-	"fmnx.su/core/pack/pacman"
 )
 
+// Parameters that will be used to execute push command.
+type PushParameters struct {
+	// Directory to read package files and signatures.
+	Directory string
+	// Push over HTTP instead of HTTPS. Insecure? hah
+	HTTP bool
+}
+
+func pushdefault() *PushParameters {
+	return &PushParameters{
+		Directory: "/var/cache/pacman/pkg",
+	}
+}
+
 // Push your package to registry.
-func Push(args []string) error {
-	gnupgident, err := pacman.GetGnupgIdentity()
+func Push(args []string, prms ...PushParameters) error {
+	p := formOptions(prms, pushdefault)
+
+	gnupgident, err := GetGnupgIdentity()
 	if err != nil {
 		return err
 	}
 	email := strings.ReplaceAll(strings.Split(gnupgident, "<")[1], ">", "")
+
 	var pkgs []*Package
 	for _, pkg := range args {
 		p, err := FormPackage(pkg)

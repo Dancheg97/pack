@@ -78,7 +78,7 @@ func UpgradeList(files []string, opts ...UpgradeOptions) error {
 	args = append(args, o.AdditionalParams...)
 	args = append(args, files...)
 
-	cmd := SudoCommand(o.Sudo, pacman, args...)
+	cmd := sudoCommand(o.Sudo, pacman, args...)
 	cmd.Stdout = o.Stdout
 	cmd.Stderr = o.Stderr
 	cmd.Stdin = o.Stdin
