@@ -193,12 +193,13 @@ func CheckErr(err error) {
 func args() []string {
 	var filtered []string
 	for i, v := range os.Args {
-		if !strings.HasPrefix(v, "/") &&
-			!strings.HasPrefix(v, "-") &&
-			!strings.HasPrefix(v, ".") &&
-			i != 0 {
-			filtered = append(filtered, v)
+		if i == 0 || i == 1 {
+			continue
 		}
+		if strings.HasPrefix(v, "-") {
+			continue
+		}
+		filtered = append(filtered, v)
 	}
 	return filtered
 }
