@@ -20,22 +20,22 @@ import (
 
 // Parameters that can be used to build packages.
 type BuildParameters struct {
-	// Do not ask for any confirmation on build/installation.
-	Quick bool
-	// Directory where resulting package and signature will be moved.
-	Dir string
-	// Syncronize/reinstall package after build.
-	Syncbuild bool
-	// Remove dependencies after successful build.
-	Rmdeps bool
-	// Do not clean workspace before and after build.
-	Garbage bool
 	// Where command will write output text.
 	Stdout io.Writer
 	// Where command will write output text.
 	Stderr io.Writer
 	// Stdin from user is command will ask for something.
 	Stdin io.Reader
+	// Directory where resulting package and signature will be moved.
+	Dir string
+	// Do not ask for any confirmation on build/installation.
+	Quick bool
+	// Syncronize/reinstall package after build.
+	Syncbuild bool
+	// Remove dependencies after successful build.
+	Rmdeps bool
+	// Do not clean workspace before and after build.
+	Garbage bool
 }
 
 func builddefault() *BuildParameters {
@@ -77,7 +77,7 @@ func Build(prms ...BuildParameters) error {
 		return err
 	}
 
-	return exec.Command("bash", "-c", "sudo mv *.pkg.tar.zst* "+p.Dir).Run()
+	return exec.Command("bash", "-c", "sudo mv *.pkg.tar.zst* "+p.Dir).Run() //nolint
 }
 
 // Ensure, that user have created gnupg keys for package signing before package
@@ -96,7 +96,7 @@ func checkGnupg(errwriter io.Writer) error {
 			return nil
 		}
 	}
-	errwriter.Write([]byte(tmpl.GnuPGprivkeyNotFound)) //nolint:errcheck
+	errwriter.Write([]byte(tmpl.ErrGnuPGprivkeyNotFound)) //nolint:errcheck
 	return errors.New("GnuPG private keys are missing")
 }
 
@@ -113,12 +113,12 @@ func validatePackager(errwriter io.Writer) error {
 	}
 	splt := strings.Split(string(f), "\nPACKAGER=\"")
 	if len(splt) != 2 {
-		errwriter.Write([]byte(tmpl.NoPackager)) //nolint:errcheck
+		errwriter.Write([]byte(tmpl.ErrNoPackager)) //nolint
 		return errors.New("packager not found")
 	}
 	confPackager := strings.Split(splt[1], "\"\n")[0]
 	if confPackager != keySigner {
-		errwriter.Write([]byte(tmpl.SignerMissmatch)) //nolint:errcheck
+		errwriter.Write([]byte(tmpl.ErrSignerMissmatch)) //nolint
 		return errors.New("signer is not matching")
 	}
 	return nil

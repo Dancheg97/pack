@@ -19,8 +19,12 @@ import (
 
 // Syncronize packages with pack.
 type SyncParameters struct {
-	// Don't ask for any confirmation (--noconfirm)
-	Quick bool
+	// Where command will write output text.
+	Stdout io.Writer
+	// Where command will write output text.
+	Stderr io.Writer
+	// Stdin from user is command will ask for something.
+	Stdin io.Reader
 	// Download fresh package databases from the server (-yy force)
 	Refresh []bool
 	// Upgrade installed packages (-uu enables downgrade)
@@ -29,18 +33,14 @@ type SyncParameters struct {
 	Info []bool
 	// View a list of packages in a repo
 	List []bool
+	// Don't ask for any confirmation (--noconfirm)
+	Quick bool
 	// Use relaxed timeouts for download
 	Notimeout bool
 	// Reinstall up to date targets
 	Force bool
 	// Do not save new registries in pacman.conf
 	Keepcfg bool
-	// Where command will write output text.
-	Stdout io.Writer
-	// Where command will write output text.
-	Stderr io.Writer
-	// Stdin from user is command will ask for something.
-	Stdin io.Reader
 }
 
 func syncdefault() *SyncParameters {
@@ -89,7 +89,7 @@ func Sync(args []string, prms ...SyncParameters) error {
 type RegistryPkg struct {
 	Registry string
 	Owner    string
-	Package  string
+	Name     string
 }
 
 // Format packages to pack compatible formats for operations with registries.
@@ -101,24 +101,24 @@ func formatpkgs(pkgs []string, errw io.Writer) ([]RegistryPkg, []string, error) 
 		switch len(splt) {
 		case 1:
 			rez = append(rez, RegistryPkg{
-				Package: splt[0],
+				Name: splt[0],
 			})
 			fmtpkgs = append(fmtpkgs, pkg)
 		case 2:
 			rez = append(rez, RegistryPkg{
 				Registry: splt[0],
-				Package:  splt[1],
+				Name:     splt[1],
 			})
 			fmtpkgs = append(fmtpkgs, pkg)
 		case 3:
 			rez = append(rez, RegistryPkg{
 				Registry: splt[0],
 				Owner:    splt[1],
-				Package:  splt[2],
+				Name:     splt[2],
 			})
 			fmtpkgs = append(fmtpkgs, splt[0]+"/"+splt[2])
 		default:
-			errw.Write([]byte(tmpl.BrokenPackage + pkg)) //nolint
+			errw.Write([]byte(tmpl.ErrBrokenPackage + pkg)) //nolint
 			return nil, nil, errors.New("broken package: " + pkg)
 		}
 	}
@@ -173,7 +173,7 @@ func addconfdb(pkg RegistryPkg, ew io.Writer, ow io.Writer) error {
 	command := "cat <<EOF >> /etc/pacman.conf" + t + "EOF"
 	err := exec.Command("sudo", "bash", "-c", command).Run()
 	if err != nil {
-		ew.Write([]byte(tmpl.UnableAppendConf + t)) //nolint
+		ew.Write([]byte(tmpl.ErrUnableAppendConf + t)) //nolint
 		return errors.New("unable to add database: " + t)
 	}
 	ow.Write([]byte(tmpl.Dots + tmpl.DbAdded + pkg.Registry)) //nolint
@@ -181,7 +181,7 @@ func addconfdb(pkg RegistryPkg, ew io.Writer, ow io.Writer) error {
 }
 
 func rollbackconf(s string) {
-	exec.Command(
+	exec.Command( //nolint
 		"sudo", "bash", "-c",
 		"cat <<EOF > /etc/pacman.conf\n"+s+"EOF",
 	).Run() //nolint

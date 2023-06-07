@@ -7,7 +7,7 @@ package tmpl
 
 import "github.com/fatih/color"
 
-var GnuPGprivkeyNotFound = color.RedString("error:") + ` GnuPG private key not found.
+var ErrGnuPGprivkeyNotFound = color.RedString("error:") + ` GnuPG private key not found.
 It is required for package signing, run:
 
 1) Install gnupg:
@@ -26,19 +26,31 @@ It is required for package signing, run:
 Name and email should match with name and email in GnuPG authority for pack to work properly.
 `
 
-var NoPackager = color.RedString("error:") + ` packager not found.
+var ErrNoPackager = color.RedString("error:") + ` packager not found.
 
 Add PACKAGER variable matching your GnuPG authority in ` + color.CyanString("/etc/makepkg.conf") + `
 
 PACKAGER="John Doe <john@doe.com>"
 `
 
-var SignerMissmatch = color.RedString("error:") + ` signer and packager are different.
+var ErrSignerMissmatch = color.RedString("error:") + ` signer and packager are different.
 
 Authority you defined in GnuPG is not matching with PACKAGER variable in 
 
 ` + color.BlueString("PACKAGER") + `=` + color.HiMagentaString("John Doe <john@doe.com>\n")
 
-var BrokenPackage = color.RedString("error:") + " broken package: "
+var ErrBrokenPackage = color.RedString("error:") + " broken package: "
 
-var UnableAppendConf = color.RedString("error:") + " unable to add to pacman.conf: "
+var ErrUnableAppendConf = color.RedString("error:") + " unable to add to pacman.conf: "
+
+var ErrEmailRead = color.RedString("error:") + " unable to get GnuPG email: "
+
+var ErrNoRegistry = color.RedString("error:") + " provide registry to push package: "
+
+var ErrBrokenPkgFile = color.RedString("error:") + " package file is not valid: "
+
+var ErrDirRead = color.RedString("error:") + " unable to get directory contents: "
+
+var ErrPkgNotFound = color.RedString("error:") + " unable to find push package: "
+
+var ErrSigRead = color.RedString("error:") + " unable to read signature: "

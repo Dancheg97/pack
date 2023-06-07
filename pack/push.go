@@ -15,6 +15,8 @@ import (
 	"os/exec"
 	"path"
 	"strings"
+
+	"fmnx.su/core/pack/tmpl"
 )
 
 // Parameters that will be used to execute push command.
@@ -25,13 +27,19 @@ type PushParameters struct {
 	Protocol string
 	// Custom endpoint for package push
 	Endpoint string
+	// Where command will write output text.
+	Stdout io.Writer
+	// Where command will write output text.
+	Stderr io.Writer
+	// Stdin from user is command will ask for something.
+	Stdin io.Reader
 }
 
 func pushdefault() *PushParameters {
 	return &PushParameters{
 		Protocol:  "https",
-		Directory: "/var/cache/pacman/pkg",
 		Endpoint:  "/api/pack/push",
+		Directory: "/var/cache/pacman/pkg",
 	}
 }
 
@@ -39,94 +47,166 @@ func pushdefault() *PushParameters {
 func Push(args []string, prms ...PushParameters) error {
 	p := formOptions(prms, pushdefault)
 
-	var pkgs []*Package
-	for _, pkg := range args {
-		p, err := FormPackage(p.Directory, pkg)
-		if err != nil {
-			return err
-		}
-		pkgs = append(pkgs, p)
-	}
-
-	gnupgident, err := gnuPGIdentity()
+	email, err := gnupgEmail(p.Stderr)
 	if err != nil {
 		return err
 	}
-	email := strings.ReplaceAll(strings.Split(gnupgident, "<")[1], ">", "")
 
-	for _, pkg := range pkgs {
-		err := push(pkg, email, p.Protocol, p.Endpoint)
+	pkgs, _, err := formatpkgs(args, p.Stderr)
+	if err != nil {
+		return err
+	}
+
+	err = checkRegistries(pkgs, p.Stderr)
+	if err != nil {
+		return err
+	}
+
+	filenames, err := listPkgFilenames(p.Directory, p.Stderr)
+	if err != nil {
+		return err
+	}
+
+	pprms, err := fillfileinfo(fillparams{
+		filenames: filenames,
+		packages:  pkgs,
+		directory: p.Directory,
+		ew:        p.Stderr,
+	})
+	if err != nil {
+		return err
+	}
+
+	for _, pp := range pprms {
+		err = push(pp, email, p.Protocol, p.Endpoint)
 		if err != nil {
 			return err
+		}
+	}
+
+	return nil
+}
+
+// This function will be used to get email from user's GnuPG identitry.
+func gnupgEmail(ew io.Writer) (string, error) {
+	gnupgident, err := gnuPGIdentity()
+	if err != nil {
+		ew.Write([]byte(tmpl.ErrEmailRead + err.Error())) //nolint
+		return ``, err
+	}
+	return strings.ReplaceAll(strings.Split(gnupgident, "<")[1], ">", ""), nil
+}
+
+// Check if all packages have registries where they will be pushed to.
+func checkRegistries(pkgs []RegistryPkg, ew io.Writer) error {
+	for _, pkg := range pkgs {
+		if pkg.Registry == "" {
+			ew.Write([]byte(tmpl.ErrNoRegistry + pkg.Name)) //nolint
+			return errors.New("no registry for package " + pkg.Name)
 		}
 	}
 	return nil
 }
 
-type Package struct {
-	Registry string
-	PkgName  string
+// Structure including base registry parameters and information about file
+// pathes requied to push packages.
+type PushPkg struct {
+	RegistryPkg
+	// Name of the file which will be pushed.
 	Filename string
-	PkgFile  string
-	SigFile  string
+	// Path to file which will be read and pushed.
+	PkgPath string
+	// Signature encoded to base64 string to check.
+	Signature string
 }
 
-// This function will find the latest version of package in cache direcotry and
-// then push it to registry specified in package name provided in argiement.
-func FormPackage(dir string, pkg string) (*Package, error) {
-	splt := strings.Split(pkg, "/")
-	if len(splt) != 2 {
-		msg := "error: package should contain registry and name: "
-		return nil, errors.New(msg + pkg)
-	}
-	registry := splt[0]
-	pkgname := splt[1]
+// List file names in provided cache directory.
+func listPkgFilenames(dir string, ew io.Writer) ([]string, error) {
 	des, err := os.ReadDir(dir)
 	if err != nil {
+		ew.Write([]byte(tmpl.ErrDirRead + dir + " " + err.Error())) //nolint
 		return nil, err
 	}
-	var pkgs []Package
+	var fns []string
 	for _, de := range des {
-		filename := de.Name()
-		if !strings.HasSuffix(filename, ".pkg.tar.zst") {
-			continue
-		}
-		pkgsplt := strings.Split(filename, "-")
-		if len(pkgsplt) < 4 {
-			return nil, errors.New("invalid package in cache: " + filename)
-		}
-		namecheck := strings.Join(pkgsplt[:len(pkgsplt)-3], "-")
-		if pkgname == namecheck {
-			pkgs = append(pkgs, Package{
-				Registry: registry,
-				PkgName:  pkgname,
-				Filename: filename,
-				PkgFile:  path.Join(dir, filename),
-				SigFile:  path.Join(dir, filename+".sig"),
-			})
+		fn := de.Name()
+		if strings.HasSuffix(fn, ".pkg.tar.zst") {
+			fns = append(fns, fn)
 		}
 	}
-	if len(pkgs) == 0 {
-		return nil, errors.New("package not found in cache: " + pkgname)
+	return fns, nil
+}
+
+type fillparams struct {
+	filenames []string
+	packages  []RegistryPkg
+	directory string
+	ew        io.Writer
+}
+
+// Create array of package arguements, that will be pushed to registry.
+func fillfileinfo(p fillparams) ([]PushPkg, error) {
+	var ppkgs []PushPkg
+	for _, pkg := range p.packages {
+		for i, filename := range p.filenames {
+			if !strings.Contains(filename, pkg.Name) {
+				continue
+			}
+			pkgname, err := ejectpkgname(filename, p.ew)
+			if err != nil {
+				return nil, err
+			}
+			if pkgname == pkg.Name {
+				pkgpath := path.Join(p.directory, filename)
+				sigbase64, err := readpkgsign(pkgpath+".sig", p.ew)
+				if err != nil {
+					return nil, err
+				}
+				ppkgs = append(ppkgs, PushPkg{
+					RegistryPkg: pkg,
+					Filename:    filename,
+					PkgPath:     pkgpath,
+					Signature:   sigbase64,
+				})
+				break
+			}
+			if i == len(p.filenames) {
+				p.ew.Write([]byte(tmpl.ErrPkgNotFound + pkg.Name)) //nolint
+				return nil, errors.New("package file not found " + pkg.Name)
+			}
+		}
 	}
-	return &pkgs[len(pkgs)-1], nil
+	return ppkgs, nil
+}
+
+// Eject package name from file name.
+func ejectpkgname(filename string, ew io.Writer) (string, error) {
+	pkgsplt := strings.Split(filename, "-")
+	if len(pkgsplt) < 4 {
+		ew.Write([]byte(tmpl.ErrBrokenPkgFile + filename)) //nolint
+		return ``, errors.New("invalid package in cache: " + filename)
+	}
+	return strings.Join(pkgsplt[:len(pkgsplt)-3], "-"), nil
+}
+
+// Read package signature and encode to base64.
+func readpkgsign(path string, ew io.Writer) (string, error) {
+	err := exec.Command("bash", "-c", "sudo chmod 0777 "+path).Run() //nolint
+	if err != nil {
+		ew.Write([]byte(tmpl.ErrSigRead + path)) //nolint
+		return ``, err
+	}
+	sigbytes, err := os.ReadFile(path)
+	if err != nil {
+		ew.Write([]byte(tmpl.ErrSigRead + path)) //nolint
+		return ``, err
+	}
+	return base64.StdEncoding.EncodeToString(sigbytes), nil
 }
 
 // This function pushes package to registry via http.
-func push(p *Package, email string, protocol string, endpoint string) error {
-	packagefile, err := os.Open(p.PkgFile)
-	if err != nil {
-		return err
-	}
-	fmt.Println(":: Retrieving package signature access.")
-	err = exec.Command( // nolint:gosec
-		"bash", "-c",
-		"sudo chmod 0777 "+p.SigFile,
-	).Run()
-	if err != nil {
-		return err
-	}
-	sigbytes, err := os.ReadFile(p.SigFile)
+func push(p PushPkg, email string, protocol string, endpoint string) error {
+	packagefile, err := os.Open(p.PkgPath)
 	if err != nil {
 		return err
 	}
@@ -142,7 +222,8 @@ func push(p *Package, email string, protocol string, endpoint string) error {
 
 	req.Header.Add("file", p.Filename)
 	req.Header.Add("email", email)
-	req.Header.Add("sign", base64.StdEncoding.EncodeToString(sigbytes))
+	req.Header.Add("sign", p.Signature)
+	req.Header.Add("owner", p.Owner)
 
 	var client http.Client
 	resp, err := client.Do(req)
@@ -157,6 +238,6 @@ func push(p *Package, email string, protocol string, endpoint string) error {
 		return errors.New(resp.Status + " " + string(b))
 	}
 
-	fmt.Println("[PUSH] - package delivered: " + p.PkgFile)
+	fmt.Println("[PUSH] - package delivered: " + p.Name)
 	return nil
 }

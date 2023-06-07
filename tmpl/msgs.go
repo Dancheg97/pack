@@ -37,12 +37,12 @@ func init() {
 var Help = `📦 Simplified version of pacman
 
 operations:
-	pack {-S --sync}    [options] [repository/owner/package(s)]
-	pack {-P --push}    [options] [repository/owner/package(s)]
-	pack {-R --remove}  [options] [package(s)]
-	pack {-Q --query}   [options] [package(s)]
-	pack {-B --build}   [options]
-	pack {-O --open}    [options]
+	pack {-S --sync}   [options] [repository/owner/package(s)]
+	pack {-P --push}   [options] [repository/owner/package(s)]
+	pack {-R --remove} [options] [package(s)]
+	pack {-Q --query}  [options] [package(s)]
+	pack {-B --build}  [options]
+	pack {-O --open}   [options]
 
 use 'pack {-h --help}' with an operation for available options`
 
@@ -127,3 +127,4 @@ var Version = color.CyanString("    _.._      _.._") + `
 
 var Dots = color.CyanString("::")
 var DbAdded = color.New(color.FgWhite).Add(color.Bold).Sprintf(" Database added: ")
+var SigAccess = color.New(color.FgWhite).Add(color.Bold).Sprintf(" Reading package signature: ")
