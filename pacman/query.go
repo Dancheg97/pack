@@ -32,7 +32,7 @@ type QueryOptions struct {
 	// Check that package files exist (-kk for file properties).
 	Check []bool
 	// List the files owned by the queried package.
-	List bool
+	List []bool
 	// Query a package file instead of the database.
 	File string
 	// Where command will write output text.
@@ -77,8 +77,8 @@ func Query(pkgs []string, opts ...QueryOptions) error {
 	if o.Groups {
 		args = append(args, "--groups")
 	}
-	if o.List {
-		args = append(args, "--list")
+	for range o.List {
+		args = append(args, "-l")
 	}
 	for range o.Info {
 		args = append(args, "-i")

@@ -32,7 +32,9 @@ type SyncOptions struct {
 	// Download fresh package databases from the server. [--refresh]
 	Refresh bool
 	// Upgrade programms that are outdated. [--sysupgrade]
-	Upgrade bool
+	Upgrade []bool
+	// View a list of packages in a repo. [--list]
+	List []bool
 	// Only download, but do not install package. [--downloadonly]
 	DownloadOnly bool
 	// Clean old packages from cache directory. [--clean]
@@ -93,8 +95,11 @@ func SyncList(pkgs []string, opts ...SyncOptions) error {
 	if o.Refresh {
 		args = append(args, "--refresh")
 	}
-	if o.Upgrade {
-		args = append(args, "--sysupgrade")
+	for range o.Upgrade {
+		args = append(args, "-u")
+	}
+	for range o.List {
+		args = append(args, "-l")
 	}
 	if o.DownloadOnly {
 		args = append(args, "--downloadonly")

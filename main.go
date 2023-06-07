@@ -29,7 +29,7 @@ func main() {
 
 		// Shared flags.
 		Info []bool `short:"i" long:"info"`
-		List bool   `short:"l" long:"list"`
+		List []bool `short:"l" long:"list"`
 
 		// Query options.
 		Deps     bool   `short:"d" long:"deps"`
@@ -47,10 +47,11 @@ func main() {
 		Nocfgs      bool `short:"w" long:"nocfgs"`
 
 		// Sync options.
-		Garbage   bool `short:"g" long:"garbage"`
-		Refresh   bool `short:"y" long:"refresh"`
-		Reinstall bool `short:"r" long:"reinstall"`
-		Quick     bool `short:"q" long:"quick"`
+		Garbage   bool   `short:"g" long:"garbage"`
+		Refresh   bool   `short:"y" long:"refresh"`
+		Reinstall bool   `short:"r" long:"reinstall"`
+		Quick     bool   `short:"q" long:"quick"`
+		Upgrade   []bool `short:"u" long:"sysupgrade"`
 	}
 
 	_, err := flags.NewParser(&opts, flags.None).Parse()
@@ -96,6 +97,21 @@ func main() {
 
 	case opts.Sync && opts.Help:
 		fmt.Println(tmpl.SyncHelp)
+		return
+
+	case opts.Sync:
+		CheckErr(pacman.SyncList(args(), pacman.SyncOptions{
+			Sudo:      true,
+			Needed:    !opts.Reinstall,
+			NoConfirm: opts.Quick,
+			Refresh:   opts.Refresh,
+			Upgrade:   opts.Upgrade,
+			List:      opts.List,
+			CleanAll:  !opts.Garbage,
+			Stdout:    os.Stdout,
+			Stderr:    os.Stderr,
+			Stdin:     os.Stdin,
+		}))
 		return
 
 	case opts.Help:

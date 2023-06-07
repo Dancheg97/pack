@@ -45,12 +45,13 @@ usage:  pack {-R --remove} [options] <package(s)>`
 const SyncHelp = `🔧 Syncronize packages
 
 options:
+	-y, --refresh     download fresh package databases from the server (-yy force)
+	-u, --sysupgrade  upgrade installed packages (-uu enables downgrade)
 	-g, --garbage     leave old packages in cache directory
 	-i, --info        view package information (-ii for extended information)
 	-l, --list <repo> view a list of packages in a repo
-	-y, --refresh     download fresh package databases from the server (-yy force)
 	-f, --no-timeout  use relaxed timeouts for download
 	-r, --reinstall   reinstall up to date packages
-	-q, --quick       do not ask for any confirmation
+	-q, --quick       do not ask for any confirmation (noconfirm)
 
 usage:  pack {-S --sync} [options] <registry/owner/package(s)>`
