@@ -35,23 +35,23 @@ func pushdefault() *PushParameters {
 func Push(args []string, prms ...PushParameters) error {
 	p := formOptions(prms, pushdefault)
 
+	var pkgs []*Package
+	for _, pkg := range args {
+		p, err := FormPackage(p.Directory, pkg)
+		if err != nil {
+			return err
+		}
+		pkgs = append(pkgs, p)
+	}
+
 	gnupgident, err := GetGnupgIdentity()
 	if err != nil {
 		return err
 	}
 	email := strings.ReplaceAll(strings.Split(gnupgident, "<")[1], ">", "")
 
-	var pkgs []*Package
-	for _, pkg := range args {
-		p, err := FormPackage(pkg)
-		p.Email = email
-		if err != nil {
-			return err
-		}
-		pkgs = append(pkgs, p)
-	}
 	for _, pkg := range pkgs {
-		err := PushPkg(pkg)
+		err := PushPkg(pkg, email, p.HTTP)
 		if err != nil {
 			return err
 		}
@@ -65,12 +65,11 @@ type Package struct {
 	Filename string
 	PkgFile  string
 	SigFile  string
-	Email    string
 }
 
 // This function will find the latest version of package in cache direcotry and
 // then push it to registry specified in package name provided in argiement.
-func FormPackage(pkg string) (*Package, error) {
+func FormPackage(dir string, pkg string) (*Package, error) {
 	splt := strings.Split(pkg, "/")
 	if len(splt) != 2 {
 		msg := "error: package should contain registry and name: "
@@ -78,7 +77,7 @@ func FormPackage(pkg string) (*Package, error) {
 	}
 	registry := splt[0]
 	pkgname := splt[1]
-	des, err := os.ReadDir("/var/cache/pacman/pkg")
+	des, err := os.ReadDir(dir)
 	if err != nil {
 		return nil, err
 	}
@@ -97,8 +96,8 @@ func FormPackage(pkg string) (*Package, error) {
 				Registry: registry,
 				PkgName:  pkgname,
 				Filename: filename,
-				PkgFile:  path.Join("/var/cache/pacman/pkg", filename),
-				SigFile:  path.Join("/var/cache/pacman/pkg", filename+".sig"),
+				PkgFile:  path.Join(dir, filename),
+				SigFile:  path.Join(dir, filename+".sig"),
 			}, err
 		}
 	}
@@ -106,7 +105,7 @@ func FormPackage(pkg string) (*Package, error) {
 }
 
 // This function pushes package to registry via http.
-func PushPkg(p *Package) error {
+func PushPkg(p *Package, email string, usehttp bool) error {
 	packagefile, err := os.Open(p.PkgFile)
 	if err != nil {
 		return err
@@ -124,9 +123,14 @@ func PushPkg(p *Package) error {
 		return err
 	}
 
+	var protocol = "https://"
+	if usehttp {
+		protocol = "http://"
+	}
+
 	req, err := http.NewRequest(
 		http.MethodPut,
-		"https://"+p.Registry+"/api/pack/push",
+		protocol+p.Registry+"/api/pack/push",
 		packagefile,
 	)
 	if err != nil {
@@ -134,7 +138,7 @@ func PushPkg(p *Package) error {
 	}
 
 	req.Header.Add("file", p.Filename)
-	req.Header.Add("email", p.Email)
+	req.Header.Add("email", email)
 	req.Header.Add("sign", base64.StdEncoding.EncodeToString(sigbytes))
 
 	var client http.Client
