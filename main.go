@@ -143,6 +143,10 @@ func main() {
 		return
 
 	case opts.Build && opts.Help:
+		fmt.Println(tmpl.BuildHelp)
+		return
+
+	case opts.Build:
 		CheckErr(pack.Build(pack.BuildParameters{
 			Quick:     opts.Quick,
 			Dir:       opts.Dir,
@@ -153,9 +157,6 @@ func main() {
 			Stderr:    os.Stderr,
 			Stdin:     os.Stdin,
 		}))
-		return
-
-	case opts.Build:
 		return
 
 	case opts.Open && opts.Help:
