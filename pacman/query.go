@@ -8,22 +8,39 @@ package pacman
 import (
 	"bytes"
 	"errors"
+	"io"
 	"os/exec"
 	"strings"
 )
 
 // Query parameters for pacman packages.
 type QueryOptions struct {
-	// List packages explicitly installed. [--explicit]
+	// List packages explicitly installed.
 	Explicit bool
-	// List packages installed as dependencies. [--deps]
+	// List packages installed as dependencies.
 	Deps bool
-	// Query only for packages installed from official repositories. [--native]
+	// Query only for packages installed from official repositories.
 	Native bool
-	// Query for packages installed from other sources. [--foreign]
+	// Query for packages installed from other sources.
 	Foreign bool
-	// Unrequired packages (not a dependency for other one). [--unrequired]
+	// Unrequired packages (not a dependency for other one).
 	Unrequired bool
+	// View all members of a package group.
+	Groups bool
+	// View package information (-ii for backup files).
+	Info []bool
+	// Check that package files exist (-kk for file properties).
+	Check []bool
+	// List the files owned by the queried package.
+	List bool
+	// Query a package file instead of the database.
+	File string
+	// Where command will write output text.
+	Stdout io.Writer
+	// Where command will write output text.
+	Stderr io.Writer
+	// Stdin from user is command will ask for something.
+	Stdin io.Reader
 	// Additional queue parameters.
 	AdditionalParams []string
 }
@@ -38,7 +55,7 @@ type PackageInfo struct {
 }
 
 // Get information about installed packages.
-func Query(opts ...QueryOptions) ([]PackageInfo, error) {
+func Query(pkgs []string, opts ...QueryOptions) error {
 	o := formOptions(opts, QueryDefault)
 
 	args := []string{"-Q"}
@@ -57,36 +74,32 @@ func Query(opts ...QueryOptions) ([]PackageInfo, error) {
 	if o.Unrequired {
 		args = append(args, "--unrequired")
 	}
+	if o.Groups {
+		args = append(args, "--groups")
+	}
+	if o.List {
+		args = append(args, "--list")
+	}
+	for range o.Info {
+		args = append(args, "-i")
+	}
+	for range o.Check {
+		args = append(args, "-k")
+	}
+	if o.File != "" {
+		args = append(args, "--file")
+		args = append(args, o.File)
+	}
+
 	args = append(args, o.AdditionalParams...)
+	args = append(args, pkgs...)
 
-	var b bytes.Buffer
 	cmd := exec.Command(pacman, args...)
-	cmd.Stdout = &b
-	cmd.Stderr = &b
+	cmd.Stdout = o.Stdout
+	cmd.Stderr = o.Stderr
+	cmd.Stdin = o.Stdin
 
-	err := cmd.Run()
-	if err != nil {
-		if b.String() == "" {
-			return nil, nil
-		}
-		return nil, errors.New("unable to query packages: " + b.String())
-	}
-	return parsePackages(b.String()), nil
-}
-
-func parsePackages(q string) []PackageInfo {
-	var rez []PackageInfo
-	for _, v := range strings.Split(q, "\n") {
-		if v == "" {
-			break
-		}
-		splt := strings.Split(v, " ")
-		rez = append(rez, PackageInfo{
-			Name:    splt[0],
-			Version: splt[1],
-		})
-	}
-	return rez
+	return cmd.Run()
 }
 
 type PackageInfoFull struct {
