@@ -4,3 +4,8 @@
 // Contact email: help@fmnx.su
 
 package pack
+
+// Parameters to run pack registry.
+type OpenParameters struct {
+	
+}

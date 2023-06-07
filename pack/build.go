@@ -48,12 +48,12 @@ func builddefault() *BuildParameters {
 func Build(prms ...BuildParameters) error {
 	p := formOptions(prms, builddefault)
 
-	err := CheckGnupg(p.Stderr)
+	err := checkGnupg(p.Stderr)
 	if err != nil {
 		return err
 	}
 
-	err = ValidatePackager(p.Stderr)
+	err = validatePackager(p.Stderr)
 	if err != nil {
 		return err
 	}
@@ -81,7 +81,7 @@ func Build(prms ...BuildParameters) error {
 
 // Ensure, that user have created gnupg keys for package signing before package
 // is built and cached.
-func CheckGnupg(errwriter io.Writer) error {
+func checkGnupg(errwriter io.Writer) error {
 	hd, err := os.UserHomeDir()
 	if err != nil {
 		return err
@@ -101,8 +101,8 @@ func CheckGnupg(errwriter io.Writer) error {
 
 // Validate, that packager defined in /etc/makepkg.conf matches signer
 // authority in GnuPG.
-func ValidatePackager(errwriter io.Writer) error {
-	keySigner, err := GetGnupgIdentity()
+func validatePackager(errwriter io.Writer) error {
+	keySigner, err := gnuPGIdentity()
 	if err != nil {
 		return err
 	}
@@ -123,7 +123,7 @@ func ValidatePackager(errwriter io.Writer) error {
 	return nil
 }
 
-func GetGnupgIdentity() (string, error) {
+func gnuPGIdentity() (string, error) {
 	gnukey := `gpg --with-colons -k | awk -F: '$1=="uid" {print $10; exit}'`
 	cmd := exec.Command("bash", "-c", gnukey)
 	var b bytes.Buffer

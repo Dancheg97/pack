@@ -44,7 +44,7 @@ func Push(args []string, prms ...PushParameters) error {
 		pkgs = append(pkgs, p)
 	}
 
-	gnupgident, err := GetGnupgIdentity()
+	gnupgident, err := gnuPGIdentity()
 	if err != nil {
 		return err
 	}

@@ -16,61 +16,63 @@ import (
 	"github.com/jessevdk/go-flags"
 )
 
+var opts struct {
+	Help    bool `long:"help" short:"h"`
+	Version bool `long:"version" short:"v"`
+
+	// Root options.
+	Query  bool `short:"Q" long:"query"`
+	Remove bool `short:"R" long:"remove"`
+	Sync   bool `short:"S" long:"sync"`
+	Push   bool `short:"P" long:"push"`
+	Open   bool `short:"O" long:"open"`
+	Build  bool `short:"B" long:"build"`
+
+	// Sync options.
+	Quick     bool   `short:"q" long:"quick"`
+	Refresh   bool   `short:"y" long:"refresh"`
+	Upgrade   []bool `short:"u" long:"upgrade"`
+	Info      []bool `short:"i" long:"info"`
+	List      []bool `short:"l" long:"list"`
+	Notimeout bool   `short:"j" long:"notimeout"`
+	Force     bool   `short:"f" long:"force"`
+	Keepcfg   bool   `short:"k" long:"keepcfg"`
+
+	// Push options.
+	Dir      string `short:"d" long:"dir" default:"/var/cache/pacman/pkg"`
+	Protocol string `long:"http" default:"https"`
+	Endpoint string `long:"endpoint" default:"/api/pack/push"`
+
+	// Remove options.
+	Confirm     bool `short:"o" long:"confirm"`
+	Norecursive bool `short:"a" long:"norecursive"`
+	Nocfgs      bool `short:"w" long:"nocfgs"`
+	Cascade     bool `long:"cascade"`
+
+	// Query options.
+	Explicit bool   `long:"explicit"`
+	Unreq    bool   `long:"unreq"`
+	File     string `long:"file"`
+	Foreign  bool   `long:"foreign"`
+	Deps     bool   `long:"deps"`
+	Native   bool   `long:"native"`
+	Groups   bool   `long:"groups"`
+	Check    []bool `long:"check"`
+
+	// Build options.
+	Syncbuild bool `short:"s" long:"syncbuild"`
+	Rmdeps    bool `short:"r" long:"rmdeps"`
+	Garbage   bool `short:"g" long:"garbage"`
+
+	// Open options.
+	Name string   `short:"n" long:"name" default:"localhost"`
+	Mirr []string `short:"m" long:"mirr"`
+	Port string   `short:"p" long:"port" default:"80"`
+	Cert string   `long:"cert"`
+	Key  string   `long:"key"`
+}
+
 func main() {
-	var opts struct {
-		Help bool `long:"help" short:"h"`
-
-		// Root options.
-		Query  bool `short:"Q" long:"query"`
-		Remove bool `short:"R" long:"remove"`
-		Sync   bool `short:"S" long:"sync"`
-		Push   bool `short:"P" long:"push"`
-		Open   bool `short:"O" long:"open"`
-		Build  bool `short:"B" long:"build"`
-
-		// Sync options.
-		Quick     bool   `short:"q" long:"quick"`
-		Refresh   bool   `short:"y" long:"refresh"`
-		Upgrade   []bool `short:"u" long:"upgrade"`
-		Info      []bool `short:"i" long:"info"`
-		List      []bool `short:"l" long:"list"`
-		Notimeout bool   `short:"j" long:"notimeout"`
-		Reinstall bool   `short:"r" long:"reinstall"`
-		Fallback  bool   `short:"f" long:"fallback"`
-
-		// Push options.
-		Protocol string `long:"http" default:"https"`
-		Dir      string `short:"d" long:"dir" default:"/var/cache/pacman/pkg"`
-
-		// Remove options.
-		Confirm     bool `short:"o" long:"confirm"`
-		Norecursive bool `short:"a" long:"norecursive"`
-		Nocfgs      bool `short:"w" long:"nocfgs"`
-		Cascade     bool `long:"cascade"`
-
-		// Query options.
-		Explicit bool   `long:"explicit"`
-		Unreq    bool   `long:"unreq"`
-		File     string `long:"file"`
-		Foreign  bool   `long:"foreign"`
-		Deps     bool   `long:"deps"`
-		Native   bool   `long:"native"`
-		Groups   bool   `long:"groups"`
-		Check    []bool `long:"check"`
-
-		// Build options.
-		Syncbuild bool `short:"s" long:"syncbuild"`
-		Rmdeps    bool `short:"z" long:"rmdeps"`
-		Garbage   bool `short:"g" long:"garbage"`
-
-		// Open options.
-		Name string   `short:"n" long:"name" default:"localhost"`
-		Port string   `short:"p" long:"port" default:"80"`
-		Cert string   `short:"c" long:"cert"`
-		Key  string   `short:"k" long:"key"`
-		Mirr []string `short:"m" long:"mirr"`
-	}
-
 	_, err := flags.NewParser(&opts, flags.None).Parse()
 	CheckErr(err)
 
@@ -82,7 +84,7 @@ func main() {
 	case opts.Sync:
 		CheckErr(pacman.SyncList(args(), pacman.SyncOptions{
 			Sudo:      true,
-			Needed:    !opts.Reinstall,
+			Needed:    !opts.Force,
 			NoConfirm: opts.Quick,
 			Refresh:   opts.Refresh,
 			Upgrade:   opts.Upgrade,
@@ -166,6 +168,10 @@ func main() {
 	case opts.Open:
 		return
 
+	case opts.Version:
+		fmt.Println(tmpl.Version)
+		return
+
 	case opts.Help:
 		fmt.Println(tmpl.Help)
 		return
@@ -180,6 +186,7 @@ func main() {
 // Herlper function to exit on unexpected errors.
 func CheckErr(err error) {
 	if err != nil {
+		fmt.Println(err.Error())
 		os.Exit(1)
 	}
 }

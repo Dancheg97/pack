@@ -55,16 +55,17 @@ options:
 	-i, --info        view package information (-ii for extended information)
 	-l, --list <repo> view a list of packages in a repo
 	-j, --notimeout   use relaxed timeouts for download
-	-r, --reinstall   reinstall up to date packages (unneeded)
-	-f, --fallback    removes new registries after installation
+	-f, --force       reinstall up to date targets
+	-k, --keepcfg     do not save new registries in pacman.conf
 
 usage:  pack {-S --sync} [options] <registry/owner/package(s)>`
 
 var PushHelp = `🚀 Push packages
 
 options:
-	--protocol  push over http (default https)
 	--dir <dir> use custom source dir with packages (default /var/cache/pacman/pkg)
+	--protocol  protocol that will be used for client (default https)
+	--endpoint  use custom endpoint for push (default /api/pack/push)
 
 usage:  pack {-P --push} [options] <registry/owner/package(s)>`
 
@@ -100,7 +101,7 @@ options:
 	-q, --quick     do not ask for any confirmation (noconfirm)
 	-d, --dir <dir> use custom dir to store result (default /var/cache/pacman/pkg)
 	-s, --syncbuild sync/reinstall target packages
-	-z, --rmdeps    remove installed dependencies after a successful build
+	-r, --rmdeps    remove installed dependencies after a successful build
 	-g, --garbage   don't clean workspace before and after build
 
 usage:  pack {-B --build} [options]`
