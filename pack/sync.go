@@ -57,12 +57,12 @@ func syncdefault() *SyncParameters {
 func Sync(args []string, prms ...SyncParameters) error {
 	p := formOptions(prms, syncdefault)
 
-	pkgs, fmtpkgs, err := formatpkgs(args, p.Stderr)
+	pkgs, fmtpkgs, err := formatpkgs(args)
 	if err != nil {
 		return err
 	}
 
-	initial, err := prepareconf(pkgs, p.Stderr, p.Stdout)
+	initial, err := prepareconf(pkgs, p.Stdout)
 	if err != nil {
 		return err
 	}
@@ -93,7 +93,7 @@ type RegistryPkg struct {
 }
 
 // Format packages to pack compatible formats for operations with registries.
-func formatpkgs(pkgs []string, errw io.Writer) ([]RegistryPkg, []string, error) {
+func formatpkgs(pkgs []string) ([]RegistryPkg, []string, error) {
 	var rez []RegistryPkg
 	var fmtpkgs []string
 	for _, pkg := range pkgs {
@@ -118,8 +118,7 @@ func formatpkgs(pkgs []string, errw io.Writer) ([]RegistryPkg, []string, error) 
 			})
 			fmtpkgs = append(fmtpkgs, splt[0]+"/"+splt[2])
 		default:
-			errw.Write([]byte(tmpl.ErrBrokenPackage + pkg)) //nolint
-			return nil, nil, errors.New("broken package: " + pkg)
+			return nil, nil, errors.New(tmpl.Err + " broken package: " + pkg)
 		}
 	}
 	return rez, fmtpkgs, nil
@@ -127,7 +126,7 @@ func formatpkgs(pkgs []string, errw io.Writer) ([]RegistryPkg, []string, error) 
 
 // Add missing registries to pacman configuration file and return file before
 // modifications.
-func prepareconf(pkgs []RegistryPkg, ew io.Writer, ow io.Writer) (*string, error) {
+func prepareconf(pkgs []RegistryPkg, ow io.Writer) (*string, error) {
 	f, err := os.ReadFile("/etc/pacman.conf")
 	if err != nil {
 		return nil, err
@@ -138,14 +137,14 @@ func prepareconf(pkgs []RegistryPkg, ew io.Writer, ow io.Writer) (*string, error
 		switch {
 		case pkg.Registry != "" && pkg.Owner != "":
 			if !checkexistowner(conf, pkg.Registry, pkg.Owner) {
-				err = addconfdb(pkg, ew, ow)
+				err = addconfdb(pkg, ow)
 				if err != nil {
 					return nil, err
 				}
 			}
 		case pkg.Registry != "":
 			if !checkexistsroot(conf, pkg.Registry) {
-				err = addconfdb(pkg, ew, ow)
+				err = addconfdb(pkg, ow)
 				if err != nil {
 					return nil, err
 				}
@@ -163,7 +162,7 @@ func checkexistsroot(conf string, registry string) bool {
 	return strings.Contains(conf, "\n["+registry+"]\n")
 }
 
-func addconfdb(pkg RegistryPkg, ew io.Writer, ow io.Writer) error {
+func addconfdb(pkg RegistryPkg, ow io.Writer) error {
 	var t string
 	if pkg.Owner == "" {
 		t = fmt.Sprintf(tmpl.RegistryRoot, pkg.Registry, pkg.Registry)
@@ -173,8 +172,7 @@ func addconfdb(pkg RegistryPkg, ew io.Writer, ow io.Writer) error {
 	command := "cat <<EOF >> /etc/pacman.conf" + t + "EOF"
 	err := exec.Command("sudo", "bash", "-c", command).Run()
 	if err != nil {
-		ew.Write([]byte(tmpl.ErrUnableAppendConf + t)) //nolint
-		return errors.New("unable to add database: " + t)
+		return errors.New(tmpl.Err + " unable to add to pacman.conf: " + t)
 	}
 	ow.Write([]byte(tmpl.Dots + tmpl.DbAdded + pkg.Registry)) //nolint
 	return nil

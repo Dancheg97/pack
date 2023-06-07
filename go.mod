@@ -6,6 +6,7 @@ require (
 	github.com/ProtonMail/gopenpgp/v2 v2.7.1
 	github.com/fatih/color v1.13.0
 	github.com/jessevdk/go-flags v1.5.0
+	github.com/mitchellh/ioprogress v0.0.0-20180201004757-6a23b12fa88e
 	github.com/radovskyb/watcher v1.0.7
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.15.0

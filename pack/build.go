@@ -49,12 +49,12 @@ func builddefault() *BuildParameters {
 func Build(prms ...BuildParameters) error {
 	p := formOptions(prms, builddefault)
 
-	err := checkGnupg(p.Stderr)
+	err := checkGnupg()
 	if err != nil {
 		return err
 	}
 
-	err = validatePackager(p.Stderr)
+	err = validatePackager()
 	if err != nil {
 		return err
 	}
@@ -82,7 +82,7 @@ func Build(prms ...BuildParameters) error {
 
 // Ensure, that user have created gnupg keys for package signing before package
 // is built and cached.
-func checkGnupg(errwriter io.Writer) error {
+func checkGnupg() error {
 	hd, err := os.UserHomeDir()
 	if err != nil {
 		return err
@@ -96,13 +96,12 @@ func checkGnupg(errwriter io.Writer) error {
 			return nil
 		}
 	}
-	errwriter.Write([]byte(tmpl.ErrGnuPGprivkeyNotFound)) //nolint:errcheck
-	return errors.New("GnuPG private keys are missing")
+	return errors.New(tmpl.ErrGnuPGprivkeyNotFound)
 }
 
 // Validate, that packager defined in /etc/makepkg.conf matches signer
 // authority in GnuPG.
-func validatePackager(errwriter io.Writer) error {
+func validatePackager() error {
 	keySigner, err := gnuPGIdentity()
 	if err != nil {
 		return err
@@ -113,13 +112,11 @@ func validatePackager(errwriter io.Writer) error {
 	}
 	splt := strings.Split(string(f), "\nPACKAGER=\"")
 	if len(splt) != 2 {
-		errwriter.Write([]byte(tmpl.ErrNoPackager)) //nolint
-		return errors.New("packager not found")
+		return errors.New(tmpl.ErrNoPackager)
 	}
 	confPackager := strings.Split(splt[1], "\"\n")[0]
 	if confPackager != keySigner {
-		errwriter.Write([]byte(tmpl.ErrSignerMissmatch)) //nolint
-		return errors.New("signer is not matching")
+		return errors.New(tmpl.ErrSignerMissmatch)
 	}
 	return nil
 }

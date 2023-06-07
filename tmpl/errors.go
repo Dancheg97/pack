@@ -39,18 +39,4 @@ Authority you defined in GnuPG is not matching with PACKAGER variable in
 
 ` + color.BlueString("PACKAGER") + `=` + color.HiMagentaString("John Doe <john@doe.com>\n")
 
-var ErrBrokenPackage = color.RedString("error:") + " broken package: "
-
-var ErrUnableAppendConf = color.RedString("error:") + " unable to add to pacman.conf: "
-
-var ErrEmailRead = color.RedString("error:") + " unable to get GnuPG email: "
-
-var ErrNoRegistry = color.RedString("error:") + " provide registry to push package: "
-
-var ErrBrokenPkgFile = color.RedString("error:") + " package file is not valid: "
-
-var ErrDirRead = color.RedString("error:") + " unable to get directory contents: "
-
-var ErrPkgNotFound = color.RedString("error:") + " unable to find push package: "
-
-var ErrSigRead = color.RedString("error:") + " unable to read signature: "
+var Err = color.RedString("error:")
