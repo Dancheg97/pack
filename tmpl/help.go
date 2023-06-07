@@ -46,7 +46,7 @@ operations:
 
 use 'pack {-h --help}' with an operation for available options`
 
-var SyncHelp = `🔧 Syncronize packages
+var SyncHelp = `🔧 Syncronize packages, repositroy and owner args are optional
 
 options:
 	-q, --quick       do not ask for any confirmation (noconfirm)
@@ -69,7 +69,7 @@ options:
 
 usage:  pack {-P --push} [options] <registry/owner/package(s)>`
 
-var RemoveHelp = `🚫 Remove packages
+var RemoveHelp = `📍 Remove packages
 
 options:
 	-o, --confirm  ask for confirmation when deleting package
@@ -95,7 +95,7 @@ options:
 
 usage:  pack {-Q --query} [options] [package(s)]`
 
-var BuildHelp = `🧰 Build package in current directory
+var BuildHelp = `⚙️ Build package in current directory
 
 options:
 	-q, --quick     do not ask for any confirmation (noconfirm)
@@ -106,7 +106,7 @@ options:
 
 usage:  pack {-B --build} [options]`
 
-var OpenHelp = `🌐 Open repository
+var OpenHelp = `🌐 Open registry - launch web-server
 
 options:
 	-n, --name <domain> registry name, should match the domain name

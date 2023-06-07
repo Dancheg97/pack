@@ -5,9 +5,12 @@
 
 package tmpl
 
-var Version = `    _.._      _.._
-  :'    \    /    ';            Pack - package manager.
-  (  '-. \()/_.-'  )         Copyright (C) 2023 FMNX team
-   \   (__()__)   /   This program may be freely redistributed under
-    ),'  /()\  ',(     the terms of the GNU General Public License.
-    \___/ () \___/    Web page: https://fmnx.su/core/pack  Version: 0.3`
+import "github.com/fatih/color"
+
+var Version = color.CyanString("    _.._      _.._") + `
+  ` + color.CyanString(`:'    \    /    ';`) + `            Pack - package manager.
+  ` + color.CyanString(`(  '-. \()/_.-'  )`) + `         Copyright (C) 2023 FMNX team
+   ` + color.CyanString(`\   (__()__)   /`) + `   This program may be freely redistributed under
+    ` + color.CyanString(`),'  /()\  ',(`) + `     the terms of the GNU General Public License.
+    ` + color.CyanString(`\   / () \   /`) + `         Web page: https://fmnx.su/core/pack
+    ` + color.CyanString(` \_/      \_/`) + `                   Version: 0.3`
