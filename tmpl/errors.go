@@ -22,17 +22,19 @@ It is required for package signing, run:
 4) Send it to key server:
 ` + color.YellowString("gpg --send-keys KEY-ID") + `
 
-5) Edit PACKAGER variable in ` + color.CyanString("/etc/makepkg.conf") + `, name and email should match
-with name and email in GnuPG authority for pack to work properly.`
+5) Edit ` + color.BlueString("PACKAGER") + ` variable in ` + color.CyanString("/etc/makepkg.conf") + `
+Name and email should match with name and email in GnuPG authority for pack to work properly.
+`
 
-var NoPackager = color.RedString("error:") + `packager not found.
+var NoPackager = color.RedString("error:") + ` packager not found.
 
 Add PACKAGER variable matching your GnuPG authority in ` + color.CyanString("/etc/makepkg.conf") + `
 
-PACKAGER="John Doe <john@doe.com>"`
+PACKAGER="John Doe <john@doe.com>"
+`
 
-var SignerMissmatch = color.RedString("error:") + `signer and packager are different.
+var SignerMissmatch = color.RedString("error:") + ` signer and packager are different.
 
 Authority you defined in GnuPG is not matching with PACKAGER variable in 
 
-` + color.BlueString("PACKAGER") + `=` + color.HiMagentaString("John Doe <john@doe.com>")
+` + color.BlueString("PACKAGER") + `=` + color.HiMagentaString("John Doe <john@doe.com>\n")
