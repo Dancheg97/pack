@@ -28,20 +28,19 @@ func main() {
 		Open   bool `short:"O" long:"open"`
 		Build  bool `short:"B" long:"build"`
 
-		// Shared options.
-		Info []bool `short:"i" long:"info"`
-		List []bool `short:"l" long:"list"`
-		Dir  string `short:"d" long:"dir" default:"/var/cache/pacman/pkg"`
+		// Sync options.
+		Quick     bool   `short:"q" long:"quick"`
+		Refresh   bool   `short:"y" long:"refresh"`
+		Upgrade   []bool `short:"u" long:"upgrade"`
+		Info      []bool `short:"i" long:"info"`
+		List      []bool `short:"l" long:"list"`
+		Notimeout bool   `short:"j" long:"notimeout"`
+		Reinstall bool   `short:"r" long:"reinstall"`
+		Fallback  bool   `short:"f" long:"fallback"`
 
-		// Query options.
-		Explicit bool   `short:"e" long:"explicit"`
-		Unreq    bool   `short:"t" long:"unreq"`
-		File     string `long:"file"`
-		Foreign  bool   `long:"foreign"`
-		Deps     bool   `long:"deps"`
-		Native   bool   `long:"native"`
-		Groups   bool   `long:"groups"`
-		Check    []bool `long:"check"`
+		// Push options.
+		Protocol string `long:"http" default:"https"`
+		Dir      string `short:"d" long:"dir" default:"/var/cache/pacman/pkg"`
 
 		// Remove options.
 		Confirm     bool `short:"o" long:"confirm"`
@@ -49,11 +48,20 @@ func main() {
 		Nocfgs      bool `short:"w" long:"nocfgs"`
 		Cascade     bool `long:"cascade"`
 
-		// Sync options.
-		Refresh   bool   `short:"y" long:"refresh"`
-		Upgrade   []bool `short:"u" long:"sysupgrade"`
-		Reinstall bool   `short:"r" long:"reinstall"`
-		Quick     bool   `short:"q" long:"quick"`
+		// Query options.
+		Explicit bool   `long:"explicit"`
+		Unreq    bool   `long:"unreq"`
+		File     string `long:"file"`
+		Foreign  bool   `long:"foreign"`
+		Deps     bool   `long:"deps"`
+		Native   bool   `long:"native"`
+		Groups   bool   `long:"groups"`
+		Check    []bool `long:"check"`
+
+		// Build options.
+		Syncbld bool `short:"s" long:"syncbuild"`
+		Rmdeps  bool `short:"z" long:"rmdeps"`
+		Garbage bool `short:"g" long:"garbage"`
 
 		// Open options.
 		Name string   `short:"n" long:"name" default:"localhost"`
@@ -61,53 +69,12 @@ func main() {
 		Cert string   `short:"c" long:"cert"`
 		Key  string   `short:"k" long:"key"`
 		Mirr []string `short:"m" long:"mirr"`
-
-		// Push options.
-		HTTP bool `long:"http"`
 	}
 
 	_, err := flags.NewParser(&opts, flags.None).Parse()
 	CheckErr(err)
 
 	switch {
-	case opts.Query && opts.Help:
-		fmt.Println(tmpl.QueryHelp)
-		return
-
-	case opts.Query:
-		CheckErr(pacman.Query(args(), pacman.QueryOptions{
-			Explicit:   opts.Explicit,
-			Deps:       opts.Deps,
-			Native:     opts.Native,
-			Foreign:    opts.Foreign,
-			Unrequired: opts.Unreq,
-			Groups:     opts.Groups,
-			Info:       opts.Info,
-			Check:      opts.Check,
-			List:       opts.List,
-			File:       opts.File,
-			Stdout:     os.Stdout,
-			Stderr:     os.Stderr,
-			Stdin:      os.Stdin,
-		}))
-		return
-
-	case opts.Remove && opts.Help:
-		fmt.Println(tmpl.RemoveHelp)
-		return
-
-	case opts.Remove:
-		CheckErr(pacman.RemoveList(args(), pacman.RemoveOptions{
-			Sudo:        true,
-			NoConfirm:   !opts.Confirm,
-			Recursive:   !opts.Norecursive,
-			WithConfigs: !opts.Nocfgs,
-			Stdout:      os.Stdout,
-			Stderr:      os.Stderr,
-			Stdin:       os.Stdin,
-		}))
-		return
-
 	case opts.Sync && opts.Help:
 		fmt.Println(tmpl.SyncHelp)
 		return
@@ -133,7 +100,45 @@ func main() {
 	case opts.Push:
 		CheckErr(pack.Push(args(), pack.PushParameters{
 			Directory: opts.Dir,
-			HTTP:      opts.HTTP,
+			Protocol:  opts.Protocol,
+		}))
+		return
+
+	case opts.Remove && opts.Help:
+		fmt.Println(tmpl.RemoveHelp)
+		return
+
+	case opts.Remove:
+		CheckErr(pacman.RemoveList(args(), pacman.RemoveOptions{
+			Sudo:        true,
+			NoConfirm:   !opts.Confirm,
+			Recursive:   !opts.Norecursive,
+			WithConfigs: !opts.Nocfgs,
+			Stdout:      os.Stdout,
+			Stderr:      os.Stderr,
+			Stdin:       os.Stdin,
+		}))
+		return
+
+	case opts.Query && opts.Help:
+		fmt.Println(tmpl.QueryHelp)
+		return
+
+	case opts.Query:
+		CheckErr(pacman.Query(args(), pacman.QueryOptions{
+			Explicit:   opts.Explicit,
+			Deps:       opts.Deps,
+			Native:     opts.Native,
+			Foreign:    opts.Foreign,
+			Unrequired: opts.Unreq,
+			Groups:     opts.Groups,
+			Info:       opts.Info,
+			Check:      opts.Check,
+			List:       opts.List,
+			File:       opts.File,
+			Stdout:     os.Stdout,
+			Stderr:     os.Stderr,
+			Stdin:      os.Stdin,
 		}))
 		return
 
@@ -142,7 +147,13 @@ func main() {
 		return
 
 	case opts.Build:
-		CheckErr(pack.Build(args()))
+		return
+
+	case opts.Open && opts.Help:
+		fmt.Println(tmpl.OpenHelp)
+		return
+
+	case opts.Open:
 		return
 
 	case opts.Help:

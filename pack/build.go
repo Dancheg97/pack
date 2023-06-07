@@ -11,77 +11,105 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path"
 	"strings"
+
+	"fmnx.su/core/pack/tmpl"
+	"github.com/fatih/color"
 )
 
-// Build package with pack.
-func Build(args []string) error {
-	// CheckErr(CheckGnupg())
-	// CheckErr(pacman.ValidatePackager())
-	// CheckErr(pacman.Makepkg())
-	// CheckErr(exec.Command(
-	// 	"bash", "-c",
-	// 	"sudo mv *.pkg.tar.zst* /var/cache/pacman/pkg",
-	// ).Run())
-	return nil
+// Parameters that can be used to build packages.
+type BuildParameters struct {
+	// Do not ask for any confirmation on build/installation.
+	Quick bool
+	// Directory where resulting package and signature will be moved.
+	Dir string
+	// Syncronize/reinstall package after build.
+	Syncbuild bool
+	// Remove dependencies after successful build.
+	Rmdeps bool
+	// Do not clean workspace before and after build.
+	Garbage bool
 }
 
-// const gnupgerr = `GPG key is not found in user directory ~/.gnupg
-// It is required for package signing, run:
+func builddefault() *BuildParameters {
+	return &BuildParameters{
+		Dir:       "/var/cache/pacman/pkg",
+		Syncbuild: true,
+	}
+}
 
-// 1) Install gnupg:
-// pack i gnupg
+func Build(prms ...BuildParameters) error {
+	_ = formOptions(prms, builddefault)
 
-// 2) Generate a key:
-// gpg --gen-key
+	return CheckGnupg()
+}
 
-// 3) Get KEY-ID, paste it to next command:
-// gpg -k
-
-// 4) Send it to key server:
-// gpg --send-keys KEY-ID`
+// // Build package with pack.
+// func Build(args []string) error {
+// 	// CheckErr(CheckGnupg())
+// 	// CheckErr(pacman.ValidatePackager())
+// 	// CheckErr(pacman.Makepkg())
+// 	// CheckErr(exec.Command(
+// 	// 	"bash", "-c",
+// 	// 	"sudo mv *.pkg.tar.zst* /var/cache/pacman/pkg",
+// 	// ).Run())
+// 	return nil
+// }
 
 // Ensure, that user have created gnupg keys for package signing before package
 // is built and cached.
 func CheckGnupg() error {
-	// hd, err := os.UserHomeDir()
-	// CheckErr(err)
-	// _, err = os.Stat(path.Join(hd, ".gnupg"))
-	// if err != nil {
-	// 	fmt.Println(gnupgerr)
-	// }
-	return nil
+	hd, err := os.UserHomeDir()
+	if err != nil {
+		return err
+	}
+	gpgdir, err := os.ReadDir(path.Join(hd, ".gnupg"))
+	if err != nil {
+		return err
+	}
+	for _, de := range gpgdir {
+		if strings.Contains(de.Name(), "private-keys") {
+			return nil
+		}
+	}
+	fmt.Printf(
+		"%s unable to find GnuPG private keys, required for package signing\n",
+		color.RedString("error:"),
+	)
+	fmt.Println(tmpl.Gnupgerr)
+	return errors.New("GnuPG private keys are missing")
 }
 
-// Validate, that packager defined in /etc/makepkg.conf matches signer
-// authority in GnuPG.
-func ValidatePackager() error {
-	keySigner, err := GetGnupgIdentity()
-	if err != nil {
-		return err
-	}
-	f, err := os.ReadFile("/etc/makepkg.conf")
-	if err != nil {
-		return err
-	}
-	splt := strings.Split(string(f), "\nPACKAGER=\"")
-	if len(splt) != 2 {
-		return errors.New(
-			"packager is not defined in /etc/makepkg.conf. " +
-				"Add PACKAGER variable matching your GnuPG authority " +
-				"in /etc/makepkg.conf\n" +
-				"Example: PACKAGER=\"John Doe <john@doe.com>\"",
-		)
-	}
-	confPackager := strings.Split(splt[1], "\"\n")[0]
-	if confPackager != keySigner {
-		return fmt.Errorf(
-			"gnu key signer should match makepkg packager: %s / %s",
-			keySigner, confPackager,
-		)
-	}
-	return nil
-}
+// // Validate, that packager defined in /etc/makepkg.conf matches signer
+// // authority in GnuPG.
+// func ValidatePackager() error {
+// 	keySigner, err := GetGnupgIdentity()
+// 	if err != nil {
+// 		return err
+// 	}
+// 	f, err := os.ReadFile("/etc/makepkg.conf")
+// 	if err != nil {
+// 		return err
+// 	}
+// 	splt := strings.Split(string(f), "\nPACKAGER=\"")
+// 	if len(splt) != 2 {
+// 		return errors.New(
+// 			"packager is not defined in /etc/makepkg.conf. " +
+// 				"Add PACKAGER variable matching your GnuPG authority " +
+// 				"in /etc/makepkg.conf\n" +
+// 				"Example: PACKAGER=\"John Doe <john@doe.com>\"",
+// 		)
+// 	}
+// 	confPackager := strings.Split(splt[1], "\"\n")[0]
+// 	if confPackager != keySigner {
+// 		return fmt.Errorf(
+// 			"gnu key signer should match makepkg packager: %s / %s",
+// 			keySigner, confPackager,
+// 		)
+// 	}
+// 	return nil
+// }
 
 func GetGnupgIdentity() (string, error) {
 	gnukey := `gpg --with-colons -k | awk -F: '$1=="uid" {print $10; exit}'`

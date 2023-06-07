@@ -21,8 +21,8 @@ import (
 type PushParameters struct {
 	// Directory to read package files and signatures.
 	Directory string
-	// Push over HTTP instead of HTTPS. Insecure? hah
-	HTTP bool
+	// Which protocol to use for connection.
+	Protocol string
 }
 
 func pushdefault() *PushParameters {
@@ -51,7 +51,7 @@ func Push(args []string, prms ...PushParameters) error {
 	email := strings.ReplaceAll(strings.Split(gnupgident, "<")[1], ">", "")
 
 	for _, pkg := range pkgs {
-		err := PushPkg(pkg, email, p.HTTP)
+		err := PushPkg(pkg, email, p.Protocol)
 		if err != nil {
 			return err
 		}
@@ -105,7 +105,7 @@ func FormPackage(dir string, pkg string) (*Package, error) {
 }
 
 // This function pushes package to registry via http.
-func PushPkg(p *Package, email string, usehttp bool) error {
+func PushPkg(p *Package, email string, protocol string) error {
 	packagefile, err := os.Open(p.PkgFile)
 	if err != nil {
 		return err
@@ -123,14 +123,9 @@ func PushPkg(p *Package, email string, usehttp bool) error {
 		return err
 	}
 
-	var protocol = "https://"
-	if usehttp {
-		protocol = "http://"
-	}
-
 	req, err := http.NewRequest(
 		http.MethodPut,
-		protocol+p.Registry+"/api/pack/push",
+		protocol+"://"+p.Registry+"/api/pack/push",
 		packagefile,
 	)
 	if err != nil {
