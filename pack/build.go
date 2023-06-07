@@ -8,14 +8,14 @@ package pack
 import (
 	"bytes"
 	"errors"
-	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path"
 	"strings"
 
+	"fmnx.su/core/pack/pacman"
 	"fmnx.su/core/pack/tmpl"
-	"github.com/fatih/color"
 )
 
 // Parameters that can be used to build packages.
@@ -30,6 +30,12 @@ type BuildParameters struct {
 	Rmdeps bool
 	// Do not clean workspace before and after build.
 	Garbage bool
+	// Where command will write output text.
+	Stdout io.Writer
+	// Where command will write output text.
+	Stderr io.Writer
+	// Stdin from user is command will ask for something.
+	Stdin io.Reader
 }
 
 func builddefault() *BuildParameters {
@@ -40,26 +46,42 @@ func builddefault() *BuildParameters {
 }
 
 func Build(prms ...BuildParameters) error {
-	_ = formOptions(prms, builddefault)
+	p := formOptions(prms, builddefault)
 
-	return CheckGnupg()
+	err := CheckGnupg(p.Stderr)
+	if err != nil {
+		return err
+	}
+
+	err = ValidatePackager(p.Stderr)
+	if err != nil {
+		return err
+	}
+
+	err = pacman.Makepkg(pacman.MakepkgOptions{
+		Sign:       true,
+		Stdout:     p.Stdout,
+		Stderr:     p.Stderr,
+		Stdin:      p.Stdin,
+		Clean:      !p.Garbage,
+		CleanBuild: !p.Garbage,
+		Force:      !p.Garbage,
+		Install:    p.Syncbuild,
+		RmDeps:     p.Rmdeps,
+		SyncDeps:   p.Syncbuild,
+		Needed:     !p.Syncbuild,
+		NoConfirm:  p.Quick,
+	})
+	if err != nil {
+		return err
+	}
+
+	return exec.Command("bash", "-c", "sudo mv *.pkg.tar.zst* "+p.Dir).Run()
 }
-
-// // Build package with pack.
-// func Build(args []string) error {
-// 	// CheckErr(CheckGnupg())
-// 	// CheckErr(pacman.ValidatePackager())
-// 	// CheckErr(pacman.Makepkg())
-// 	// CheckErr(exec.Command(
-// 	// 	"bash", "-c",
-// 	// 	"sudo mv *.pkg.tar.zst* /var/cache/pacman/pkg",
-// 	// ).Run())
-// 	return nil
-// }
 
 // Ensure, that user have created gnupg keys for package signing before package
 // is built and cached.
-func CheckGnupg() error {
+func CheckGnupg(errwriter io.Writer) error {
 	hd, err := os.UserHomeDir()
 	if err != nil {
 		return err
@@ -73,43 +95,33 @@ func CheckGnupg() error {
 			return nil
 		}
 	}
-	fmt.Printf(
-		"%s unable to find GnuPG private keys, required for package signing\n",
-		color.RedString("error:"),
-	)
-	fmt.Println(tmpl.Gnupgerr)
+	errwriter.Write([]byte(tmpl.GnuPGprivkeyNotFound)) //nolint:errcheck
 	return errors.New("GnuPG private keys are missing")
 }
 
-// // Validate, that packager defined in /etc/makepkg.conf matches signer
-// // authority in GnuPG.
-// func ValidatePackager() error {
-// 	keySigner, err := GetGnupgIdentity()
-// 	if err != nil {
-// 		return err
-// 	}
-// 	f, err := os.ReadFile("/etc/makepkg.conf")
-// 	if err != nil {
-// 		return err
-// 	}
-// 	splt := strings.Split(string(f), "\nPACKAGER=\"")
-// 	if len(splt) != 2 {
-// 		return errors.New(
-// 			"packager is not defined in /etc/makepkg.conf. " +
-// 				"Add PACKAGER variable matching your GnuPG authority " +
-// 				"in /etc/makepkg.conf\n" +
-// 				"Example: PACKAGER=\"John Doe <john@doe.com>\"",
-// 		)
-// 	}
-// 	confPackager := strings.Split(splt[1], "\"\n")[0]
-// 	if confPackager != keySigner {
-// 		return fmt.Errorf(
-// 			"gnu key signer should match makepkg packager: %s / %s",
-// 			keySigner, confPackager,
-// 		)
-// 	}
-// 	return nil
-// }
+// Validate, that packager defined in /etc/makepkg.conf matches signer
+// authority in GnuPG.
+func ValidatePackager(errwriter io.Writer) error {
+	keySigner, err := GetGnupgIdentity()
+	if err != nil {
+		return err
+	}
+	f, err := os.ReadFile("/etc/makepkg.conf")
+	if err != nil {
+		return err
+	}
+	splt := strings.Split(string(f), "\nPACKAGER=\"")
+	if len(splt) != 2 {
+		errwriter.Write([]byte(tmpl.NoPackager)) //nolint:errcheck
+		return errors.New("packager not found")
+	}
+	confPackager := strings.Split(splt[1], "\"\n")[0]
+	if confPackager != keySigner {
+		errwriter.Write([]byte(tmpl.SignerMissmatch)) //nolint:errcheck
+		return errors.New("signer is not matching")
+	}
+	return nil
+}
 
 func GetGnupgIdentity() (string, error) {
 	gnukey := `gpg --with-colons -k | awk -F: '$1=="uid" {print $10; exit}'`

@@ -59,9 +59,9 @@ func main() {
 		Check    []bool `long:"check"`
 
 		// Build options.
-		Syncbld bool `short:"s" long:"syncbuild"`
-		Rmdeps  bool `short:"z" long:"rmdeps"`
-		Garbage bool `short:"g" long:"garbage"`
+		Syncbuild bool `short:"s" long:"syncbuild"`
+		Rmdeps    bool `short:"z" long:"rmdeps"`
+		Garbage   bool `short:"g" long:"garbage"`
 
 		// Open options.
 		Name string   `short:"n" long:"name" default:"localhost"`
@@ -143,7 +143,16 @@ func main() {
 		return
 
 	case opts.Build && opts.Help:
-		fmt.Println(tmpl.BuildHelp)
+		CheckErr(pack.Build(pack.BuildParameters{
+			Quick:     opts.Quick,
+			Dir:       opts.Dir,
+			Syncbuild: opts.Syncbuild,
+			Rmdeps:    opts.Rmdeps,
+			Garbage:   opts.Garbage,
+			Stdout:    os.Stdout,
+			Stderr:    os.Stderr,
+			Stdin:     os.Stdin,
+		}))
 		return
 
 	case opts.Build:

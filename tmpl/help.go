@@ -9,9 +9,30 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/fatih/color"
 )
 
 var Color bool
+
+func init() {
+	b, err := os.ReadFile("/etc/pacman.conf")
+	if err != nil {
+		fmt.Println("unable to read pacman configuration")
+		os.Exit(1)
+	}
+	Color = strings.Contains(string(b), "\nColor\n")
+	if !Color {
+		color.NoColor = true
+		Help = strings.Replace(Help, "📦 ", "", 1)
+		QueryHelp = strings.Replace(QueryHelp, "🔎 ", "", 1)
+		RemoveHelp = strings.Replace(RemoveHelp, "🚫 ", "", 1)
+		SyncHelp = strings.Replace(SyncHelp, "🔧 ", "", 1)
+		PushHelp = strings.Replace(PushHelp, "🚀 ", "", 1)
+		BuildHelp = strings.Replace(BuildHelp, "🧰 ", "", 1)
+		OpenHelp = strings.Replace(OpenHelp, "🌐 ", "", 1)
+	}
+}
 
 var Help = `📦 Simplified version of pacman
 
@@ -95,21 +116,3 @@ options:
 	    --key  <file>   key file for TLS
 
 usage:  pack {-O --open} [options]`
-
-func init() {
-	b, err := os.ReadFile("/etc/pacman.conf")
-	if err != nil {
-		fmt.Println("unable to read pacman configuration")
-		os.Exit(1)
-	}
-	Color = strings.Contains(string(b), "\nColor\n")
-	if !Color {
-		Help = strings.Replace(Help, "📦 ", "", 1)
-		QueryHelp = strings.Replace(QueryHelp, "🔎 ", "", 1)
-		RemoveHelp = strings.Replace(RemoveHelp, "🚫 ", "", 1)
-		SyncHelp = strings.Replace(SyncHelp, "🔧 ", "", 1)
-		PushHelp = strings.Replace(PushHelp, "🚀 ", "", 1)
-		BuildHelp = strings.Replace(BuildHelp, "🧰 ", "", 1)
-		OpenHelp = strings.Replace(OpenHelp, "🌐 ", "", 1)
-	}
-}
