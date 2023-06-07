@@ -124,3 +124,6 @@ var Version = color.CyanString("    _.._      _.._") + `
     ` + color.CyanString(`),'  /()\  ',(`) + `     the terms of the GNU General Public License.
     ` + color.CyanString(`\   / () \   /`) + `         Web page: https://fmnx.su/core/pack
     ` + color.CyanString(` \_/      \_/`) + `                   Version: 0.3`
+
+var Dots = color.CyanString("::")
+var DbAdded = color.New(color.FgWhite).Add(color.Bold).Sprintf(" Database added: ")

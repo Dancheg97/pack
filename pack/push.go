@@ -23,6 +23,8 @@ type PushParameters struct {
 	Directory string
 	// Which protocol to use for connection.
 	Protocol string
+	// Custom endpoint for package push
+	Endpoint string
 }
 
 func pushdefault() *PushParameters {

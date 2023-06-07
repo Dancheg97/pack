@@ -15,7 +15,6 @@ import (
 
 	"fmnx.su/core/pack/pacman"
 	"fmnx.su/core/pack/tmpl"
-	"github.com/fatih/color"
 )
 
 // Syncronize packages with pack.
@@ -171,21 +170,19 @@ func addconfdb(pkg RegistryPkg, ew io.Writer, ow io.Writer) error {
 	} else {
 		t = fmt.Sprintf(tmpl.RegistryUser, pkg.Registry, pkg.Owner, pkg.Registry)
 	}
-	command := "cat <<EOF >> /etc/pacman.conf\n" + t + "\nEOF"
+	command := "cat <<EOF >> /etc/pacman.conf" + t + "EOF"
 	err := exec.Command("sudo", "bash", "-c", command).Run()
 	if err != nil {
 		ew.Write([]byte(tmpl.UnableAppendConf + t)) //nolint
 		return errors.New("unable to add database: " + t)
 	}
-	whilte := color.New(color.FgWhite).Add(color.Bold)
-	msg := color.CyanString("::") + whilte.Sprintf(" database added:") + t
-	ow.Write([]byte(msg)) //nolint
+	ow.Write([]byte(tmpl.Dots + tmpl.DbAdded + pkg.Registry)) //nolint
 	return nil
 }
 
 func rollbackconf(s string) {
 	exec.Command(
 		"sudo", "bash", "-c",
-		"cat <<EOF > /etc/pacman.conf\n"+s+"\nEOF",
+		"cat <<EOF > /etc/pacman.conf\n"+s+"EOF",
 	).Run() //nolint
 }
