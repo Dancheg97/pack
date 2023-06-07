@@ -109,7 +109,6 @@ usage:  pack {-B --build} [options]`
 var OpenHelp = `🌐 Open registry - launch web-server
 
 options:
-	-n, --name <domain> registry name, should match the domain name
 	-d, --dir  <dir>    exposed directory (default /var/cache/pacman/pkg)
 	-m, --mirr <link>   create mirror for existing pacman package repository
 	-p, --port <port>   port to launch server on

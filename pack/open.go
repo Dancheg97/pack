@@ -7,5 +7,6 @@ package pack
 
 // Parameters to run pack registry.
 type OpenParameters struct {
-	
+	// Name of domain and database, database name will be automatically assigned.
+	Name string
 }

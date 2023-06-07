@@ -186,17 +186,17 @@ func main() {
 // Herlper function to exit on unexpected errors.
 func CheckErr(err error) {
 	if err != nil {
-		fmt.Println(err.Error())
 		os.Exit(1)
 	}
 }
 
 func args() []string {
 	var filtered []string
-	for _, v := range os.Args {
+	for i, v := range os.Args {
 		if !strings.HasPrefix(v, "/") &&
 			!strings.HasPrefix(v, "-") &&
-			!strings.HasPrefix(v, ".") {
+			!strings.HasPrefix(v, ".") &&
+			i != 0 {
 			filtered = append(filtered, v)
 		}
 	}
