@@ -16,49 +16,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-func init() {
-	AddStringFlag(&FlagParameters{
-		Cmd:     serveCmd,
-		Name:    "port",
-		Short:   "p",
-		Desc:    "port to run on",
-		Default: "4572",
-	})
-	AddStringFlag(&FlagParameters{
-		Cmd:     serveCmd,
-		Name:    "name",
-		Short:   "n",
-		Desc:    "database name, should match the domain",
-		Default: "localhost:4572",
-	})
-	AddStringFlag(&FlagParameters{
-		Cmd:     serveCmd,
-		Name:    "dir",
-		Short:   "d",
-		Desc:    "exposed directory where packages will be stored",
-		Default: pacmancache,
-	})
-	AddStringFlag(&FlagParameters{
-		Cmd:   serveCmd,
-		Name:  "key",
-		Short: "k",
-		Desc:  "key file path for TLS connection",
-	})
-	AddStringFlag(&FlagParameters{
-		Cmd:   serveCmd,
-		Name:  "cert",
-		Short: "c",
-		Desc:  "certificate file path for TLS connection",
-	})
-	AddStringListFlag(&FlagParameters{
-		Cmd:   serveCmd,
-		Name:  "mirror",
-		Short: "m",
-		Desc:  "pull mirror used to load packages every 24 hours",
-	})
-	rootCmd.AddCommand(serveCmd)
-}
-
 var serveCmd = &cobra.Command{
 	Use:     "serve",
 	Aliases: []string{"s"},

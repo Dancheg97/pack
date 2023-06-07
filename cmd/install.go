@@ -14,28 +14,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-func init() {
-	AddBoolFlag(&FlagParameters{
-		Cmd:   installCmd,
-		Name:  "keep",
-		Short: "k",
-		Desc:  "do not remove database after package installation",
-	})
-	rootCmd.AddCommand(installCmd)
-}
-
-var installCmd = &cobra.Command{
-	Use:     "install",
-	Aliases: []string{"i"},
-	Short:   "🔧 install packages",
-	Long: `🔧 install packages
-
-This command will automtically connect registries adding them to pacman.conf
-and install provided packages. After installation it will remove registry 
-from pacman configuration.`,
-	Run: Install,
-}
-
 func Install(cmd *cobra.Command, args []string) {
 	rgs, err := pacman.AddRegistries(args)
 	CheckErr(err)

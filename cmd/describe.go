@@ -13,7 +13,7 @@ import (
 )
 
 func init() {
-	rootCmd.AddCommand(describeCmd)
+	Command.AddCommand(describeCmd)
 }
 
 var describeCmd = &cobra.Command{

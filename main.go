@@ -5,8 +5,17 @@
 
 package main
 
-import "fmnx.su/core/pack/cmd"
+import (
+	"fmt"
+	"os"
+
+	"fmnx.su/core/pack/cmd"
+)
 
 func main() {
-	cmd.Execute()
+	err := cmd.Command.Execute()
+	if err != nil {
+		fmt.Printf("%v", err)
+		os.Exit(1)
+	}
 }
