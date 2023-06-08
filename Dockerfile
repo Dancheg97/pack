@@ -18,6 +18,8 @@ FROM archlinux/archlinux:base-devel
 
 LABEL maintainer="Danila Fominykh <dancheg97@fmnx.su>"
 
+EXPOSE 80 443
+
 RUN pacman -Syu --noconfirm --needed gnupg wget
 
 WORKDIR /home

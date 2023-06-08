@@ -1,6 +1,6 @@
 <h2 align="center">Go wrapper for arch package manager</h2>
 
-This library aims to provide concurrent, stable and extensible interface to interact with arch package manager - pacman. Library has 0 dependencies and written in pure go with only a few packages from stdlib.
+This library aims to provide concurrent, stable and extensible interface to interact with arch package manager - pacman. Library is top-level wrapper and making direct calls to pacman, so it has to be installed on host machine.
 
 Some of the default options for functions can contain sudo, if you don't need it you can manually disable it.
 
