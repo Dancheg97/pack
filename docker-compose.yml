@@ -11,6 +11,7 @@ services:
       -O
       --port 80
       --cert /data/cert.pem
-      --key /data/key.pem
-      --dir /data/pkgs
       --gpgdir /data/keys
+      --dir /data/pkgs
+    # --key /data/key.pem
+    # --dir /data/pkgs

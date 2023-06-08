@@ -58,6 +58,11 @@ func opendefault() *OpenParameters {
 func Open(prms ...OpenParameters) error {
 	p := formOptions(prms, opendefault)
 
+	_, err := os.Stat(p.Dir)
+	if err != nil {
+		return fmt.Errorf("expose dir not found: %+v", err)
+	}
+
 	d := server.LocalDirDb{
 		Dir:    p.Dir,
 		DbName: p.Name,
