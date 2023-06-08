@@ -65,9 +65,10 @@ usage:  pack {-S --sync} [options] <registry/owner/package(s)>`
 var PushHelp = `Push packages
 
 options:
-	--dir <dir> Use custom source dir with packages (default /var/cache/pacman/pkg)
-	--protocol  Protocol that will be used for client (default https)
-	--endpoint  Use custom endpoint for push (default /api/pack/push)
+	-d, --dir <dir> Use custom source dir with packages (default /var/cache/pacman/pkg)
+	-f, --force     Owerwrite package with same version if exists
+	    --protocol  Protocol that will be used for client (default https)
+	    --endpoint  Use custom endpoint for push (default /api/pack/push)
 
 usage:  pack {-P --push} [options] <registry/owner/package(s)>`
 

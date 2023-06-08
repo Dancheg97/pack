@@ -8,6 +8,7 @@ package pack
 import (
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -28,6 +29,8 @@ type PushParameters struct {
 	Protocol string
 	// Custom endpoint for package push
 	Endpoint string
+	// Owerwrite package with same version if exists.
+	Force bool
 	// Where command will write output text.
 	Stdout io.Writer
 	// Where command will write output text.
@@ -78,7 +81,7 @@ func Push(args []string, prms ...PushParameters) error {
 	}
 
 	for _, pp := range pprms {
-		err = push(pp, email, p.Protocol, p.Endpoint)
+		err = push(pp, email, p.Protocol, p.Endpoint, p.Force)
 		if err != nil {
 			return err
 		}
@@ -205,7 +208,7 @@ func readpkgsign(path string) (string, error) {
 }
 
 // This function pushes package to registry via http.
-func push(p PushPkg, email string, protocol string, endpoint string) error {
+func push(p PushPkg, email string, protocol string, endpoint string, force bool) error {
 	packagefile, err := os.Open(p.PkgPath)
 	if err != nil {
 		return err
@@ -232,7 +235,12 @@ func push(p PushPkg, email string, protocol string, endpoint string) error {
 	req.Header.Add("file", p.Filename)
 	req.Header.Add("email", email)
 	req.Header.Add("sign", p.Signature)
-	req.Header.Add("owner", p.Owner)
+	if p.Owner != "" {
+		req.Header.Add("owner", p.Owner)
+	}
+	if force {
+		req.Header.Add("force", "true")
+	}
 
 	var client http.Client
 	resp, err := client.Do(req)
@@ -244,8 +252,7 @@ func push(p PushPkg, email string, protocol string, endpoint string) error {
 		if err != nil {
 			return errors.Join(err, errors.New(tmpl.Err+resp.Status))
 		}
-		return errors.New(tmpl.Err + resp.Status + ", " +
-			string(b) + " - " + p.Filename)
+		return fmt.Errorf("%s%s, %s - %s", tmpl.Err, resp.Status, string(b), p.Filename)
 	}
 	return nil
 }
