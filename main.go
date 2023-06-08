@@ -40,7 +40,7 @@ var opts struct {
 
 	// Push options.
 	Dir      string `short:"d" long:"dir" default:"/var/cache/pacman/pkg"`
-	Protocol string `long:"http" default:"https"`
+	Protocol string `long:"protocol" default:"https"`
 	Endpoint string `long:"endpoint" default:"/api/pack/push"`
 
 	// Remove options.

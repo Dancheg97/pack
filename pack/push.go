@@ -81,6 +81,7 @@ func Push(args []string, prms ...PushParameters) error {
 	}
 
 	for _, pp := range pprms {
+		pp.Protocol = p.Protocol
 		err = push(pp, email)
 		if err != nil {
 			return err
