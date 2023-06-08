@@ -65,11 +65,11 @@ var opts struct {
 	Garbage   bool `short:"g" long:"garbage"`
 
 	// Open options.
-	Name string   `short:"n" long:"name" default:"localhost"`
-	Mirr []string `short:"m" long:"mirr"`
-	Port string   `short:"p" long:"port" default:"80"`
-	Cert string   `long:"cert"`
-	Key  string   `long:"key"`
+	Name string `short:"n" long:"name" default:"localhost"`
+	Port string `short:"p" long:"port" default:"80"`
+	Cert string `long:"cert"`
+	Key  string `long:"key"`
+	Ring string `long:"ring"`
 }
 
 func main() {

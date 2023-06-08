@@ -24,17 +24,19 @@ func init() {
 	Color = strings.Contains(string(b), "\nColor\n")
 	if !Color {
 		color.NoColor = true
-		Help = strings.Replace(Help, "📦 ", "", 1)
-		QueryHelp = strings.Replace(QueryHelp, "🔎 ", "", 1)
-		RemoveHelp = strings.Replace(RemoveHelp, "🚫 ", "", 1)
-		SyncHelp = strings.Replace(SyncHelp, "🔧 ", "", 1)
-		PushHelp = strings.Replace(PushHelp, "🚀 ", "", 1)
-		BuildHelp = strings.Replace(BuildHelp, "🧰 ", "", 1)
-		OpenHelp = strings.Replace(OpenHelp, "🌐 ", "", 1)
+	}
+	if Color {
+		Help = strings.Join([]string{"📦", Help}, " ")
+		QueryHelp = strings.Join([]string{"🔎", QueryHelp}, " ")
+		RemoveHelp = strings.Join([]string{"📍", RemoveHelp}, " ")
+		SyncHelp = strings.Join([]string{"⚡", SyncHelp}, " ")
+		PushHelp = strings.Join([]string{"🚀", PushHelp}, " ")
+		BuildHelp = strings.Join([]string{"🔐", BuildHelp}, " ")
+		OpenHelp = strings.Join([]string{"🌐", OpenHelp}, " ")
 	}
 }
 
-var Help = `📦 Simplified version of pacman
+var Help = `Simplified version of pacman
 
 operations:
 	pack {-S --sync}   [options] [repository/owner/package(s)]
@@ -46,7 +48,7 @@ operations:
 
 use 'pack {-h --help}' with an operation for available options`
 
-var SyncHelp = `🔧 Syncronize packages, repositroy and owner args are optional
+var SyncHelp = `Syncronize packages
 
 options:
 	-q, --quick       Do not ask for any confirmation (noconfirm)
@@ -60,7 +62,7 @@ options:
 
 usage:  pack {-S --sync} [options] <registry/owner/package(s)>`
 
-var PushHelp = `🚀 Push packages
+var PushHelp = `Push packages
 
 options:
 	--dir <dir> Use custom source dir with packages (default /var/cache/pacman/pkg)
@@ -69,7 +71,7 @@ options:
 
 usage:  pack {-P --push} [options] <registry/owner/package(s)>`
 
-var RemoveHelp = `📍 Remove packages
+var RemoveHelp = `Remove packages
 
 options:
 	-o, --confirm  Ask for confirmation when deleting package
@@ -79,7 +81,7 @@ options:
 
 usage:  pack {-R --remove} [options] <package(s)>`
 
-var QueryHelp = `🔎 Query packages
+var QueryHelp = `Query packages
 
 options:
 	-i, --info     View package information (-ii for backup files)
@@ -95,25 +97,25 @@ options:
 
 usage:  pack {-Q --query} [options] [package(s)]`
 
-var BuildHelp = `⚙️ Build package in current directory
+var BuildHelp = `Build package in current directory
 
 options:
 	-q, --quick     Do not ask for any confirmation (noconfirm)
 	-d, --dir <dir> Use custom dir to store result (default /var/cache/pacman/pkg)
-	-s, --syncbuild Sync/reinstall target packages
+	-s, --syncbuild Syncronize dependencies and build target
 	-r, --rmdeps    Remove installed dependencies after a successful build
 	-g, --garbage   Do not clean workspace before and after build
 
 usage:  pack {-B --build} [options]`
 
-var OpenHelp = `🌐 Open registry - launch web-server
+var OpenHelp = `Open registry - launch web-server
 
 options:
 	-d, --dir  <dir>  Exposed directory (default /var/cache/pacman/pkg)
-	-m, --mirr <link> Create mirror for existing pacman package repository
-	-p, --port <port> Port to launch server on
-	    --cert <file> Certificate file for TLS
-	    --key  <file> Key file for TLS
+	-p, --port <port> Port to launch server (default 80)
+	    --cert <file> Certificate file for TLS server
+	    --key  <file> Key file for TLS server
+	    --ring <file> Keyring that will be used to validate package signatures
 
 usage:  pack {-O --open} [options]`
 

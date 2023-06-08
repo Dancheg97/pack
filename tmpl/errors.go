@@ -7,7 +7,9 @@ package tmpl
 
 import "github.com/fatih/color"
 
-var ErrGnuPGprivkeyNotFound = color.RedString("error:") + ` GnuPG private key not found.
+var Err = color.New(color.Bold, color.FgHiRed).Sprintf("error: ")
+
+var ErrGnuPGprivkeyNotFound = Err + ` GnuPG private key not found.
 It is required for package signing, run:
 
 1) Install gnupg:
@@ -26,17 +28,15 @@ It is required for package signing, run:
 Name and email should match with name and email in GnuPG authority for pack to work properly.
 `
 
-var ErrNoPackager = color.RedString("error:") + ` packager not found.
+var ErrNoPackager = Err + ` packager not found.
 
 Add PACKAGER variable matching your GnuPG authority in ` + color.CyanString("/etc/makepkg.conf") + `
 
 PACKAGER="John Doe <john@doe.com>"
 `
 
-var ErrSignerMissmatch = color.RedString("error:") + ` signer and packager are different.
+var ErrSignerMissmatch = Err + ` signer and packager are different.
 
 Authority you defined in GnuPG is not matching with PACKAGER variable in 
 
 ` + color.BlueString("PACKAGER") + `=` + color.HiMagentaString("John Doe <john@doe.com>\n")
-
-var Err = color.New(color.Bold, color.FgHiRed).Sprintf("error: ")
