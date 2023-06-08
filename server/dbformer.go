@@ -8,6 +8,7 @@ package server
 import (
 	"os"
 	"path"
+	"strings"
 
 	"fmnx.su/core/pack/pacman"
 )
@@ -24,6 +25,7 @@ type AddPkgParameters struct {
 	Package  []byte
 	Sign     []byte
 	Filename string
+	Owner    string
 	Force    bool
 }
 
@@ -39,5 +41,6 @@ func (d *LocalDirDb) AddPkg(p AddPkgParameters) error {
 		return err
 	}
 
-	return pacman.RepoAdd(path.Join(d.Dir, d.DbName+".db.tar.gz"), pkgpath)
+	dbname := strings.Join([]string{p.Owner, d.DbName + ".db.tar.gz"}, ".")
+	return pacman.RepoAdd(path.Join(d.Dir, dbname), pkgpath)
 }

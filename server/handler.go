@@ -68,6 +68,7 @@ func (p *Pusher) Push(w http.ResponseWriter, r *http.Request) {
 		Package:  pkgbytes,
 		Sign:     sigbytes,
 		Filename: filename,
+		Owner:    owner,
 		Force:    force,
 	})
 	if err != nil {
