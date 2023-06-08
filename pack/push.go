@@ -8,13 +8,13 @@ package pack
 import (
 	"encoding/base64"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"os/exec"
 	"path"
 	"strings"
+	"time"
 
 	"fmnx.su/core/pack/tmpl"
 	"github.com/mitchellh/ioprogress"
@@ -147,7 +147,8 @@ type fillparams struct {
 func fillfileinfo(p fillparams) ([]PushPkg, error) {
 	var ppkgs []PushPkg
 	for _, pkg := range p.packages {
-		for i, filename := range p.filenames {
+		for i := len(p.filenames) - 1; i >= 0; i-- {
+			filename := p.filenames[i]
 			if !strings.Contains(filename, pkg.Name) {
 				continue
 			}
@@ -169,7 +170,7 @@ func fillfileinfo(p fillparams) ([]PushPkg, error) {
 				})
 				break
 			}
-			if i == len(p.filenames) {
+			if i == 0 {
 				return nil, errors.New(tmpl.Err +
 					" unable to find push package: " + pkg.Name,
 				)
@@ -209,11 +210,20 @@ func push(p PushPkg, email string, protocol string, endpoint string) error {
 	if err != nil {
 		return err
 	}
+	fi, err := os.Stat(p.PkgPath)
+	if err != nil {
+		return err
+	}
 
 	req, err := http.NewRequest(
 		http.MethodPut,
 		protocol+"://"+p.Registry+endpoint,
-		&ioprogress.Reader{Reader: packagefile},
+		&ioprogress.Reader{
+			Reader:       packagefile,
+			Size:         fi.Size(),
+			DrawFunc:     tmpl.Loader(p.Registry, p.Owner, p.Name),
+			DrawInterval: time.Millisecond,
+		},
 	)
 	if err != nil {
 		return err
@@ -232,10 +242,10 @@ func push(p PushPkg, email string, protocol string, endpoint string) error {
 	if resp.StatusCode != http.StatusOK {
 		b, err := io.ReadAll(resp.Body)
 		if err != nil {
-			return errors.Join(err, errors.New(resp.Status))
+			return errors.Join(err, errors.New(tmpl.Err+resp.Status))
 		}
-		return errors.New(resp.Status + ", " + string(b) + " package: " + p.Filename)
+		return errors.New(tmpl.Err + resp.Status + ", " +
+			string(b) + " - " + p.Filename)
 	}
-	fmt.Println("[PUSH] - package delivered: " + p.Name)
 	return nil
 }
