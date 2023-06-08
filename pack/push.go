@@ -15,7 +15,6 @@ import (
 	"os/exec"
 	"path"
 	"strings"
-	"time"
 
 	"fmnx.su/core/pack/tmpl"
 	"github.com/mitchellh/ioprogress"
@@ -42,7 +41,7 @@ type PushParameters struct {
 func pushdefault() *PushParameters {
 	return &PushParameters{
 		Protocol:  "https",
-		Endpoint:  "/api/pack/push",
+		Endpoint:  "/api/pack",
 		Directory: "/var/cache/pacman/pkg",
 	}
 }
@@ -82,6 +81,7 @@ func Push(args []string, prms ...PushParameters) error {
 
 	for _, pp := range pprms {
 		pp.Protocol = p.Protocol
+		pp.Endpoint = p.Endpoint
 		err = push(pp, email)
 		if err != nil {
 			return err
@@ -127,10 +127,7 @@ type pushpkg struct {
 func listPkgFilenames(dir string) ([]string, error) {
 	des, err := os.ReadDir(dir)
 	if err != nil {
-		return nil, errors.New(
-			tmpl.Err + " unable to get directory contents: " +
-				dir + " " + err.Error(),
-		)
+		return nil, errors.New("unable to get directory contents: " + dir)
 	}
 	var fns []string
 	for _, de := range des {
@@ -218,12 +215,11 @@ func push(p pushpkg, email string) error {
 
 	req, err := http.NewRequest(
 		http.MethodPut,
-		p.Protocol+"://"+p.Registry+p.Endpoint,
+		p.Protocol+"://"+p.Registry+p.Endpoint+"/push",
 		&ioprogress.Reader{
-			Reader:       packagefile,
-			Size:         fi.Size(),
-			DrawFunc:     tmpl.Loader(p.Registry, p.Owner, p.Name),
-			DrawInterval: time.Nanosecond * 1000,
+			Reader:   packagefile,
+			Size:     fi.Size(),
+			DrawFunc: tmpl.Loader(p.Registry, p.Owner, p.Name),
 		},
 	)
 	if err != nil {

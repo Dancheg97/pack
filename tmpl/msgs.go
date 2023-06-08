@@ -68,7 +68,7 @@ options:
 	-d, --dir <dir> Use custom source dir with packages (default /var/cache/pacman/pkg)
 	-f, --force     Owerwrite package with same version if exists
 	    --protocol  Protocol that will be used for client (default https)
-	    --endpoint  Use custom endpoint for push (default /api/pack/push)
+	    --endpoint  Use custom API endpoint (default /api/pack)
 
 usage:  pack {-P --push} [options] <registry/owner/package(s)>`
 
@@ -117,6 +117,7 @@ options:
 	    --cert <file> Certificate file for TLS server
 	    --key  <file> Key file for TLS server
 	    --ring <file> Keyring that will be used to validate package signatures
+	    --endpoint    Use custom API endpoint (default /api/pack)
 
 usage:  pack {-O --open} [options]`
 

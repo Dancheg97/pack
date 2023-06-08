@@ -41,7 +41,7 @@ var opts struct {
 	// Push options.
 	Dir      string `short:"d" long:"dir" default:"/var/cache/pacman/pkg"`
 	Protocol string `long:"protocol" default:"https"`
-	Endpoint string `long:"endpoint" default:"/api/pack/push"`
+	Endpoint string `long:"endpoint" default:"/api/pack"`
 
 	// Remove options.
 	Confirm     bool `short:"o" long:"confirm"`
@@ -69,7 +69,7 @@ var opts struct {
 	Port string `short:"p" long:"port" default:"80"`
 	Cert string `long:"cert"`
 	Key  string `long:"key"`
-	Ring string `long:"ring"`
+	Ring string `long:"ring" default:"/usr/share/pacman/keyrings/archlinux.gpg"`
 }
 
 func main() {
@@ -170,17 +170,16 @@ func main() {
 
 	case opts.Open:
 		CheckErr(pack.Open(pack.OpenParameters{
-			Stdout:       os.Stdout,
-			Stderr:       os.Stderr,
-			Stdin:        os.Stdin,
-			FsEndpoint:   "/api/pack",
-			PushEndpoint: "/api/pack/push",
-			Dir:          opts.Dir,
-			Name:         opts.Name,
-			Port:         opts.Port,
-			Cert:         opts.Cert,
-			Key:          opts.Key,
-			Ring:         opts.Ring,
+			Stdout:   os.Stdout,
+			Stderr:   os.Stderr,
+			Stdin:    os.Stdin,
+			Endpoint: opts.Endpoint,
+			Dir:      opts.Dir,
+			Name:     opts.Name,
+			Port:     opts.Port,
+			Cert:     opts.Cert,
+			Key:      opts.Key,
+			Ring:     opts.Ring,
 		}))
 		return
 
@@ -208,12 +207,25 @@ func CheckErr(err error) {
 }
 
 func args() []string {
+	var stringargs = []string{
+		"-n", "--name", "-p", "--port", "--cert", "--key", "--ring",
+		"--file", "--protocol", "--endopint", "-d", "--dir",
+	}
 	var filtered []string
 	for i, v := range os.Args {
 		if i == 0 || i == 1 {
 			continue
 		}
 		if strings.HasPrefix(v, "-") {
+			continue
+		}
+		var next bool
+		for _, args := range stringargs {
+			if os.Args[i-1] == args {
+				next = true
+			}
+		}
+		if next {
 			continue
 		}
 		filtered = append(filtered, v)

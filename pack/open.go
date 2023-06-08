@@ -23,12 +23,10 @@ type OpenParameters struct {
 	Stderr io.Writer
 	// Stdin from user is command will ask for something.
 	Stdin io.Reader
-	// FsEndpoint that will be mounted for provided directory. This endpoint
-	// can be used as connection in pacman.conf file. Default /api/pack
-	FsEndpoint string
-	// Endpoint that can be used to accept package push requests. By default
-	// it is /api/pack/push
-	PushEndpoint string
+	// Endpoint that will be mounted for provided directory. This endpoint
+	// can be used as connection in pacman.conf file. Also creates push subpath
+	// /push, which can accept packages from end user
+	Endpoint string
 	// Directory with packages that will be opened. Make sure you have access
 	// to read and write (default /var/cache/pacman/pkg).
 	Dir string
@@ -46,17 +44,14 @@ type OpenParameters struct {
 
 func opendefault() *OpenParameters {
 	return &OpenParameters{
-		Stdout: os.Stdout,
-		Stderr: os.Stderr,
-		Stdin:  os.Stdin,
-
-		FsEndpoint:   "/api/pack",
-		PushEndpoint: "/api/pack/push",
-
-		Dir:  "/var/cache/pacman/pkg",
-		Ring: "/usr/share/pacman/keyrings/archlinux.gpg",
-		Name: "localhost",
-		Port: "8080",
+		Stdout:   os.Stdout,
+		Stderr:   os.Stderr,
+		Stdin:    os.Stdin,
+		Endpoint: "/api/pack",
+		Dir:      "/var/cache/pacman/pkg",
+		Ring:     "/usr/share/pacman/keyrings/archlinux.gpg",
+		Name:     "localhost",
+		Port:     "8080",
 	}
 }
 
@@ -79,10 +74,9 @@ func Open(prms ...OpenParameters) error {
 		DbFormer:        &d,
 	}
 
-	http.HandleFunc(p.PushEndpoint, s.Push)
-
 	fs := http.FileServer(http.Dir(p.Dir))
-	http.Handle(p.FsEndpoint, http.StripPrefix(p.FsEndpoint, fs))
+	http.Handle(p.Endpoint, http.StripPrefix(p.Endpoint, fs))
+	http.HandleFunc(p.Endpoint+"/push", s.Push)
 
 	startmes := fmt.Sprintf("%s %s%s\n", tmpl.Dots, tmpl.Launching, p.Name)
 	p.Stdout.Write([]byte(startmes))
