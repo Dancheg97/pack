@@ -109,7 +109,7 @@ options:
 
 usage:  pack {-B --build} [options]`
 
-var OpenHelp = `Open registry - launch web-server
+var OpenHelp = `Open package registry web-server
 
 options:
 	-d, --dir  <dir>  Exposed directory (default /var/cache/pacman/pkg)
@@ -128,7 +128,7 @@ $$ |  $$ |$$  __$$ |$$ |      $$  _$$\   This program may be freely redistribute
 $$$$$$$  |\$$$$$$$ |\$$$$$$$\ $$ | \$$\   the terms of the GNU General Public License.
 $$  ____/  \_______| \_______|\__|  \__|      Web page: https://fmnx.su/core/pack
 $$ |                                           
-$$ |                                                 Version: 0.4.5
+$$ |                                                    Version: 0.4.5
 \__|
 `
 
