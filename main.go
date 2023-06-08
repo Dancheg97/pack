@@ -106,6 +106,10 @@ func main() {
 			Directory: opts.Dir,
 			Protocol:  opts.Protocol,
 			Endpoint:  opts.Endpoint,
+			Force:     opts.Force,
+			Stdout:    os.Stdout,
+			Stderr:    os.Stderr,
+			Stdin:     os.Stdin,
 		}))
 		return
 

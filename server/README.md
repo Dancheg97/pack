@@ -1,4 +1,4 @@
-<h2 align="center">Go pack server</h2>
+<h2 align="center">Pack server</h2>
 
 This library provides interfaces required to embed pack registry to foreign projects written in go. You have to implement 2 interfaces, to get `http.Handler` which will be able to function with your system:
 

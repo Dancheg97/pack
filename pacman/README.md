@@ -1,4 +1,4 @@
-<h2 align="center">Go wrapper for arch package manager</h2>
+<h2 align="center">Go pacman</h2>
 
 This library aims to provide concurrent, stable and extensible interface to interact with arch package manager - pacman. Library is top-level wrapper and making direct calls to pacman, so it has to be installed on host machine.
 
