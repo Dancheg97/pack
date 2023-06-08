@@ -81,7 +81,7 @@ func Push(args []string, prms ...PushParameters) error {
 	}
 
 	for _, pp := range pprms {
-		err = push(pp, email, p.Protocol, p.Endpoint, p.Force)
+		err = push(pp, email)
 		if err != nil {
 			return err
 		}
@@ -100,7 +100,7 @@ func gnupgEmail() (string, error) {
 }
 
 // Check if all packages have registries where they will be pushed to.
-func checkRegistries(pkgs []RegistryPkg) error {
+func checkRegistries(pkgs []registrypkg) error {
 	for _, pkg := range pkgs {
 		if pkg.Registry == "" {
 			return errors.New(tmpl.Err + " provide registry to push package: " + pkg.Name)
@@ -111,8 +111,9 @@ func checkRegistries(pkgs []RegistryPkg) error {
 
 // Structure including base registry parameters and information about file
 // pathes requied to push packages.
-type PushPkg struct {
-	RegistryPkg
+type pushpkg struct {
+	registrypkg
+	PushParameters
 	// Name of the file which will be pushed.
 	Filename string
 	// Path to file which will be read and pushed.
@@ -142,13 +143,13 @@ func listPkgFilenames(dir string) ([]string, error) {
 
 type fillparams struct {
 	filenames []string
-	packages  []RegistryPkg
+	packages  []registrypkg
 	directory string
 }
 
 // Create array of package arguements, that will be pushed to registry.
-func fillfileinfo(p fillparams) ([]PushPkg, error) {
-	var ppkgs []PushPkg
+func fillfileinfo(p fillparams) ([]pushpkg, error) {
+	var ppkgs []pushpkg
 	for _, pkg := range p.packages {
 		for i := len(p.filenames) - 1; i >= 0; i-- {
 			filename := p.filenames[i]
@@ -165,8 +166,8 @@ func fillfileinfo(p fillparams) ([]PushPkg, error) {
 				if err != nil {
 					return nil, err
 				}
-				ppkgs = append(ppkgs, PushPkg{
-					RegistryPkg: pkg,
+				ppkgs = append(ppkgs, pushpkg{
+					registrypkg: pkg,
 					Filename:    filename,
 					PkgPath:     pkgpath,
 					Signature:   sigbase64,
@@ -208,7 +209,7 @@ func readpkgsign(path string) (string, error) {
 }
 
 // This function pushes package to registry via http.
-func push(p PushPkg, email string, protocol string, endpoint string, force bool) error {
+func push(p pushpkg, email string) error {
 	packagefile, err := os.Open(p.PkgPath)
 	if err != nil {
 		return err
@@ -220,7 +221,7 @@ func push(p PushPkg, email string, protocol string, endpoint string, force bool)
 
 	req, err := http.NewRequest(
 		http.MethodPut,
-		protocol+"://"+p.Registry+endpoint,
+		p.Protocol+"://"+p.Registry+p.Endpoint,
 		&ioprogress.Reader{
 			Reader:       packagefile,
 			Size:         fi.Size(),
@@ -238,7 +239,7 @@ func push(p PushPkg, email string, protocol string, endpoint string, force bool)
 	if p.Owner != "" {
 		req.Header.Add("owner", p.Owner)
 	}
-	if force {
+	if p.Force {
 		req.Header.Add("force", "true")
 	}
 

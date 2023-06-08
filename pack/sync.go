@@ -86,32 +86,32 @@ func Sync(args []string, prms ...SyncParameters) error {
 }
 
 // Pakcage with owner and registry for further pack operations.
-type RegistryPkg struct {
+type registrypkg struct {
 	Registry string
 	Owner    string
 	Name     string
 }
 
 // Format packages to pack compatible formats for operations with registries.
-func formatpkgs(pkgs []string) ([]RegistryPkg, []string, error) {
-	var rez []RegistryPkg
+func formatpkgs(pkgs []string) ([]registrypkg, []string, error) {
+	var rez []registrypkg
 	var fmtpkgs []string
 	for _, pkg := range pkgs {
 		splt := strings.Split(pkg, "/")
 		switch len(splt) {
 		case 1:
-			rez = append(rez, RegistryPkg{
+			rez = append(rez, registrypkg{
 				Name: splt[0],
 			})
 			fmtpkgs = append(fmtpkgs, pkg)
 		case 2:
-			rez = append(rez, RegistryPkg{
+			rez = append(rez, registrypkg{
 				Registry: splt[0],
 				Name:     splt[1],
 			})
 			fmtpkgs = append(fmtpkgs, pkg)
 		case 3:
-			rez = append(rez, RegistryPkg{
+			rez = append(rez, registrypkg{
 				Registry: splt[0],
 				Owner:    splt[1],
 				Name:     splt[2],
@@ -126,7 +126,7 @@ func formatpkgs(pkgs []string) ([]RegistryPkg, []string, error) {
 
 // Add missing registries to pacman configuration file and return file before
 // modifications.
-func prepareconf(pkgs []RegistryPkg, ow io.Writer) (*string, error) {
+func prepareconf(pkgs []registrypkg, ow io.Writer) (*string, error) {
 	f, err := os.ReadFile("/etc/pacman.conf")
 	if err != nil {
 		return nil, err
@@ -162,7 +162,7 @@ func checkexistsroot(conf string, registry string) bool {
 	return strings.Contains(conf, "\n["+registry+"]\n")
 }
 
-func addconfdb(pkg RegistryPkg, ow io.Writer) error {
+func addconfdb(pkg registrypkg, ow io.Writer) error {
 	var t string
 	if pkg.Owner == "" {
 		t = fmt.Sprintf(tmpl.RegistryRoot, pkg.Registry, pkg.Registry)
