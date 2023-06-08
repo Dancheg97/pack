@@ -65,11 +65,11 @@ var opts struct {
 	Garbage   bool `short:"g" long:"garbage"`
 
 	// Open options.
-	Name string `short:"n" long:"name" default:"localhost"`
-	Port string `short:"p" long:"port" default:"80"`
-	Cert string `long:"cert"`
-	Key  string `long:"key"`
-	Ring string `long:"ring" default:"/usr/share/pacman/keyrings/archlinux.gpg"`
+	Name   string `short:"n" long:"name" default:"localhost"`
+	Port   string `short:"p" long:"port" default:"80"`
+	Cert   string `long:"cert"`
+	Key    string `long:"key"`
+	GpgDir string `long:"gpgdir"`
 }
 
 func main() {
@@ -179,7 +179,7 @@ func main() {
 			Port:     opts.Port,
 			Cert:     opts.Cert,
 			Key:      opts.Key,
-			Ring:     opts.Ring,
+			GpgDir:   opts.GpgDir,
 		}))
 		return
 

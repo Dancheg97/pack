@@ -112,12 +112,12 @@ usage:  pack {-B --build} [options]`
 var OpenHelp = `Launch package registry
 
 options:
-	-d, --dir  <dir>  Exposed directory (default /var/cache/pacman/pkg)
-	-p, --port <port> Port to launch server (default 80)
-	    --cert <file> Certificate file for TLS server
-	    --key  <file> Key file for TLS server
-	    --ring <file> Keyring that will be used to validate package signatures
-	    --endpoint    Use custom API endpoint (default /api/pack)
+	-d, --dir      Exposed directory (default /var/cache/pacman/pkg)
+	-p, --port     Port to launch server (default 80)
+	    --cert     Certificate file for TLS server
+	    --key      Key file for TLS server
+	    --gpgdir   Directory containing files with GnuPG keys (sign validation)
+	    --endpoint Use custom API endpoint (default /api/pack)
 
 usage:  pack {-O --open} [options]`
 

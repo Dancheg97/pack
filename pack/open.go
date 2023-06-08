@@ -38,8 +38,9 @@ type OpenParameters struct {
 	Cert string
 	// Path to key file for TLS.
 	Key string
-	// Path to custom keyring, by default pacman keyring. (pacman-key -e)
-	Ring string
+	// Path to custom directory, which contains files with public GnuPG keys,
+	// which will further be used to validate pushed packages.
+	GpgDir string
 }
 
 func opendefault() *OpenParameters {
@@ -49,7 +50,6 @@ func opendefault() *OpenParameters {
 		Stdin:    os.Stdin,
 		Endpoint: "/api/pack",
 		Dir:      "/var/cache/pacman/pkg",
-		Ring:     "/usr/share/pacman/keyrings/archlinux.gpg",
 		Name:     "localhost",
 		Port:     "8080",
 	}
@@ -63,8 +63,8 @@ func Open(prms ...OpenParameters) error {
 		DbName: p.Name,
 	}
 
-	k := server.LocalKeyring{
-		File: p.Ring,
+	k := server.LocalGpgDir{
+		GpgDir: p.GpgDir,
 	}
 
 	s := server.Pusher{

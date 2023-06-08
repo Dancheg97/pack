@@ -3,9 +3,4 @@ src/**
 pkgs/**
 **.pkg.tar.zst
 **.pkg.tar.zst.sig
-.vscode
-packbin
-key.pem
-cert.pem
-docker/**
-p
+**.gpg

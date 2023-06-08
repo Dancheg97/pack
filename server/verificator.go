@@ -9,15 +9,17 @@ import (
 	"errors"
 	"io"
 	"os"
+	"path"
 
 	"github.com/ProtonMail/gopenpgp/v2/crypto"
 )
 
 // Local keyring can serve as GPG verificator for local package server. It
 // requires path to specific keyring file.
-type LocalKeyring struct {
-	// Path to file containing GnuPG keyring.
-	File string
+type LocalGpgDir struct {
+	// Path to directory containing GnuPG files related to emails by name.
+	// Example /folder/name@email.md.gpg
+	GpgDir string
 }
 
 // Parameters for package verification.
@@ -28,8 +30,8 @@ type VerificationParameters struct {
 	Signature []byte
 }
 
-func (l *LocalKeyring) Verify(p VerificationParameters) ([]byte, error) {
-	f, err := os.Open(l.File)
+func (l *LocalGpgDir) Verify(p VerificationParameters) ([]byte, error) {
+	f, err := os.Open(path.Join(l.GpgDir, p.Email+".gpg"))
 	if err != nil {
 		return nil, err
 	}

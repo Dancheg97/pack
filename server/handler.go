@@ -75,7 +75,7 @@ func (p *Pusher) Push(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	p.Stdout.Write([]byte(fmt.Sprintf("[%s] - %s", tmpl.Accepted, filename)))
+	p.Stdout.Write([]byte(fmt.Sprintf("[%s] - %s\n", tmpl.Accepted, filename)))
 	w.WriteHeader(http.StatusOK)
 }
 

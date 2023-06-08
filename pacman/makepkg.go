@@ -73,7 +73,7 @@ type MakepkgOptions struct {
 	SkipCheckSums bool
 	// Do not perform any verification checks on source files. [--skipinteg]
 	SkipIntegrityChecks bool
-	// Do not verify source files with PGP signatures. [--skippgpcheck]
+	// Do not verify source files with GPG signatures. [--skippgpcheck]
 	SkipPgpCheck bool
 	// Do not reinstall up to date packages. [--needed]
 	Needed bool
