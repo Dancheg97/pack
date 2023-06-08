@@ -28,28 +28,28 @@ type VerificationParameters struct {
 	Signature []byte
 }
 
-func (l *LocalKeyring) Verify(p VerificationParameters) error {
+func (l *LocalKeyring) Verify(p VerificationParameters) ([]byte, error) {
 	f, err := os.Open(l.File)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	pgpkey, err := crypto.NewKeyFromArmoredReader(f)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	pgpsig := crypto.NewPGPSignature(p.Signature)
 
 	msg, err := io.ReadAll(p.PkgReader)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	pgpmes := crypto.NewPlainMessage(msg)
 
 	keyring, err := crypto.NewKeyRing(pgpkey)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	var found bool
@@ -59,8 +59,8 @@ func (l *LocalKeyring) Verify(p VerificationParameters) error {
 		}
 	}
 	if !found {
-		return errors.New("unable to find email in keyring identities")
+		return nil, errors.New("unable to find email in keyring identities")
 	}
 
-	return keyring.VerifyDetached(pgpmes, pgpsig, crypto.GetUnixTime())
+	return msg, keyring.VerifyDetached(pgpmes, pgpsig, crypto.GetUnixTime())
 }
