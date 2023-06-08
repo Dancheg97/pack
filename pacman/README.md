@@ -74,7 +74,7 @@ func main() {
 }
 ```
 
-- `RepoAdd` - add package to local repository
+- `RepoAdd` - add package to local database
 
 ```go
 import "fmnx.su/dancheg97/pacman"

@@ -39,8 +39,8 @@ func init() {
 var Help = `Simplified version of pacman
 
 operations:
-	pack {-S --sync}   [options] [repository/owner/package(s)]
-	pack {-P --push}   [options] [repository/owner/package(s)]
+	pack {-S --sync}   [options] [registry/(owner)/package(s)]
+	pack {-P --push}   [options] [registry/(owner)/package(s)]
 	pack {-R --remove} [options] [package(s)]
 	pack {-Q --query}  [options] [package(s)]
 	pack {-B --build}  [options]
@@ -109,7 +109,7 @@ options:
 
 usage:  pack {-B --build} [options]`
 
-var OpenHelp = `Open package registry web-server
+var OpenHelp = `Launch package registry
 
 options:
 	-d, --dir  <dir>  Exposed directory (default /var/cache/pacman/pkg)
@@ -122,15 +122,14 @@ usage:  pack {-O --open} [options]`
 
 var Version = `
 $$$$$$\   $$$$$$\   $$$$$$$\  $$ |  $$\             Pack - package manager.
-$$  __$$\  \____$$\ $$  _____|$$ | $$  |          Copyright (C) 2023 FMNX team
+$$  __$$\  \____$$\ $$  ____| $$ | $$  |          Copyright (C) 2023 FMNX team
 $$ /  $$ | $$$$$$$ |$$ /      $$$$$$  / 
 $$ |  $$ |$$  __$$ |$$ |      $$  _$$\   This program may be freely redistributed under
 $$$$$$$  |\$$$$$$$ |\$$$$$$$\ $$ | \$$\   the terms of the GNU General Public License.
 $$  ____/  \_______| \_______|\__|  \__|      Web page: https://fmnx.su/core/pack
-$$ |                                           
+$$ |
 $$ |                                                    Version: 0.4.5
-\__|
-`
+\__|`
 
 var Dots = color.New(color.FgWhite, color.Bold, color.FgHiBlue).Sprintf("::")
 var DbAdded = color.New(color.FgWhite, color.Bold).Sprintf(" Database added: ")

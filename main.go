@@ -202,7 +202,7 @@ func main() {
 // Herlper function to exit on unexpected errors.
 func CheckErr(err error) {
 	if err != nil {
-		fmt.Println(tmpl.Err + " " + err.Error())
+		fmt.Println(tmpl.Err + err.Error())
 		os.Exit(1)
 	}
 }
