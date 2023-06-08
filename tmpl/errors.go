@@ -39,4 +39,4 @@ Authority you defined in GnuPG is not matching with PACKAGER variable in
 
 ` + color.BlueString("PACKAGER") + `=` + color.HiMagentaString("John Doe <john@doe.com>\n")
 
-var Err = color.RedString("error: ")
+var Err = color.New(color.Bold, color.FgHiRed).Sprintf("error: ")

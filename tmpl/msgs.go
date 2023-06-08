@@ -125,6 +125,6 @@ var Version = color.CyanString("    _.._      _.._") + `
     ` + color.CyanString(`\   / () \   /`) + `         Web page: https://fmnx.su/core/pack
     ` + color.CyanString(` \_/      \_/`) + `                   Version: 0.3`
 
-var Dots = color.CyanString("::")
-var DbAdded = color.New(color.FgWhite).Add(color.Bold).Sprintf(" Database added: ")
-var SigAccess = color.New(color.FgWhite).Add(color.Bold).Sprintf(" Reading package signature: ")
+var Dots = color.New(color.FgWhite, color.Bold, color.FgHiBlue).Sprintf("::")
+var DbAdded = color.New(color.FgWhite, color.Bold).Sprintf(" Database added: ")
+var SigAccess = color.New(color.FgWhite, color.Bold).Sprintf(" Reading package signature: ")

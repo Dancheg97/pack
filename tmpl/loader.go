@@ -15,14 +15,13 @@ import (
 )
 
 func Loader(registry string, owner string, pkg string) func(int64, int64) error {
-	dots := color.New(color.FgWhite).Add(color.Bold, color.FgHiBlue).Sprintf(" :: ")
-	pre := dots + color.New(color.FgWhite).Add(color.Bold).Sprintf("Pushing: ")
-	done := dots + color.New(color.FgWhite).Add(color.Bold).Sprintf("Pushed:  ")
+	pre := Dots + color.New(color.Bold).Sprintf(" Pushing package:  ")
+	done := Dots + color.New(color.Bold).Sprintf(" Package uploaded: ")
 	pkg = path.Join(registry, owner, pkg)
 	return bar.DrawTerminalf(os.Stdout, func(progress, total int64) string {
 		prg := float32(progress) / float32(total)
 		switch {
-		case prg > 0.995:
+		case prg > 0.999:
 			return fmt.Sprintf("%s[=======================================] %s", done, pkg)
 		case prg > 0.975:
 			return fmt.Sprintf("%s[======================================>] %s", pre, pkg)

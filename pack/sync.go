@@ -174,7 +174,7 @@ func addconfdb(pkg RegistryPkg, ow io.Writer) error {
 	if err != nil {
 		return errors.New(tmpl.Err + " unable to add to pacman.conf: " + t)
 	}
-	ow.Write([]byte(tmpl.Dots + tmpl.DbAdded + pkg.Registry)) //nolint
+	ow.Write([]byte(tmpl.Dots + tmpl.DbAdded + pkg.Registry + "\n")) //nolint
 	return nil
 }
 
