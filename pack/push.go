@@ -222,7 +222,7 @@ func push(p PushPkg, email string, protocol string, endpoint string) error {
 			Reader:       packagefile,
 			Size:         fi.Size(),
 			DrawFunc:     tmpl.Loader(p.Registry, p.Owner, p.Name),
-			DrawInterval: time.Millisecond,
+			DrawInterval: time.Nanosecond * 1000,
 		},
 	)
 	if err != nil {
