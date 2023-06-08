@@ -25,4 +25,4 @@ WORKDIR /home
 COPY --from=build /src/packbin /usr/bin/pack
 
 ENTRYPOINT ["pack"]
-CMD ["serve"]
+CMD ["-O"]

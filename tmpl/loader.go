@@ -21,7 +21,7 @@ func Loader(registry string, owner string, pkg string) func(int64, int64) error 
 	return bar.DrawTerminalf(os.Stdout, func(progress, total int64) string {
 		prg := float32(progress) / float32(total)
 		switch {
-		case prg > 0.9999:
+		case prg > 0.999:
 			return fmt.Sprintf("%s[=======================================] %s", done, pkg)
 		case prg > 0.975:
 			return fmt.Sprintf("%s[======================================>] %s", pre, pkg)

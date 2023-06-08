@@ -4,3 +4,4 @@ pkgs/**
 **.pkg.tar.zst
 **.pkg.tar.zst.sig
 **.gpg
+docker/**

@@ -114,6 +114,7 @@ var OpenHelp = `Launch package registry
 options:
 	-d, --dir      Exposed directory (default /var/cache/pacman/pkg)
 	-p, --port     Port to launch server (default 80)
+	-n, --name     Name of registry database (default localhost)
 	    --cert     Certificate file for TLS server
 	    --key      Key file for TLS server
 	    --gpgdir   Directory containing files with GnuPG keys (sign validation)
