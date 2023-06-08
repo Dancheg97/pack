@@ -23,10 +23,15 @@ type Pusher struct {
 	DbFormer DbFormer
 }
 
+// An interface, that can check that package is signed by valid email and GnuPG
+// key belogns to required keyring/exists in other trusted source for specified
+// package owner.
 type GPGVireivicator interface {
 	Verify(owner string, email string, pkg io.Reader, sign []byte) error
 }
 
+// Interface, that accepts package bytes body, writes signature and forms
+// database with new packages.
 type DbFormer interface {
 	AddPkg(pkg io.Reader, sign []byte, filename string, force bool) error
 }
@@ -66,22 +71,6 @@ func (p *Pusher) end(w http.ResponseWriter, status int, msg string) {
 	w.WriteHeader(status)
 	w.Write(msgbytes) //nolint
 }
-
-// // Structure, that allows to create handler for incoming arch packages
-// // push requests.
-// type PushHandler struct {
-// 	// Direcotry, where push handler will store the resulting packages.
-// 	CacheDir string
-
-// 	// Public key source, get public key related to specific user. If not
-// 	// provided default gnupg signature verification scheme will be used.
-// 	PubkeySource
-
-// 	// Subdir source, if enabled packages would be created in subdirectories
-// 	// instead of base directory, allowing
-// 	// SubdirSource
-
-// }
 
 // func (p *PushHandler) Push(w http.ResponseWriter, r *http.Request) {
 // 	ep := weberrwriter{respWriter: w, logger: p.ErrLogger}
