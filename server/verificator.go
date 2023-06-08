@@ -6,6 +6,7 @@
 package server
 
 import (
+	"errors"
 	"io"
 	"os"
 
@@ -19,7 +20,15 @@ type LocalKeyring struct {
 	File string
 }
 
-func (l *LocalKeyring) Verify(owner string, email string, pkg io.Reader, sign []byte) error {
+// Parameters for package verification.
+type VerificationParameters struct {
+	Email     string
+	Owner     string
+	PkgReader io.Reader
+	Signature []byte
+}
+
+func (l *LocalKeyring) Verify(p VerificationParameters) error {
 	f, err := os.Open(l.File)
 	if err != nil {
 		return err
@@ -30,9 +39,9 @@ func (l *LocalKeyring) Verify(owner string, email string, pkg io.Reader, sign []
 		return err
 	}
 
-	pgpsig := crypto.NewPGPSignature(sign)
+	pgpsig := crypto.NewPGPSignature(p.Signature)
 
-	msg, err := io.ReadAll(pkg)
+	msg, err := io.ReadAll(p.PkgReader)
 	if err != nil {
 		return err
 	}
@@ -41,6 +50,16 @@ func (l *LocalKeyring) Verify(owner string, email string, pkg io.Reader, sign []
 	keyring, err := crypto.NewKeyRing(pgpkey)
 	if err != nil {
 		return err
+	}
+
+	var found bool
+	for _, idnt := range keyring.GetIdentities() {
+		if idnt.Email == p.Email {
+			found = true
+		}
+	}
+	if !found {
+		return errors.New("unable to find email in keyring identities")
 	}
 
 	return keyring.VerifyDetached(pgpmes, pgpsig, crypto.GetUnixTime())

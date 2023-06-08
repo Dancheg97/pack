@@ -25,15 +25,15 @@ type Pusher struct {
 
 // An interface, that can check that package is signed by valid email and GnuPG
 // key belogns to required keyring/exists in other trusted source for specified
-// package owner.
+// package owner. Verificator returns bytes of package it have verified.
 type GPGVireivicator interface {
-	Verify(owner string, email string, pkg io.Reader, sign []byte) error
+	Verify(p VerificationParameters) ([]byte, error)
 }
 
 // Interface, that accepts package bytes body, writes signature and forms
 // database with new packages.
 type DbFormer interface {
-	AddPkg(pkg io.Reader, sign []byte, filename string, force bool) error
+	AddPkg(p AddPkgParameters) error
 }
 
 // Handler that can be used to upload user packages.
@@ -44,19 +44,29 @@ func (p *Pusher) Push(w http.ResponseWriter, r *http.Request) {
 	force := r.Header.Get("force") == "true"
 	owner := r.Header.Get("owner")
 
-	sigdata, err := base64.StdEncoding.DecodeString(sign)
+	sigbytes, err := base64.StdEncoding.DecodeString(sign)
 	if err != nil {
 		p.end(w, http.StatusInternalServerError, "unable to decode signature")
 		return
 	}
 
-	err = p.GPGVireivicator.Verify(owner, email, r.Body, sigdata)
+	pkgbytes, err := p.GPGVireivicator.Verify(VerificationParameters{
+		Email:     email,
+		Owner:     owner,
+		PkgReader: r.Body,
+		Signature: sigbytes,
+	})
 	if err != nil {
 		p.end(w, http.StatusUnauthorized, err.Error())
 		return
 	}
 
-	err = p.DbFormer.AddPkg(r.Body, sigdata, filename, force)
+	err = p.DbFormer.AddPkg(AddPkgParameters{
+		Package:  pkgbytes,
+		Sign:     sigbytes,
+		Filename: filename,
+		Force:    force,
+	})
 	if err != nil {
 		p.end(w, http.StatusInternalServerError, err.Error())
 		return

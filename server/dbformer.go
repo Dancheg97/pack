@@ -5,10 +5,33 @@
 
 package server
 
-// const (
-// 	pkgext = ".pkg.tar.zst"
-// 	dbext  = ".db.tar.gz"
-// )
+import (
+	"os"
+	"path"
+)
+
+// This implementation can be used to create local directory for packages and
+// add packages to database with a function.
+type LocalDirDb struct {
+	Dir string
+}
+
+// Parameters required to add package to pacman database.
+type AddPkgParameters struct {
+	Package  []byte
+	Sign     []byte
+	Filename string
+	Force    bool
+}
+
+func (d *LocalDirDb) AddPkg(p AddPkgParameters) error {
+	err := os.WriteFile(path.Join(d.Dir, p.Filename), p.Package, 0600)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
 
 // // Parameters for directory db watcher.
 // type PkgDirDaemon struct {
