@@ -165,9 +165,9 @@ func checkexistsroot(conf string, registry string) bool {
 func addconfdb(pkg registrypkg, ow io.Writer) error {
 	var t string
 	if pkg.Owner == "" {
-		t = fmt.Sprintf(tmpl.RegistryRoot, pkg.Registry, pkg.Registry)
+		t = fmt.Sprintf(confroot, pkg.Registry, pkg.Registry)
 	} else {
-		t = fmt.Sprintf(tmpl.RegistryUser, pkg.Registry, pkg.Owner, pkg.Registry)
+		t = fmt.Sprintf(confuser, pkg.Registry, pkg.Owner, pkg.Registry)
 	}
 	command := "cat <<EOF >> /etc/pacman.conf" + t + "EOF"
 	err := exec.Command("sudo", "bash", "-c", command).Run()
@@ -184,3 +184,13 @@ func rollbackconf(s string) {
 		"cat <<EOF > /etc/pacman.conf\n"+s+"EOF",
 	).Run() //nolint
 }
+
+const confroot = `
+[%s]
+Server = https://%s/api/pack
+`
+
+const confuser = `
+[%s.%s]
+Server = https://%s/api/pack
+`

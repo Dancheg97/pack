@@ -42,6 +42,7 @@ func opendefault() *OpenParameters {
 		Stdin:    os.Stdin,
 		Endpoint: "/api/pack",
 		Dir:      "/var/cache/pacman/pkg",
+		Ring:     "/usr/share/pacman/keyrings/archlinux.gpg",
 		Name:     "localhost",
 		Port:     "8080",
 	}

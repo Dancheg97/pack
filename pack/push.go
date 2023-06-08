@@ -94,7 +94,7 @@ func Push(args []string, prms ...PushParameters) error {
 func gnupgEmail() (string, error) {
 	gnupgident, err := gnuPGIdentity()
 	if err != nil {
-		return ``, errors.New(tmpl.Err + " unable to get GnuPG email: " + err.Error())
+		return ``, err
 	}
 	return strings.ReplaceAll(strings.Split(gnupgident, "<")[1], ">", ""), nil
 }

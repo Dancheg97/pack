@@ -129,7 +129,8 @@ func gnuPGIdentity() (string, error) {
 	cmd.Stderr = &b
 	err := cmd.Run()
 	if err != nil {
-		return ``, errors.New("unable to get gnupg identity: " + b.String())
+		o := b.String()
+		return ``, errors.New(tmpl.Err + "unable to get gnupg identity: " + o)
 	}
 	return strings.ReplaceAll(b.String(), "\n", ""), nil
 }

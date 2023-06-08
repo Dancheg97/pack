@@ -120,13 +120,17 @@ options:
 
 usage:  pack {-O --open} [options]`
 
-var Version = color.CyanString("    _.._      _.._") + `
-  ` + color.CyanString(`:'    \    /    ';`) + `            Pack - package manager.
-  ` + color.CyanString(`(  '-. \()/_.-'  )`) + `         Copyright (C) 2023 FMNX team
-   ` + color.CyanString(`\   (__()__)   /`) + `   This program may be freely redistributed under
-    ` + color.CyanString(`),'  /()\  ',(`) + `     the terms of the GNU General Public License.
-    ` + color.CyanString(`\   / () \   /`) + `         Web page: https://fmnx.su/core/pack
-    ` + color.CyanString(` \_/      \_/`) + `                   Version: 0.3`
+var Version = `
+$$$$$$\   $$$$$$\   $$$$$$$\  $$ |  $$\             Pack - package manager.
+$$  __$$\  \____$$\ $$  _____|$$ | $$  |          Copyright (C) 2023 FMNX team
+$$ /  $$ | $$$$$$$ |$$ /      $$$$$$  / 
+$$ |  $$ |$$  __$$ |$$ |      $$  _$$\   This program may be freely redistributed under
+$$$$$$$  |\$$$$$$$ |\$$$$$$$\ $$ | \$$\   the terms of the GNU General Public License.
+$$  ____/  \_______| \_______|\__|  \__|      Web page: https://fmnx.su/core/pack
+$$ |                                           
+$$ |                                                 Version: 0.4.5
+\__|
+`
 
 var Dots = color.New(color.FgWhite, color.Bold, color.FgHiBlue).Sprintf("::")
 var DbAdded = color.New(color.FgWhite, color.Bold).Sprintf(" Database added: ")
