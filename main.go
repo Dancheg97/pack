@@ -169,6 +169,19 @@ func main() {
 		return
 
 	case opts.Open:
+		CheckErr(pack.Open(pack.OpenParameters{
+			Stdout:       os.Stdout,
+			Stderr:       os.Stderr,
+			Stdin:        os.Stdin,
+			FsEndpoint:   "/api/pack",
+			PushEndpoint: "/api/pack/push",
+			Dir:          opts.Dir,
+			Name:         opts.Name,
+			Port:         opts.Port,
+			Cert:         opts.Cert,
+			Key:          opts.Key,
+			Ring:         opts.Ring,
+		}))
 		return
 
 	case opts.Version:
@@ -189,7 +202,7 @@ func main() {
 // Herlper function to exit on unexpected errors.
 func CheckErr(err error) {
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println(tmpl.Err + " " + err.Error())
 		os.Exit(1)
 	}
 }

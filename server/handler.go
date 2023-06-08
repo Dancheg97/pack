@@ -7,8 +7,11 @@ package server
 
 import (
 	"encoding/base64"
+	"fmt"
 	"io"
 	"net/http"
+
+	"fmnx.su/core/pack/tmpl"
 )
 
 // Parameters required to get http.Pusher.
@@ -46,7 +49,7 @@ func (p *Pusher) Push(w http.ResponseWriter, r *http.Request) {
 
 	sigbytes, err := base64.StdEncoding.DecodeString(sign)
 	if err != nil {
-		p.end(w, http.StatusInternalServerError, "unable to decode signature")
+		p.end(w, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -57,7 +60,7 @@ func (p *Pusher) Push(w http.ResponseWriter, r *http.Request) {
 		Signature: sigbytes,
 	})
 	if err != nil {
-		p.end(w, http.StatusUnauthorized, err.Error())
+		p.end(w, http.StatusUnauthorized, err)
 		return
 	}
 
@@ -68,16 +71,18 @@ func (p *Pusher) Push(w http.ResponseWriter, r *http.Request) {
 		Force:    force,
 	})
 	if err != nil {
-		p.end(w, http.StatusInternalServerError, err.Error())
+		p.end(w, http.StatusInternalServerError, err)
 		return
 	}
+
+	p.Stdout.Write([]byte(fmt.Sprintf("[%s] - %s", tmpl.Accepted, filename)))
 	w.WriteHeader(http.StatusOK)
 }
 
 // Write header, log error and end request.
-func (p *Pusher) end(w http.ResponseWriter, status int, msg string) {
-	msgbytes := []byte(msg)
-	p.Stderr.Write(msgbytes) //nolint
+func (p *Pusher) end(w http.ResponseWriter, status int, msg error) {
+	errmsg := []byte(tmpl.Err + " " + msg.Error())
+	p.Stderr.Write(errmsg)
 	w.WriteHeader(status)
-	w.Write(msgbytes) //nolint
+	w.Write(errmsg)
 }

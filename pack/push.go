@@ -103,7 +103,7 @@ func gnupgEmail() (string, error) {
 func checkRegistries(pkgs []registrypkg) error {
 	for _, pkg := range pkgs {
 		if pkg.Registry == "" {
-			return errors.New(tmpl.Err + " provide registry to push package: " + pkg.Name)
+			return errors.New("provide registry to push package: " + pkg.Name)
 		}
 	}
 	return nil
@@ -175,9 +175,7 @@ func fillfileinfo(p fillparams) ([]pushpkg, error) {
 				break
 			}
 			if i == 0 {
-				return nil, errors.New(tmpl.Err +
-					" unable to find push package: " + pkg.Name,
-				)
+				return nil, errors.New("unable to find package: " + pkg.Name)
 			}
 		}
 	}
@@ -188,22 +186,20 @@ func fillfileinfo(p fillparams) ([]pushpkg, error) {
 func ejectpkgname(filename string) (string, error) {
 	pkgsplt := strings.Split(filename, "-")
 	if len(pkgsplt) < 4 {
-		return ``, errors.New(tmpl.Err + " package file is not valid: " + filename)
+		return ``, errors.New("not valid package file name: " + filename)
 	}
 	return strings.Join(pkgsplt[:len(pkgsplt)-3], "-"), nil
 }
 
 // Read package signature and encode to base64.
 func readpkgsign(path string) (string, error) {
-	err := exec.Command("bash", "-c", "sudo chmod 0777 "+path).Run() //nolint
+	err := exec.Command("bash", "-c", "sudo chmod 0777 "+path).Run()
 	if err != nil {
-		return ``, errors.New(tmpl.Err + " unable to read signature: " +
-			path + " " + err.Error())
+		return ``, errors.New("unable to read signature: " + path)
 	}
 	sigbytes, err := os.ReadFile(path)
 	if err != nil {
-		return ``, errors.New(tmpl.Err + " unable to read signature: " +
-			path + " " + err.Error())
+		return ``, errors.New("unable to read signature: " + path)
 	}
 	return base64.StdEncoding.EncodeToString(sigbytes), nil
 }
@@ -251,9 +247,9 @@ func push(p pushpkg, email string) error {
 	if resp.StatusCode != http.StatusOK {
 		b, err := io.ReadAll(resp.Body)
 		if err != nil {
-			return errors.Join(err, errors.New(tmpl.Err+resp.Status))
+			return errors.Join(err, errors.New(resp.Status))
 		}
-		return fmt.Errorf("%s%s, %s - %s", tmpl.Err, resp.Status, string(b), p.Filename)
+		return fmt.Errorf("%s, %s - %s", resp.Status, string(b), p.Filename)
 	}
 	return nil
 }

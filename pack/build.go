@@ -77,7 +77,7 @@ func Build(prms ...BuildParameters) error {
 		return err
 	}
 
-	return exec.Command("bash", "-c", "sudo mv *.pkg.tar.zst* "+p.Dir).Run() //nolint
+	return exec.Command("bash", "-c", "sudo mv *.pkg.tar.zst* "+p.Dir).Run()
 }
 
 // Ensure, that user have created gnupg keys for package signing before package
@@ -130,7 +130,7 @@ func gnuPGIdentity() (string, error) {
 	err := cmd.Run()
 	if err != nil {
 		o := b.String()
-		return ``, errors.New(tmpl.Err + "unable to get gnupg identity: " + o)
+		return ``, errors.New("unable to get gnupg identity: " + o)
 	}
 	return strings.ReplaceAll(b.String(), "\n", ""), nil
 }

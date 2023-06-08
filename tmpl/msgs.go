@@ -135,3 +135,5 @@ $$ |                                                    Version: 0.4.5
 var Dots = color.New(color.FgWhite, color.Bold, color.FgHiBlue).Sprintf("::")
 var DbAdded = color.New(color.FgWhite, color.Bold).Sprintf(" Database added: ")
 var SigAccess = color.New(color.FgWhite, color.Bold).Sprintf(" Reading package signature: ")
+var Accepted = color.New(color.Bold, color.FgHiGreen).Sprintf("accepted")
+var Launching = color.New(color.Bold, color.Bold).Sprintf("Launching pack server: ")

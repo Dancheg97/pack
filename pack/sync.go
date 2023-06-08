@@ -118,7 +118,7 @@ func formatpkgs(pkgs []string) ([]registrypkg, []string, error) {
 			})
 			fmtpkgs = append(fmtpkgs, splt[0]+"/"+splt[2])
 		default:
-			return nil, nil, errors.New(tmpl.Err + " broken package: " + pkg)
+			return nil, nil, errors.New("broken package: " + pkg)
 		}
 	}
 	return rez, fmtpkgs, nil
@@ -172,17 +172,17 @@ func addconfdb(pkg registrypkg, ow io.Writer) error {
 	command := "cat <<EOF >> /etc/pacman.conf" + t + "EOF"
 	err := exec.Command("sudo", "bash", "-c", command).Run()
 	if err != nil {
-		return errors.New(tmpl.Err + " unable to add to pacman.conf: " + t)
+		return errors.New("unable to add to pacman.conf: " + t)
 	}
-	ow.Write([]byte(tmpl.Dots + tmpl.DbAdded + pkg.Registry + "\n")) //nolint
+	ow.Write([]byte(tmpl.Dots + tmpl.DbAdded + pkg.Registry + "\n"))
 	return nil
 }
 
 func rollbackconf(s string) {
-	exec.Command( //nolint
+	exec.Command(
 		"sudo", "bash", "-c",
 		"cat <<EOF > /etc/pacman.conf\n"+s+"EOF",
-	).Run() //nolint
+	).Run()
 }
 
 const confroot = `

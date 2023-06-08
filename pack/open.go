@@ -6,11 +6,13 @@
 package pack
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"os"
 
 	"fmnx.su/core/pack/server"
+	"fmnx.su/core/pack/tmpl"
 )
 
 // Parameters to run pack registry.
@@ -82,11 +84,14 @@ func Open(prms ...OpenParameters) error {
 	fs := http.FileServer(http.Dir(p.Dir))
 	http.Handle(p.FsEndpoint, http.StripPrefix(p.FsEndpoint, fs))
 
+	startmes := fmt.Sprintf("%s %s%s\n", tmpl.Dots, tmpl.Launching, p.Name)
+	p.Stdout.Write([]byte(startmes))
+
 	if p.Cert != "" && p.Key != "" {
-		return http.ListenAndServeTLS( //nolint
+		return http.ListenAndServeTLS(
 			":"+p.Port, p.Cert, p.Key,
 			http.DefaultServeMux,
 		)
 	}
-	return http.ListenAndServe(":"+p.Port, http.DefaultServeMux) //nolint
+	return http.ListenAndServe(":"+p.Port, http.DefaultServeMux)
 }
