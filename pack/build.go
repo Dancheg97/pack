@@ -48,21 +48,26 @@ func builddefault() *BuildParameters {
 // Build package in current directory with provided arguements
 func Build(prms ...BuildParameters) error {
 	p := formOptions(prms, builddefault)
+	tmpl.Amsg(p.Stdout, "Building package")
 
+	tmpl.Smsg(p.Stdout, "Running GnuPG check", 1, 4)
 	err := checkGnupg()
 	if err != nil {
 		return err
 	}
 
+	tmpl.Smsg(p.Stdout, "Validating packager identity", 2, 3)
 	err = validatePackager()
 	if err != nil {
 		return err
 	}
 
+	var b bytes.Buffer
+	tmpl.Smsg(p.Stdout, "Calling makepkg", 3, 3)
 	err = pacman.Makepkg(pacman.MakepkgOptions{
 		Sign:       true,
 		Stdout:     p.Stdout,
-		Stderr:     p.Stderr,
+		Stderr:     p.Stdout,
 		Stdin:      p.Stdin,
 		Clean:      !p.Garbage,
 		CleanBuild: !p.Garbage,
@@ -74,10 +79,18 @@ func Build(prms ...BuildParameters) error {
 		NoConfirm:  p.Quick,
 	})
 	if err != nil {
-		return err
+		return errors.Join(err, errors.New(b.String()))
 	}
 
-	return exec.Command("bash", "-c", "sudo mv *.pkg.tar.zst* "+p.Dir).Run()
+	tmpl.Amsg(p.Stdout, "Moving package to cache")
+	b.Reset()
+	cmd := exec.Command("bash", "-c", "sudo mv *.pkg.tar.zst* "+p.Dir)
+	cmd.Stderr = &b
+	err = cmd.Run()
+	if err != nil {
+		return errors.Join(err, errors.New(b.String()))
+	}
+	return nil
 }
 
 // Ensure, that user have created gnupg keys for package signing before package

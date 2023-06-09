@@ -157,14 +157,14 @@ func main() {
 
 	case opts.Build:
 		CheckErr(pack.Build(pack.BuildParameters{
+			Stdout:    os.Stdout,
+			Stderr:    os.Stderr,
+			Stdin:     os.Stdin,
 			Quick:     opts.Quick,
 			Dir:       opts.Dir,
 			Syncbuild: opts.Syncbuild,
 			Rmdeps:    opts.Rmdeps,
 			Garbage:   opts.Garbage,
-			Stdout:    os.Stdout,
-			Stderr:    os.Stderr,
-			Stdin:     os.Stdin,
 		}))
 		return
 

@@ -65,7 +65,7 @@ pack -Pf example.com/group/package
 sudo pack -O
 ```
 
-### Pack server
+### Registry
 
 It is recommend to use container environment for security purposes, also that makes deploy much easier with `docker-compose`. Docker compose example:
 
@@ -104,7 +104,7 @@ pack -S --protocol http package
 
 If're not familiar with docker, you can launch server with `-O` command on your machine.
 
-### Pack library
+### Libraries
 
 Pack provides 3 libraries for go language:
 

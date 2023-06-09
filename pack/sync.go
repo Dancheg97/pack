@@ -14,7 +14,6 @@ import (
 	"strings"
 
 	"fmnx.su/core/pack/pacman"
-	"fmnx.su/core/pack/tmpl"
 )
 
 // Syncronize packages with pack.
@@ -177,7 +176,7 @@ func addconfdb(pkg registrypkg, ow io.Writer, protocol string) error {
 	if err != nil {
 		return errors.New("unable to add to pacman.conf: " + t)
 	}
-	ow.Write([]byte(tmpl.Dots + tmpl.DbAdded + pkg.Registry + "\n"))
+	// ow.Write([]byte(tmpl.Dots + tmpl.DbAdded + pkg.Registry + "\n"))
 	return nil
 }
 

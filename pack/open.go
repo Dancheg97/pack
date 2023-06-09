@@ -83,9 +83,8 @@ func Open(prms ...OpenParameters) error {
 	http.Handle(p.Endpoint, http.StripPrefix(p.Endpoint, fs))
 	http.HandleFunc(p.Endpoint+"/push", s.Push)
 
-	startmes := fmt.Sprintf("%s %s%s\n", tmpl.Dots, tmpl.Launching, p.Name)
-	p.Stdout.Write([]byte(startmes))
-
+	msg := fmt.Sprintf("Starting server %s on port %s", p.Name, p.Port)
+	tmpl.Amsg(p.Stdout, msg)
 	if p.Cert != "" && p.Key != "" {
 		return http.ListenAndServeTLS(
 			":"+p.Port, p.Cert, p.Key,

@@ -35,7 +35,7 @@ type VerificationParameters struct {
 func (l *LocalGpgDir) Verify(p VerificationParameters) ([]byte, error) {
 	f, err := os.Open(path.Join(l.GpgDir, p.Owner, p.Email+".gpg"))
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(errors.New("user don't have rights"), err)
 	}
 
 	pgpkey, err := crypto.NewKeyFromArmoredReader(f)

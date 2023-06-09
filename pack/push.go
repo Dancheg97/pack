@@ -50,26 +50,32 @@ func pushdefault() *PushParameters {
 func Push(args []string, prms ...PushParameters) error {
 	p := formOptions(prms, pushdefault)
 
+	tmpl.Amsg(p.Stdout, "Preparing package push")
+
 	email, err := gnupgEmail()
 	if err != nil {
 		return err
 	}
+	tmpl.Smsg(p.Stdout, "Pushing as: "+email, 1, 4)
 
 	pkgs, _, err := formatpkgs(args)
 	if err != nil {
 		return err
 	}
 
+	tmpl.Smsg(p.Stdout, "Checking provided registries", 2, 4)
 	err = checkRegistries(pkgs)
 	if err != nil {
 		return err
 	}
 
+	tmpl.Smsg(p.Stdout, "Getting required files", 3, 4)
 	filenames, err := listPkgFilenames(p.Directory)
 	if err != nil {
 		return err
 	}
 
+	tmpl.Smsg(p.Stdout, "Preparing push metadata", 4, 4)
 	pprms, err := fillfileinfo(fillparams{
 		filenames: filenames,
 		packages:  pkgs,
@@ -79,10 +85,11 @@ func Push(args []string, prms ...PushParameters) error {
 		return err
 	}
 
-	for _, pp := range pprms {
+	tmpl.Amsg(p.Stdout, "Pushing packages")
+	for i, pp := range pprms {
 		pp.Protocol = p.Protocol
 		pp.Endpoint = p.Endpoint
-		err = push(pp, email)
+		err = push(pp, email, i+1, len(pprms))
 		if err != nil {
 			return err
 		}
@@ -203,7 +210,7 @@ func readpkgsign(path string) (string, error) {
 }
 
 // This function pushes package to registry via http.
-func push(p pushpkg, email string) error {
+func push(p pushpkg, email string, i, t int) error {
 	packagefile, err := os.Open(p.PkgPath)
 	if err != nil {
 		return err
@@ -219,7 +226,7 @@ func push(p pushpkg, email string) error {
 		&ioprogress.Reader{
 			Reader:   packagefile,
 			Size:     fi.Size(),
-			DrawFunc: tmpl.Loader(p.Registry, p.Owner, p.Name),
+			DrawFunc: tmpl.Loader(p.Registry, p.Owner, p.Name, i, t),
 		},
 	)
 	if err != nil {

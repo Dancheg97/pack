@@ -7,7 +7,6 @@ package server
 
 import (
 	"encoding/base64"
-	"fmt"
 	"io"
 	"net/http"
 
@@ -47,12 +46,15 @@ func (p *Pusher) Push(w http.ResponseWriter, r *http.Request) {
 	force := r.Header.Get("force") == "true"
 	owner := r.Header.Get("owner")
 
+	tmpl.Amsg(p.Stdout, "Package recieved: "+filename+", operating...")
+
 	sigbytes, err := base64.StdEncoding.DecodeString(sign)
 	if err != nil {
 		p.end(w, http.StatusInternalServerError, err)
 		return
 	}
 
+	tmpl.Smsg(p.Stdout, "Checking signature...", 1, 3)
 	pkgbytes, err := p.GPGVireivicator.Verify(VerificationParameters{
 		Email:     email,
 		Owner:     owner,
@@ -63,7 +65,9 @@ func (p *Pusher) Push(w http.ResponseWriter, r *http.Request) {
 		p.end(w, http.StatusUnauthorized, err)
 		return
 	}
+	w.WriteHeader(http.StatusAccepted)
 
+	tmpl.Smsg(p.Stdout, "Updating database...", 2, 3)
 	err = p.DbFormer.AddPkg(AddPkgParameters{
 		Package:  pkgbytes,
 		Sign:     sigbytes,
@@ -75,8 +79,9 @@ func (p *Pusher) Push(w http.ResponseWriter, r *http.Request) {
 		p.end(w, http.StatusInternalServerError, err)
 		return
 	}
+	w.WriteHeader(http.StatusCreated)
 
-	p.Stdout.Write([]byte(fmt.Sprintf("[%s] - %s\n", tmpl.Accepted, filename)))
+	tmpl.Smsg(p.Stdout, "Accepted "+filename+"...", 3, 3)
 	w.WriteHeader(http.StatusOK)
 }
 

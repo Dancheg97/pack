@@ -7,6 +7,7 @@ package tmpl
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"strings"
 
@@ -133,8 +134,16 @@ $$ |
 $$ |                                                    Version: 0.4.5
 \__|`
 
-var Dots = color.New(color.FgWhite, color.Bold, color.FgHiBlue).Sprintf("::")
-var DbAdded = color.New(color.FgWhite, color.Bold).Sprintf(" Database added: ")
-var SigAccess = color.New(color.FgWhite, color.Bold).Sprintf(" Reading package signature: ")
-var Accepted = color.New(color.Bold, color.FgHiGreen).Sprintf("accepted")
-var Launching = color.New(color.Bold, color.Bold).Sprintf("Launching pack server: ")
+// Write an announcement message with dots prefix and bold text to provided
+// io.Writer.
+func Amsg(w io.Writer, msg string) {
+	dots := color.New(color.FgWhite, color.Bold, color.FgHiBlue).Sprintf(":: ")
+	msg = color.New(color.Bold).Sprintf(msg)
+	w.Write([]byte(dots + msg + "...\n"))
+}
+
+// Write step message, with enumeration which should represent state of program
+// execution.
+func Smsg(w io.Writer, msg string, i, t int) {
+	w.Write([]byte(fmt.Sprintf("(%d/%d) %s\n", i, t, msg)))
+}
