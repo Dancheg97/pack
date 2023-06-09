@@ -131,7 +131,7 @@ $$ |  $$ |$$  __$$ |$$ |      $$  _$$\   This program may be freely redistribute
 $$$$$$$  |\$$$$$$$ |\$$$$$$$\ $$ | \$$\   the terms of the GNU General Public License.
 $$  ____/  \_______| \_______|\__|  \__|      Web page: https://fmnx.su/core/pack
 $$ |
-$$ |                                                    Version: 0.4.5
+$$ |                                                    Version: 0.4.7
 \__|`
 
 // Write an announcement message with dots prefix and bold text to provided
