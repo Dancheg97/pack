@@ -41,15 +41,18 @@ type SyncParameters struct {
 	Force bool
 	// Do not save new registries in pacman.conf
 	Keepcfg bool
+	// Which protocol to use, don't use http in production.
+	Protocol string
 }
 
 func syncdefault() *SyncParameters {
 	return &SyncParameters{
-		Quick:   true,
-		Refresh: []bool{true},
-		Stdout:  os.Stdout,
-		Stderr:  os.Stderr,
-		Stdin:   os.Stdin,
+		Quick:    true,
+		Refresh:  []bool{true},
+		Protocol: "https",
+		Stdout:   os.Stdout,
+		Stderr:   os.Stderr,
+		Stdin:    os.Stdin,
 	}
 }
 
@@ -62,7 +65,7 @@ func Sync(args []string, prms ...SyncParameters) error {
 		return err
 	}
 
-	initial, err := prepareconf(pkgs, p.Stdout)
+	initial, err := prepareconf(pkgs, p.Stdout, p.Protocol)
 	if err != nil {
 		return err
 	}
@@ -126,7 +129,7 @@ func formatpkgs(pkgs []string) ([]registrypkg, []string, error) {
 
 // Add missing registries to pacman configuration file and return file before
 // modifications.
-func prepareconf(pkgs []registrypkg, ow io.Writer) (*string, error) {
+func prepareconf(pkgs []registrypkg, ow io.Writer, protocol string) (*string, error) {
 	f, err := os.ReadFile("/etc/pacman.conf")
 	if err != nil {
 		return nil, err
@@ -137,14 +140,14 @@ func prepareconf(pkgs []registrypkg, ow io.Writer) (*string, error) {
 		switch {
 		case pkg.Registry != "" && pkg.Owner != "":
 			if !checkexistowner(conf, pkg.Registry, pkg.Owner) {
-				err = addconfdb(pkg, ow)
+				err = addconfdb(pkg, ow, protocol)
 				if err != nil {
 					return nil, err
 				}
 			}
 		case pkg.Registry != "":
 			if !checkexistsroot(conf, pkg.Registry) {
-				err = addconfdb(pkg, ow)
+				err = addconfdb(pkg, ow, protocol)
 				if err != nil {
 					return nil, err
 				}
@@ -162,12 +165,12 @@ func checkexistsroot(conf string, registry string) bool {
 	return strings.Contains(conf, "\n["+registry+"]\n")
 }
 
-func addconfdb(pkg registrypkg, ow io.Writer) error {
+func addconfdb(pkg registrypkg, ow io.Writer, protocol string) error {
 	var t string
 	if pkg.Owner == "" {
-		t = fmt.Sprintf(confroot, pkg.Registry, pkg.Registry)
+		t = fmt.Sprintf(confroot, protocol, pkg.Registry, pkg.Registry)
 	} else {
-		t = fmt.Sprintf(confuser, pkg.Registry, pkg.Owner, pkg.Registry)
+		t = fmt.Sprintf(confuser, pkg.Owner, pkg.Registry, protocol, pkg.Registry)
 	}
 	command := "cat <<EOF >> /etc/pacman.conf" + t + "EOF"
 	err := exec.Command("sudo", "bash", "-c", command).Run()
@@ -187,10 +190,10 @@ func rollbackconf(s string) {
 
 const confroot = `
 [%s]
-Server = https://%s/api/pack
+Server = %s://%s/api/pack
 `
 
 const confuser = `
 [%s.%s]
-Server = https://%s/api/pack
+Server = %s://%s/api/pack
 `
