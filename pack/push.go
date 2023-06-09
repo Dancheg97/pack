@@ -50,7 +50,7 @@ func pushdefault() *PushParameters {
 func Push(args []string, prms ...PushParameters) error {
 	p := formOptions(prms, pushdefault)
 
-	tmpl.Amsg(p.Stdout, "Preparing package push")
+	tmpl.Amsg(p.Stdout, "Preparing pushed packages")
 
 	email, err := gnupgEmail()
 	if err != nil {

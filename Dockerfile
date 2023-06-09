@@ -12,7 +12,7 @@ COPY go.sum /src
 RUN go mod download
 
 COPY . /src/
-RUN go build -o packbin .
+RUN go build -o p .
 
 FROM archlinux/archlinux:base-devel
 
@@ -20,11 +20,9 @@ LABEL maintainer="Danila Fominykh <dancheg97@fmnx.su>"
 
 EXPOSE 80 443
 
-RUN pacman -Syu --noconfirm --needed gnupg wget
-
 WORKDIR /home
 
-COPY --from=build /src/packbin /usr/bin/pack
+COPY --from=build /src/p /usr/bin/pack
 
 ENTRYPOINT ["pack"]
 CMD ["-O"]

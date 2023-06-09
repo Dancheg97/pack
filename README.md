@@ -17,7 +17,11 @@ Pack is utility that aims to simplify user interaction with pacman, automate som
 
 Pack can be used to create registries that serve as regular arch package mirrors, and provides automated form of interaction them.
 
-Also pack has slightly reworked API to make some operations faster. For example, flag `-q`, or `--quick`, can be used as shortcut alternative to `--noconfirm`. Run `pack -Sh`, `pack -Rh`, `pack -Ph`, `pack -Oh` to get full description.
+Also pack has slightly reworked API to make some operations faster. For example, flag `-q`, or `--quick`, can be used as shortcut alternative to `--noconfirm`.
+
+Run `pack -Sh`, `pack -Rh`, `pack -Ph`, `pack -Oh` to get full description of for pack commands.
+
+![](pack/push.png)
 
 ### Installation
 
@@ -102,7 +106,7 @@ cd flutter
 pack -Bqs
 pack -P --protocol http localhost/flutter
 pack -R flutter
-pack -S --protocol http localhost/package
+pack -Sk --protocol http localhost/package
 ```
 
 If do not like docker, you can run registry with `pack -O` command on your machine.
@@ -113,4 +117,4 @@ Pack provides 3 libraries for go language:
 
 - [`pacman wrapper`](pacman/README.md) - high level wrapper over pacman package manager.
 - [`pack client`](pack/README.md) - top level client fucnctions to interact with package manager.
-- [`pack server`](server/README.md) - set of interfaces required to embed pack API into existing go projects.
+- [`pack registry`](registry/README.md) - set of interfaces required to embed pack API into existing go projects.
