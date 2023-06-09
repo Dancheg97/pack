@@ -104,9 +104,9 @@ After setup you can test `pack` locally with push and sync commands. Example:
 git clone https://aur.archlinux.org/flutter
 cd flutter
 pack -Bqs
-pack -P --protocol http localhost/flutter
+pack -Pw localhost/flutter
 pack -R flutter
-pack -Sk --protocol http localhost/package
+pack -Skw localhost/package
 ```
 
 If do not like docker, you can run registry with `pack -O` command on your machine.

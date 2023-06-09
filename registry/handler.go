@@ -106,7 +106,7 @@ func (p *Pusher) Push(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tmpl.Smsg(p.Stdout, "Updating database...", 7, 8)
+	tmpl.Smsg(p.Stdout, "Updating database", 7, 8)
 	err = p.DbFormer.AddPkg(AddPkgParameters{
 		Package:  pkgdata,
 		Sign:     sigdata,
@@ -119,7 +119,7 @@ func (p *Pusher) Push(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tmpl.Smsg(p.Stdout, "Accepted "+filename+"...", 8, 8)
+	tmpl.Smsg(p.Stdout, "Accepted "+filename, 8, 8)
 	w.WriteHeader(http.StatusOK)
 }
 

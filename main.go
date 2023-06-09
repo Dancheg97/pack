@@ -40,13 +40,13 @@ var opts struct {
 
 	// Push options.
 	Dir      string `short:"d" long:"dir" default:"/var/cache/pacman/pkg"`
-	Protocol string `long:"protocol" default:"https"`
+	Insecure bool   `short:"w" long:"insecure"`
 	Endpoint string `long:"endpoint" default:"/api/pack"`
 
 	// Remove options.
 	Confirm     bool `short:"o" long:"confirm"`
-	Norecursive bool `short:"a" long:"norecursive"`
-	Nocfgs      bool `short:"w" long:"nocfgs"`
+	Norecursive bool `long:"norecursive"`
+	Nocfgs      bool `long:"nocfgs"`
 	Cascade     bool `long:"cascade"`
 
 	// Query options.
@@ -94,6 +94,7 @@ func main() {
 			Stdout:    os.Stdout,
 			Stderr:    os.Stderr,
 			Stdin:     os.Stdin,
+			Insecure:  opts.Insecure,
 		}))
 		return
 
@@ -104,7 +105,7 @@ func main() {
 	case opts.Push:
 		CheckErr(pack.Push(args(), pack.PushParameters{
 			Directory: opts.Dir,
-			Protocol:  opts.Protocol,
+			Insecure:  opts.Insecure,
 			Endpoint:  opts.Endpoint,
 			Force:     opts.Force,
 			Stdout:    os.Stdout,

@@ -40,18 +40,17 @@ type SyncParameters struct {
 	Force bool
 	// Do not save new registries in pacman.conf
 	Keepcfg bool
-	// Which protocol to use, don't use http in production.
-	Protocol string
+	// Use HTTP instead of https
+	Insecure bool
 }
 
 func syncdefault() *SyncParameters {
 	return &SyncParameters{
-		Quick:    true,
-		Refresh:  []bool{true},
-		Protocol: "https",
-		Stdout:   os.Stdout,
-		Stderr:   os.Stderr,
-		Stdin:    os.Stdin,
+		Quick:   true,
+		Refresh: []bool{true},
+		Stdout:  os.Stdout,
+		Stderr:  os.Stderr,
+		Stdin:   os.Stdin,
 	}
 }
 
@@ -64,7 +63,12 @@ func Sync(args []string, prms ...SyncParameters) error {
 		return err
 	}
 
-	initial, err := prepareconf(pkgs, p.Stdout, p.Protocol)
+	protocol := "https"
+	if p.Insecure {
+		protocol = "http"
+	}
+
+	initial, err := prepareconf(pkgs, p.Stdout, protocol)
 	if err != nil {
 		return err
 	}
@@ -136,21 +140,15 @@ func prepareconf(pkgs []registrypkg, ow io.Writer, protocol string) (*string, er
 	conf := string(f)
 
 	for _, pkg := range pkgs {
-		switch {
-		case pkg.Registry != "" && pkg.Owner != "":
-			if !checkexistowner(conf, pkg.Registry, pkg.Owner) {
-				err = addconfdb(pkg, ow, protocol)
-				if err != nil {
-					return nil, err
-				}
-			}
-		case pkg.Registry != "":
-			if !checkexistsroot(conf, pkg.Registry) {
-				err = addconfdb(pkg, ow, protocol)
-				if err != nil {
-					return nil, err
-				}
-			}
+		if pkg.Owner != "" && checkexistowner(conf, pkg.Registry, pkg.Owner) {
+			return &conf, nil
+		}
+		if checkexistsroot(pkg.Registry, pkg.Owner) {
+			return &conf, nil
+		}
+		err = addconfdb(pkg, ow, protocol)
+		if err != nil {
+			return nil, err
 		}
 	}
 	return &conf, nil
@@ -167,7 +165,7 @@ func checkexistsroot(conf string, registry string) bool {
 func addconfdb(pkg registrypkg, ow io.Writer, protocol string) error {
 	var t string
 	if pkg.Owner == "" {
-		t = fmt.Sprintf(confroot, protocol, pkg.Registry, pkg.Registry)
+		t = fmt.Sprintf(confroot, pkg.Registry, protocol, pkg.Registry)
 	} else {
 		t = fmt.Sprintf(confuser, pkg.Owner, pkg.Registry, protocol, pkg.Registry)
 	}

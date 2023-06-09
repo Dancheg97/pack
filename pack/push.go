@@ -25,7 +25,7 @@ type PushParameters struct {
 	// Directory to read package files and signatures.
 	Directory string
 	// Which protocol to use for connection.
-	Protocol string
+	Insecure bool
 	// Custom endpoint for package push
 	Endpoint string
 	// Owerwrite package with same version if exists.
@@ -40,7 +40,6 @@ type PushParameters struct {
 
 func pushdefault() *PushParameters {
 	return &PushParameters{
-		Protocol:  "https",
 		Endpoint:  "/api/pack",
 		Directory: "/var/cache/pacman/pkg",
 	}
@@ -87,7 +86,10 @@ func Push(args []string, prms ...PushParameters) error {
 
 	tmpl.Amsg(p.Stdout, "Pushing packages")
 	for i, pp := range pprms {
-		pp.Protocol = p.Protocol
+		pp.Protocol = "https"
+		if p.Insecure {
+			pp.Protocol = "http"
+		}
 		pp.Endpoint = p.Endpoint
 		err = push(pp, email, i+1, len(pprms))
 		if err != nil {
@@ -128,6 +130,8 @@ type pushpkg struct {
 	PkgPath string
 	// Signature encoded to base64 string to check.
 	Signature string
+	// Protocol
+	Protocol string
 }
 
 // List file names in provided cache directory.

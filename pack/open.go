@@ -80,7 +80,7 @@ func Open(prms ...OpenParameters) error {
 	}
 
 	fs := http.FileServer(http.Dir(p.Dir))
-	http.Handle(p.Endpoint, http.StripPrefix(p.Endpoint, fs))
+	http.Handle(p.Endpoint+"/", http.StripPrefix(p.Endpoint+"/", fs))
 	http.HandleFunc(p.Endpoint+"/push", s.Push)
 
 	msg := fmt.Sprintf("Starting registry %s on port %s", p.Name, p.Port)
