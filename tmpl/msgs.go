@@ -107,7 +107,7 @@ options:
 	-s, --syncbuild Syncronize dependencies and build target
 	-r, --rmdeps    Remove installed dependencies after a successful build
 	-g, --garbage   Do not clean workspace before and after build
-	-t, --template  Generate PKGBUILD, launch and *.desktop template and exit
+	-t, --template  Generate PKGBUILD, app.sh and app.desktop and exit
 
 usage:  pack {-B --build} [options]`
 
