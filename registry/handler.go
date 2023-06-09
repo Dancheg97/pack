@@ -125,7 +125,7 @@ func (p *Pusher) Push(w http.ResponseWriter, r *http.Request) {
 
 // Write header, log error and end request.
 func (p *Pusher) end(w http.ResponseWriter, status int, msg error) {
-	errmsg := []byte(tmpl.Err + " " + msg.Error())
+	errmsg := []byte(tmpl.Err + msg.Error())
 	p.Stderr.Write(errmsg)
 	w.WriteHeader(status)
 	w.Write(errmsg)

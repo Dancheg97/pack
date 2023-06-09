@@ -6,6 +6,7 @@
 package registry
 
 import (
+	"errors"
 	"os"
 	"path"
 
@@ -30,7 +31,13 @@ type AddPkgParameters struct {
 
 func (d *LocalDirDb) AddPkg(p AddPkgParameters) error {
 	pkgpath := path.Join(d.Dir, p.Filename)
-	err := os.WriteFile(pkgpath, p.Package, 0600)
+
+	_, err := os.Stat(pkgpath)
+	if err == nil && !p.Force {
+		return errors.New("file exists, use -f to owerwrite")
+	}
+
+	err = os.WriteFile(pkgpath, p.Package, 0600)
 	if err != nil {
 		return err
 	}

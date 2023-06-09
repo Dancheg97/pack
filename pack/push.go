@@ -90,6 +90,7 @@ func Push(args []string, prms ...PushParameters) error {
 		if p.Insecure {
 			pp.Protocol = "http"
 		}
+		pp.Force = p.Force
 		pp.Endpoint = p.Endpoint
 		err = push(pp, email, i+1, len(pprms))
 		if err != nil {
