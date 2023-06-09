@@ -8,6 +8,7 @@ package pack
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"os/exec"
@@ -36,6 +37,8 @@ type BuildParameters struct {
 	Rmdeps bool
 	// Do not clean workspace before and after build.
 	Garbage bool
+	// Generate pacakge template and exit.
+	Template bool
 }
 
 func builddefault() *BuildParameters {
@@ -48,6 +51,11 @@ func builddefault() *BuildParameters {
 // Build package in current directory with provided arguements
 func Build(prms ...BuildParameters) error {
 	p := formOptions(prms, builddefault)
+
+	if p.Template {
+		return template()
+	}
+
 	tmpl.Amsg(p.Stdout, "Building package")
 
 	tmpl.Smsg(p.Stdout, "Running GnuPG check", 1, 4)
@@ -146,4 +154,29 @@ func gnuPGIdentity() (string, error) {
 		return ``, errors.New("unable to get gnupg identity: " + o)
 	}
 	return strings.ReplaceAll(b.String(), "\n", ""), nil
+}
+
+func template() error {
+	ident, err := gnuPGIdentity()
+	if err != nil {
+		return err
+	}
+
+	dir, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	splt := strings.Split(dir, "/")
+	n := splt[len(splt)-1]
+
+	d := fmt.Sprintf(tmpl.Desktop, n, n, n, n, n)
+	derr := os.WriteFile(n+".desktop", []byte(d), 0600)
+
+	s := fmt.Sprintf(tmpl.ShFile, n, n)
+	serr := os.WriteFile(n+".sh", []byte(s), 0600)
+
+	p := fmt.Sprintf(tmpl.PKGBUILD, ident, n, n, n, n, n, n, n, n)
+	perr := os.WriteFile(`PKGBUILD`, []byte(p), 0600)
+
+	return errors.Join(derr, serr, perr)
 }

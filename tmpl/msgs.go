@@ -107,6 +107,7 @@ options:
 	-s, --syncbuild Syncronize dependencies and build target
 	-r, --rmdeps    Remove installed dependencies after a successful build
 	-g, --garbage   Do not clean workspace before and after build
+	-t, --template  Generate PKGBUILD, launch and *.desktop template and exit
 
 usage:  pack {-B --build} [options]`
 
@@ -133,6 +134,49 @@ $$  ____/  \_______| \_______|\__|  \__|      Web page: https://fmnx.su/core/pac
 $$ |
 $$ |                                                    Version: 0.4.7
 \__|`
+
+const PKGBUILD = `# Maintainer: %s
+
+pkgname="%s"
+pkgdesc="Small description"
+pkgver="1"
+pkgrel="1"
+arch=('x86_64')
+url="https://example.com/owner/repo"
+depends=()
+makedepends=(
+  "flutter"
+  "clang"
+  "cmake"
+)
+
+build() {
+  cd ..
+  flutter build linux
+}
+
+package() {
+  cd ..
+  install -Dm755 %s.sh $pkgdir/usr/bin/%s
+  install -Dm755 %s.desktop $pkgdir/usr/share/applications/%s.desktop
+  install -Dm755 assets/%s.png $pkgdir/usr/share/icons/hicolor/512x512/apps/%s.png
+  cd build/linux/x64/release/bundle
+  find . -type f -exec install -Dm755 {} $pkgdir/usr/share/%s/{} \;
+}
+`
+
+const Desktop = `[Desktop Entry]
+Name=Awesome Application
+GenericName=Awesome Application
+Comment=Awesome Application
+Exec=/usr/share/%s/%s
+WMClass=%s
+Icon=/usr/share/%s/data/flutter_assets/assets/%s.png
+Type=Application
+`
+
+const ShFile = `#!/usr/bin/env sh
+exec /usr/share/%s/%s`
 
 // Write an announcement message with dots prefix and bold text to provided
 // io.Writer.

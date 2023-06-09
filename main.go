@@ -63,6 +63,7 @@ var opts struct {
 	Syncbuild bool `short:"s" long:"syncbuild"`
 	Rmdeps    bool `short:"r" long:"rmdeps"`
 	Garbage   bool `short:"g" long:"garbage"`
+	Template  bool `short:"t" long:"template"`
 
 	// Open options.
 	Name   string `short:"n" long:"name" default:"localhost"`
@@ -166,6 +167,7 @@ func main() {
 			Syncbuild: opts.Syncbuild,
 			Rmdeps:    opts.Rmdeps,
 			Garbage:   opts.Garbage,
+			Template:  opts.Template,
 		}))
 		return
 
