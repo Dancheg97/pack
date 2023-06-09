@@ -73,10 +73,10 @@ func Open(prms ...OpenParameters) error {
 	}
 
 	s := registry.Pusher{
-		Stdout:          p.Stdout,
-		Stderr:          p.Stderr,
-		GPGVireivicator: &k,
-		DbFormer:        &d,
+		Stdout:    p.Stdout,
+		Stderr:    p.Stderr,
+		KeySource: &k,
+		DbFormer:  &d,
 	}
 
 	fs := http.FileServer(http.Dir(p.Dir))

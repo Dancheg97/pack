@@ -7,10 +7,12 @@ package registry
 
 import (
 	"encoding/base64"
+	"errors"
 	"io"
 	"net/http"
 
 	"fmnx.su/core/pack/tmpl"
+	"github.com/ProtonMail/gopenpgp/v2/crypto"
 )
 
 // Parameters required to get http.Pusher.
@@ -20,7 +22,7 @@ type Pusher struct {
 	// Where command will write output text.
 	Stderr io.Writer
 	// Interface that will be used to verify incoming packages.
-	GPGVireivicator GPGVireivicator
+	KeySource KeyReader
 	// Interface that will be used to add new packages to database.
 	DbFormer DbFormer
 }
@@ -28,8 +30,8 @@ type Pusher struct {
 // An interface, that can check that package is signed by valid email and GnuPG
 // key belogns to required keyring/exists in other trusted source for specified
 // package owner. Verificator returns bytes of package it have verified.
-type GPGVireivicator interface {
-	Verify(p VerificationParameters) ([]byte, error)
+type KeyReader interface {
+	ReadKey(owner, email string) (io.Reader, error)
 }
 
 // Interface, that accepts package bytes body, writes signature and forms
@@ -43,34 +45,71 @@ func (p *Pusher) Push(w http.ResponseWriter, r *http.Request) {
 	filename := r.Header.Get("file")
 	email := r.Header.Get("email")
 	sign := r.Header.Get("sign")
-	force := r.Header.Get("force") == "true"
 	owner := r.Header.Get("owner")
+	force := r.Header.Get("force") == "true"
 
-	tmpl.Amsg(p.Stdout, "Package recieved: "+filename+", operating...")
+	tmpl.Amsg(p.Stdout, "Request: "+filename)
 
-	sigbytes, err := base64.StdEncoding.DecodeString(sign)
+	tmpl.Smsg(p.Stdout, "Decoding signature", 1, 8)
+	sigdata, err := base64.StdEncoding.DecodeString(sign)
 	if err != nil {
 		p.end(w, http.StatusInternalServerError, err)
 		return
 	}
+	pgpsig := crypto.NewPGPSignature(sigdata)
 
-	tmpl.Smsg(p.Stdout, "Checking signature...", 1, 3)
-	pkgbytes, err := p.GPGVireivicator.Verify(VerificationParameters{
-		Email:     email,
-		Owner:     owner,
-		PkgReader: r.Body,
-		Signature: sigbytes,
-	})
+	tmpl.Smsg(p.Stdout, "Preparing GPG key", 2, 8)
+	keyreader, err := p.KeySource.ReadKey(owner, email)
+	if err != nil {
+		p.end(w, http.StatusBadRequest, err)
+		return
+	}
+
+	pgpkey, err := crypto.NewKeyFromArmoredReader(keyreader)
+	if err != nil {
+		p.end(w, http.StatusBadRequest, err)
+		return
+	}
+
+	tmpl.Smsg(p.Stdout, "Creating GPG keyring", 3, 8)
+	keyring, err := crypto.NewKeyRing(pgpkey)
+	if err != nil {
+		p.end(w, http.StatusBadRequest, err)
+		return
+	}
+
+	tmpl.Smsg(p.Stdout, "Validating email in keyring", 4, 8)
+	var found bool
+	for _, idnt := range keyring.GetIdentities() {
+		if idnt.Email == email {
+			found = true
+		}
+	}
+	if !found {
+		err := errors.New("email not found in keyring")
+		p.end(w, http.StatusUnauthorized, err)
+		return
+	}
+
+	tmpl.Smsg(p.Stdout, "Reading request body", 5, 8)
+	pkgdata, err := io.ReadAll(r.Body)
+	if err != nil {
+		p.end(w, http.StatusInternalServerError, err)
+		return
+	}
+	pgpmes := crypto.NewPlainMessage(pkgdata)
+
+	tmpl.Smsg(p.Stdout, "Validating package signature", 6, 8)
+	err = keyring.VerifyDetached(pgpmes, pgpsig, crypto.GetUnixTime())
 	if err != nil {
 		p.end(w, http.StatusUnauthorized, err)
 		return
 	}
-	w.WriteHeader(http.StatusAccepted)
 
-	tmpl.Smsg(p.Stdout, "Updating database...", 2, 3)
+	tmpl.Smsg(p.Stdout, "Updating database...", 7, 8)
 	err = p.DbFormer.AddPkg(AddPkgParameters{
-		Package:  pkgbytes,
-		Sign:     sigbytes,
+		Package:  pkgdata,
+		Sign:     sigdata,
 		Filename: filename,
 		Owner:    owner,
 		Force:    force,
@@ -79,9 +118,8 @@ func (p *Pusher) Push(w http.ResponseWriter, r *http.Request) {
 		p.end(w, http.StatusInternalServerError, err)
 		return
 	}
-	w.WriteHeader(http.StatusCreated)
 
-	tmpl.Smsg(p.Stdout, "Accepted "+filename+"...", 3, 3)
+	tmpl.Smsg(p.Stdout, "Accepted "+filename+"...", 8, 8)
 	w.WriteHeader(http.StatusOK)
 }
 

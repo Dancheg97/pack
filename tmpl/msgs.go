@@ -145,5 +145,5 @@ func Amsg(w io.Writer, msg string) {
 // Write step message, with enumeration which should represent state of program
 // execution.
 func Smsg(w io.Writer, msg string, i, t int) {
-	w.Write([]byte(fmt.Sprintf("(%d/%d) %s\n", i, t, msg)))
+	w.Write([]byte(fmt.Sprintf("(%d/%d) %s...\n", i, t, msg)))
 }

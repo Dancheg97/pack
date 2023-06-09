@@ -10,8 +10,6 @@ import (
 	"io"
 	"os"
 	"path"
-
-	"github.com/ProtonMail/gopenpgp/v2/crypto"
 )
 
 // This structure can be used to pushes calls incoming to pack. Verify method
@@ -24,47 +22,18 @@ type LocalGpgDir struct {
 	GpgDir string
 }
 
+func (l *LocalGpgDir) ReadKey(owner, email string) (io.Reader, error) {
+	f, err := os.Open(path.Join(l.GpgDir, owner, email+".gpg"))
+	if err != nil {
+		return nil, errors.Join(errors.New("user don't have rights"), err)
+	}
+	return f, err
+}
+
 // Parameters for package verification.
 type VerificationParameters struct {
 	Email     string
 	Owner     string
 	PkgReader io.Reader
 	Signature []byte
-}
-
-func (l *LocalGpgDir) Verify(p VerificationParameters) ([]byte, error) {
-	f, err := os.Open(path.Join(l.GpgDir, p.Owner, p.Email+".gpg"))
-	if err != nil {
-		return nil, errors.Join(errors.New("user don't have rights"), err)
-	}
-
-	pgpkey, err := crypto.NewKeyFromArmoredReader(f)
-	if err != nil {
-		return nil, err
-	}
-
-	pgpsig := crypto.NewPGPSignature(p.Signature)
-
-	msg, err := io.ReadAll(p.PkgReader)
-	if err != nil {
-		return nil, err
-	}
-	pgpmes := crypto.NewPlainMessage(msg)
-
-	keyring, err := crypto.NewKeyRing(pgpkey)
-	if err != nil {
-		return nil, err
-	}
-
-	var found bool
-	for _, idnt := range keyring.GetIdentities() {
-		if idnt.Email == p.Email {
-			found = true
-		}
-	}
-	if !found {
-		return nil, errors.New("unable to find email in keyring identities")
-	}
-
-	return msg, keyring.VerifyDetached(pgpmes, pgpsig, crypto.GetUnixTime())
 }

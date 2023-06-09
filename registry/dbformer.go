@@ -8,7 +8,6 @@ package registry
 import (
 	"os"
 	"path"
-	"strings"
 
 	"fmnx.su/core/pack/pacman"
 )
@@ -41,6 +40,9 @@ func (d *LocalDirDb) AddPkg(p AddPkgParameters) error {
 		return err
 	}
 
-	dbname := strings.Join([]string{p.Owner, d.DbName + ".db.tar.gz"}, ".")
+	dbname := d.DbName + ".db.tar.gz"
+	if p.Owner != "" {
+		dbname = p.Owner + "." + dbname
+	}
 	return pacman.RepoAdd(path.Join(d.Dir, dbname), pkgpath)
 }
