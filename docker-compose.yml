@@ -1,8 +1,4 @@
 
-# This compose can be used as a starting point to launch pack server.
-# By default pack works properly only over https, but you can provide http
-# flag to {-S --sync} command (hidden by default) for local testing.
-
 services:
   pack:
     image: fmnx.su/core/pack

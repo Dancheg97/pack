@@ -21,7 +21,7 @@ It is required for package signing, run:
 3) Get KEY-ID, paste it to next command:
 ` + color.YellowString("gpg -k") + `
 
-4) Send it to key server:
+4) Send it to key GPG server:
 ` + color.YellowString("gpg --send-keys KEY-ID") + `
 
 5) Edit ` + color.BlueString("PACKAGER") + ` variable in ` + color.CyanString("/etc/makepkg.conf") + `

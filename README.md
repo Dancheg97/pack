@@ -59,7 +59,7 @@ pack -Bqs
 pack -Pf example.com/group/package
 ```
 
-- Run pack registry (pack server):
+- Run pack registry:
 
 ```sh
 sudo pack -O
@@ -70,7 +70,7 @@ sudo pack -O
 It is recommend to use container environment for security purposes, also that makes deploy much easier with `docker-compose`. Docker compose example:
 
 ```yml
-# This compose can be used as a starting point to launch pack server.
+# This compose can be used as a starting point to launch pack registry.
 # By default pack works properly only over https, but you can provide http
 # flag to {-S --sync} command (hidden by default) for local testing.
 
@@ -97,12 +97,15 @@ To get complete working registry, you need to pass directory with public GPG key
 After setup you can test `pack` locally with push and sync commands. Example:
 
 ```sh
+git clone https://aur.archlinux.org/flutter
+cd flutter
 pack -Bqs
-pack -P --protocol http localhost
-pack -S --protocol http package
+pack -P --protocol http localhost/flutter
+pack -R flutter
+pack -S --protocol http localhost/package
 ```
 
-If're not familiar with docker, you can launch server with `-O` command on your machine.
+If do not like docker, you can run registry with `pack -O` command on your machine.
 
 ### Libraries
 

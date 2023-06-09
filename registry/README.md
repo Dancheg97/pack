@@ -1,4 +1,4 @@
-<h2 align="center">Pack server</h2>
+<h2 align="center">Pack registry</h2>
 
 This library provides interfaces required to embed pack registry to foreign projects written in go. You have to implement 2 interfaces, to get `http.Handler` which will be able to function with your system:
 
@@ -11,19 +11,19 @@ Example of usage:
 
 ```go
 
-import "fmnx.su/core/pack/server"
+import "fmnx.su/core/pack/registry"
 
 func main() {
-	d := server.LocalDirDb{
+	d := registry.LocalDirDb{
 		Dir:    "/var/cache/pacman/pkg",
 		DbName: "localhost",
 	}
 
-	k := server.LocalGpgDir{
+	k := registry.LocalGpgDir{
 		GpgDir: "/home/user/gpg",
 	}
 
-	s := server.Pusher{
+	s := registry.Pusher{
 		Stdout:          os.Stdout,
 		Stderr:          os.Stderr,
 		GPGVireivicator: &k,

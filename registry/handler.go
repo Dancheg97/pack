@@ -3,7 +3,7 @@
 // Official web page: https://fmnx.su/core/pack
 // Contact email: help@fmnx.su
 
-package server
+package registry
 
 import (
 	"encoding/base64"

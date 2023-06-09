@@ -4,7 +4,7 @@ This library provides API's for pack specific operations, that can't be done wit
 It has 4 main functions:
 
 - `Build()` - for package builds
-- `Open()` - starts pack registry server
+- `Open()` - starts pack registry registry
 - `Push()` - pushes packages to pack registry
 - `Sync()` - syncronizes packages with pack registries
 

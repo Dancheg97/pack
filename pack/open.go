@@ -11,7 +11,7 @@ import (
 	"net/http"
 	"os"
 
-	"fmnx.su/core/pack/server"
+	"fmnx.su/core/pack/registry"
 	"fmnx.su/core/pack/tmpl"
 )
 
@@ -63,16 +63,16 @@ func Open(prms ...OpenParameters) error {
 		return fmt.Errorf("expose dir not found: %+v", err)
 	}
 
-	d := server.LocalDirDb{
+	d := registry.LocalDirDb{
 		Dir:    p.Dir,
 		DbName: p.Name,
 	}
 
-	k := server.LocalGpgDir{
+	k := registry.LocalGpgDir{
 		GpgDir: p.GpgDir,
 	}
 
-	s := server.Pusher{
+	s := registry.Pusher{
 		Stdout:          p.Stdout,
 		Stderr:          p.Stderr,
 		GPGVireivicator: &k,
@@ -83,7 +83,7 @@ func Open(prms ...OpenParameters) error {
 	http.Handle(p.Endpoint, http.StripPrefix(p.Endpoint, fs))
 	http.HandleFunc(p.Endpoint+"/push", s.Push)
 
-	msg := fmt.Sprintf("Starting server %s on port %s", p.Name, p.Port)
+	msg := fmt.Sprintf("Starting registry %s on port %s", p.Name, p.Port)
 	tmpl.Amsg(p.Stdout, msg)
 	if p.Cert != "" && p.Key != "" {
 		return http.ListenAndServeTLS(
