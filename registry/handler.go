@@ -17,10 +17,9 @@ import (
 
 // Parameters required to get http.Pusher.
 type Pusher struct {
-	// Where command will write output text.
 	Stdout io.Writer
-	// Where command will write output text.
 	Stderr io.Writer
+
 	// Interface that will be used to verify incoming packages.
 	KeySource KeyReader
 	// Interface that will be used to add new packages to database.

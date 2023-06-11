@@ -22,6 +22,10 @@ import (
 
 // Parameters that will be used to execute push command.
 type PushParameters struct {
+	Stdout io.Writer
+	Stderr io.Writer
+	Stdin  io.Reader
+
 	// Directory to read package files and signatures.
 	Directory string
 	// Which protocol to use for connection.
@@ -30,12 +34,6 @@ type PushParameters struct {
 	Endpoint string
 	// Owerwrite package with same version if exists.
 	Force bool
-	// Where command will write output text.
-	Stdout io.Writer
-	// Where command will write output text.
-	Stderr io.Writer
-	// Stdin from user is command will ask for something.
-	Stdin io.Reader
 }
 
 func pushdefault() *PushParameters {

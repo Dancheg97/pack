@@ -21,12 +21,10 @@ import (
 
 // Parameters that can be used to build packages.
 type BuildParameters struct {
-	// Where command will write output text.
 	Stdout io.Writer
-	// Where command will write output text.
 	Stderr io.Writer
-	// Stdin from user is command will ask for something.
-	Stdin io.Reader
+	Stdin  io.Reader
+
 	// Directory where resulting package and signature will be moved.
 	Dir string
 	// Do not ask for any confirmation on build/installation.
@@ -72,7 +70,7 @@ func Build(prms ...BuildParameters) error {
 
 	var b bytes.Buffer
 	tmpl.Smsg(p.Stdout, "Calling makepkg", 3, 3)
-	err = pacman.Makepkg(pacman.MakepkgOptions{
+	err = pacman.Makepkg(pacman.MakepkgParameters{
 		Sign:       true,
 		Stdout:     p.Stdout,
 		Stderr:     p.Stdout,

@@ -18,12 +18,10 @@ import (
 
 // Syncronize packages with pack.
 type SyncParameters struct {
-	// Where command will write output text.
 	Stdout io.Writer
-	// Where command will write output text.
 	Stderr io.Writer
-	// Stdin from user is command will ask for something.
-	Stdin io.Reader
+	Stdin  io.Reader
+
 	// Download fresh package databases from the server (-yy force)
 	Refresh []bool
 	// Upgrade installed packages (-uu enables downgrade)
@@ -73,7 +71,7 @@ func Sync(args []string, prms ...SyncParameters) error {
 		return err
 	}
 
-	err = pacman.SyncList(fmtpkgs, pacman.SyncOptions{
+	err = pacman.SyncList(fmtpkgs, pacman.SyncParameters{
 		Sudo:      true,
 		Needed:    p.Force,
 		NoConfirm: p.Quick,
