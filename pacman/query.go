@@ -97,7 +97,7 @@ func Query(pkgs []string, opts ...QueryParameters) error {
 	cmd.Stderr = o.Stderr
 	cmd.Stdin = o.Stdin
 
-	return cmd.Run()
+	return call(cmd)
 }
 
 type PackageInfoFull struct {

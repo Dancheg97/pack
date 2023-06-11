@@ -6,6 +6,9 @@
 package pacman
 
 import (
+	"bytes"
+	"errors"
+	"io"
 	"os/exec"
 	"sync"
 )
@@ -20,6 +23,13 @@ const (
 // Global lock for operations with pacman database.
 var mu sync.Mutex
 
+func formOptions[Options any](arr []Options, getdefault func() *Options) *Options {
+	if len(arr) != 1 {
+		return getdefault()
+	}
+	return &arr[0]
+}
+
 func sudoCommand(sudo bool, command string, args ...string) *exec.Cmd {
 	if sudo {
 		args = append([]string{command}, args...)
@@ -28,9 +38,12 @@ func sudoCommand(sudo bool, command string, args ...string) *exec.Cmd {
 	return exec.Command(command, args...)
 }
 
-func formOptions[Options any](arr []Options, getdefault func() *Options) *Options {
-	if len(arr) != 1 {
-		return getdefault()
+func call(cmd *exec.Cmd) error {
+	var buf bytes.Buffer
+	cmd.Stderr = io.MultiWriter(cmd.Stderr, &buf)
+	err := cmd.Run()
+	if err != nil {
+		return errors.New(buf.String())
 	}
-	return &arr[0]
+	return nil
 }

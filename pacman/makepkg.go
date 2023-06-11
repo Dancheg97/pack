@@ -209,5 +209,5 @@ func Makepkg(opts ...MakepkgParameters) error {
 	cmd.Stdout = o.Stdout
 	cmd.Stderr = o.Stderr
 
-	return cmd.Run()
+	return call(cmd)
 }

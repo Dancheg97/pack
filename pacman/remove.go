@@ -73,5 +73,5 @@ func RemoveList(pkgs []string, opts ...RemoveParameters) error {
 
 	mu.Lock()
 	defer mu.Unlock()
-	return cmd.Run()
+	return call(cmd)
 }

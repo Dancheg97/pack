@@ -121,7 +121,7 @@ func SyncList(pkgs []string, opts ...SyncParameters) error {
 
 	mu.Lock()
 	defer mu.Unlock()
-	return cmd.Run()
+	return call(cmd)
 }
 
 // Options to apply when searching for some package.
