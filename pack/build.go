@@ -21,12 +21,10 @@ import (
 
 // Parameters that can be used to build packages.
 type BuildParameters struct {
-	// Where command will write output text.
 	Stdout io.Writer
-	// Where command will write output text.
 	Stderr io.Writer
-	// Stdin from user is command will ask for something.
-	Stdin io.Reader
+	Stdin  io.Reader
+
 	// Directory where resulting package and signature will be moved.
 	Dir string
 	// Do not ask for any confirmation on build/installation.
@@ -70,9 +68,8 @@ func Build(prms ...BuildParameters) error {
 		return err
 	}
 
-	var b bytes.Buffer
 	tmpl.Smsg(p.Stdout, "Calling makepkg", 3, 3)
-	err = pacman.Makepkg(pacman.MakepkgOptions{
+	err = pacman.Makepkg(pacman.MakepkgParameters{
 		Sign:       true,
 		Stdout:     p.Stdout,
 		Stderr:     p.Stdout,
@@ -87,18 +84,12 @@ func Build(prms ...BuildParameters) error {
 		NoConfirm:  p.Quick,
 	})
 	if err != nil {
-		return errors.Join(err, errors.New(b.String()))
+		return errors.Join(err)
 	}
 
 	tmpl.Amsg(p.Stdout, "Moving package to cache")
-	b.Reset()
 	cmd := exec.Command("bash", "-c", "sudo mv *.pkg.tar.zst* "+p.Dir)
-	cmd.Stderr = &b
-	err = cmd.Run()
-	if err != nil {
-		return errors.Join(err, errors.New(b.String()))
-	}
-	return nil
+	return call(cmd)
 }
 
 // Ensure, that user have created gnupg keys for package signing before package

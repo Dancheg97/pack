@@ -12,19 +12,17 @@ import (
 )
 
 // Parameters for adding packages to pacman repo.
-type RepoAddOptions struct {
+type RepoAddParameters struct {
+	Stdout io.Writer
+	Stderr io.Writer
+	Stdin  io.Reader
+
 	// Additional parameters, that will be appended to command as arguements.
 	AdditionalParams []string
 	// Run with sudo priveleges. [sudo]
 	Dir string
 	// Use the specified key to sign the database. [--key <file>]
 	Key string
-	// Where command will write output text.
-	Stdout io.Writer
-	// Where command will write output text.
-	Stderr io.Writer
-	// Stdin from user is command will ask for something.
-	Stdin io.Reader
 	// Skip existing and add only new packages. [--new]
 	Sudo bool
 	// Directory where process will be executed.
@@ -41,8 +39,8 @@ type RepoAddOptions struct {
 	Verify bool
 }
 
-func RepoAddDefaultOptions() *RepoAddOptions {
-	return &RepoAddOptions{
+func RepoAddDefaultOptions() *RepoAddParameters {
+	return &RepoAddParameters{
 		New:              true,
 		PreventDowngrade: true,
 		Stdout:           os.Stdout,
@@ -55,7 +53,7 @@ var dbmu sync.Mutex
 
 // This function will add new packages to database. You should provide valid
 // path for database file and path to package you want to add.
-func RepoAdd(dbfile, pkgfile string, opts ...RepoAddOptions) error {
+func RepoAdd(dbfile, pkgfile string, opts ...RepoAddParameters) error {
 	// Later rewrite this to mutex for only specific checked dbfile.
 	dbmu.Lock()
 	defer dbmu.Unlock()
@@ -95,5 +93,5 @@ func RepoAdd(dbfile, pkgfile string, opts ...RepoAddOptions) error {
 	cmd.Stdout = o.Stdout
 	cmd.Stdin = o.Stdin
 
-	return cmd.Run()
+	return call(cmd)
 }

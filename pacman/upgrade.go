@@ -12,7 +12,11 @@ import (
 )
 
 // Options to apply when searching for some package.
-type UpgradeOptions struct {
+type UpgradeParameters struct {
+	Stdout io.Writer
+	Stderr io.Writer
+	Stdin  io.Reader
+
 	// Run with sudo priveleges. [sudo]
 	Sudo bool
 	// Do not reinstall up to date packages. [--needed]
@@ -27,18 +31,12 @@ type UpgradeOptions struct {
 	AsDeps bool
 	// Install packages as explictly installed. [--asexplict]
 	AsExplict bool
-	// Where command will write output text.
-	Stdout io.Writer
-	// Where command will write output text.
-	Stderr io.Writer
-	// Stdin from user is command will ask for something.
-	Stdin io.Reader
 	// Additional parameters, that will be appended to command as arguements.
 	AdditionalParams []string
 }
 
-func UpgradeDefault() *UpgradeOptions {
-	return &UpgradeOptions{
+func UpgradeDefault() *UpgradeParameters {
+	return &UpgradeParameters{
 		Needed:    true,
 		NoConfirm: true,
 		Stdout:    os.Stdout,
@@ -48,12 +46,12 @@ func UpgradeDefault() *UpgradeOptions {
 }
 
 // Install packages from files.
-func Upgrade(files string, opts ...UpgradeOptions) error {
+func Upgrade(files string, opts ...UpgradeParameters) error {
 	return UpgradeList(strings.Split(files, " "), opts...)
 }
 
 // Install packages from files.
-func UpgradeList(files []string, opts ...UpgradeOptions) error {
+func UpgradeList(files []string, opts ...UpgradeParameters) error {
 	o := formOptions(opts, UpgradeDefault)
 
 	args := []string{"-U"}
@@ -85,5 +83,5 @@ func UpgradeList(files []string, opts ...UpgradeOptions) error {
 
 	mu.Lock()
 	defer mu.Unlock()
-	return cmd.Run()
+	return call(cmd)
 }

@@ -12,16 +12,20 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"os/exec"
 	"path"
 	"strings"
 
+	"fmnx.su/core/pack/pacman"
 	"fmnx.su/core/pack/tmpl"
 	"github.com/mitchellh/ioprogress"
 )
 
 // Parameters that will be used to execute push command.
 type PushParameters struct {
+	Stdout io.Writer
+	Stderr io.Writer
+	Stdin  io.Reader
+
 	// Directory to read package files and signatures.
 	Directory string
 	// Which protocol to use for connection.
@@ -30,12 +34,6 @@ type PushParameters struct {
 	Endpoint string
 	// Owerwrite package with same version if exists.
 	Force bool
-	// Where command will write output text.
-	Stdout io.Writer
-	// Where command will write output text.
-	Stderr io.Writer
-	// Stdin from user is command will ask for something.
-	Stdin io.Reader
 }
 
 func pushdefault() *PushParameters {
@@ -55,49 +53,27 @@ func Push(args []string, prms ...PushParameters) error {
 	if err != nil {
 		return err
 	}
-	tmpl.Smsg(p.Stdout, "Pushing as: "+email, 1, 4)
+	tmpl.Smsg(p.Stdout, "Pushing as: "+email, 1, 3)
 
-	pkgs, _, err := formatpkgs(args)
+	cachedpkgs, err := listPkgFilenames(p.Directory)
 	if err != nil {
 		return err
 	}
+	tmpl.Smsg(p.Stdout, "Scanning cached packages", 2, 3)
 
-	tmpl.Smsg(p.Stdout, "Checking provided registries", 2, 4)
-	err = checkRegistries(pkgs)
+	mds, err := prepareMetadata(p.Directory, cachedpkgs, args)
 	if err != nil {
 		return err
 	}
-
-	tmpl.Smsg(p.Stdout, "Getting required files", 3, 4)
-	filenames, err := listPkgFilenames(p.Directory)
-	if err != nil {
-		return err
-	}
-
-	tmpl.Smsg(p.Stdout, "Preparing push metadata", 4, 4)
-	pprms, err := fillfileinfo(fillparams{
-		filenames: filenames,
-		packages:  pkgs,
-		directory: p.Directory,
-	})
-	if err != nil {
-		return err
-	}
+	tmpl.Smsg(p.Stdout, "Preparing package metadata", 3, 3)
 
 	tmpl.Amsg(p.Stdout, "Pushing packages")
-	for i, pp := range pprms {
-		pp.Protocol = "https"
-		if p.Insecure {
-			pp.Protocol = "http"
-		}
-		pp.Force = p.Force
-		pp.Endpoint = p.Endpoint
-		err = push(pp, email, i+1, len(pprms))
+	for i, md := range mds {
+		err = push(*p, md, email, i+1, len(mds))
 		if err != nil {
 			return err
 		}
 	}
-
 	return nil
 }
 
@@ -110,29 +86,65 @@ func gnupgEmail() (string, error) {
 	return strings.ReplaceAll(strings.Split(gnupgident, "<")[1], ">", ""), nil
 }
 
-// Check if all packages have registries where they will be pushed to.
-func checkRegistries(pkgs []registrypkg) error {
-	for _, pkg := range pkgs {
-		if pkg.Registry == "" {
-			return errors.New("provide registry to push package: " + pkg.Name)
-		}
-	}
-	return nil
+type PackageMetadata struct {
+	Name        string
+	FileName    string
+	Description string
+	Registry    string
+	Owner       string
 }
 
-// Structure including base registry parameters and information about file
-// pathes requied to push packages.
-type pushpkg struct {
-	registrypkg
-	PushParameters
-	// Name of the file which will be pushed.
-	Filename string
-	// Path to file which will be read and pushed.
-	PkgPath string
-	// Signature encoded to base64 string to check.
-	Signature string
-	// Protocol
-	Protocol string
+// Collect metadata about packages, ensure all packages could be pushed.
+func prepareMetadata(dir string, filenames, pkgs []string) ([]PackageMetadata, error) {
+	var mds []PackageMetadata
+	for _, pkg := range pkgs {
+		md := PackageMetadata{}
+
+		splt := strings.Split(pkg, "/")
+		switch len(splt) {
+		case 1:
+			return nil, errors.New("no registry to push: " + pkg)
+		case 2:
+			md.Registry = splt[0]
+			md.Name = splt[1]
+		case 3:
+			md.Registry = splt[0]
+			md.Owner = splt[1]
+			md.Name = splt[2]
+		}
+
+		var err error
+		md.FileName, err = getLastverCachedPkgFile(md.Name, filenames)
+		if err != nil {
+			return nil, err
+		}
+
+		md.Description, err = pacman.RawFileInfo(path.Join(dir, md.FileName))
+		if err != nil {
+			return nil, err
+		}
+		mds = append(mds, md)
+	}
+	return mds, nil
+}
+
+// Get lastet package from list based on package name.
+func getLastverCachedPkgFile(pkg string, files []string) (string, error) {
+	for i := len(files) - 1; i >= 0; i-- {
+		filename := files[i]
+		if !strings.HasPrefix(filename, pkg) {
+			continue
+		}
+		pkgsplt := strings.Split(filename, "-")
+		if len(pkgsplt) < 4 {
+			return ``, errors.New("not valid package file name: " + filename)
+		}
+		if !(strings.Join(pkgsplt[:len(pkgsplt)-3], "-") == pkg) {
+			continue
+		}
+		return filename, nil
+	}
+	return ``, errors.New("cannot find package in cache: " + pkg)
 }
 
 // List file names in provided cache directory.
@@ -151,100 +163,47 @@ func listPkgFilenames(dir string) ([]string, error) {
 	return fns, nil
 }
 
-type fillparams struct {
-	filenames []string
-	packages  []registrypkg
-	directory string
-}
-
-// Create array of package arguements, that will be pushed to registry.
-func fillfileinfo(p fillparams) ([]pushpkg, error) {
-	var ppkgs []pushpkg
-	for _, pkg := range p.packages {
-		for i := len(p.filenames) - 1; i >= 0; i-- {
-			filename := p.filenames[i]
-			if !strings.Contains(filename, pkg.Name) {
-				continue
-			}
-			pkgname, err := ejectpkgname(filename)
-			if err != nil {
-				return nil, err
-			}
-			if pkgname == pkg.Name {
-				pkgpath := path.Join(p.directory, filename)
-				sigbase64, err := readpkgsign(pkgpath + ".sig")
-				if err != nil {
-					return nil, err
-				}
-				ppkgs = append(ppkgs, pushpkg{
-					registrypkg: pkg,
-					Filename:    filename,
-					PkgPath:     pkgpath,
-					Signature:   sigbase64,
-				})
-				break
-			}
-			if i == 0 {
-				return nil, errors.New("unable to find package: " + pkg.Name)
-			}
-		}
-	}
-	return ppkgs, nil
-}
-
-// Eject package name from file name.
-func ejectpkgname(filename string) (string, error) {
-	pkgsplt := strings.Split(filename, "-")
-	if len(pkgsplt) < 4 {
-		return ``, errors.New("not valid package file name: " + filename)
-	}
-	return strings.Join(pkgsplt[:len(pkgsplt)-3], "-"), nil
-}
-
-// Read package signature and encode to base64.
-func readpkgsign(path string) (string, error) {
-	err := exec.Command("bash", "-c", "sudo chmod 0777 "+path).Run()
-	if err != nil {
-		return ``, errors.New("unable to read signature: " + path)
-	}
-	sigbytes, err := os.ReadFile(path)
-	if err != nil {
-		return ``, errors.New("unable to read signature: " + path)
-	}
-	return base64.StdEncoding.EncodeToString(sigbytes), nil
-}
-
-// This function pushes package to registry via http.
-func push(p pushpkg, email string, i, t int) error {
-	packagefile, err := os.Open(p.PkgPath)
+// This function pushes package to registry via http/https.
+func push(pp PushParameters, md PackageMetadata, email string, i, t int) error {
+	pkgpath := path.Join(pp.Directory, md.FileName)
+	packagefile, err := os.Open(pkgpath)
 	if err != nil {
 		return err
 	}
-	fi, err := os.Stat(p.PkgPath)
+	pkgInfo, err := os.Stat(pkgpath)
 	if err != nil {
 		return err
+	}
+
+	prfx := "https://"
+	if pp.Insecure {
+		prfx = "http://"
 	}
 
 	req, err := http.NewRequest(
 		http.MethodPut,
-		p.Protocol+"://"+p.Registry+p.Endpoint+"/push",
+		prfx+path.Join(md.Registry, md.Owner, md.Name, pp.Endpoint, "push"),
 		&ioprogress.Reader{
 			Reader:   packagefile,
-			Size:     fi.Size(),
-			DrawFunc: tmpl.Loader(p.Registry, p.Owner, p.Name, i, t),
+			Size:     pkgInfo.Size(),
+			DrawFunc: tmpl.Loader(md.Registry, md.Owner, md.Name, i, t),
 		},
 	)
 	if err != nil {
 		return err
 	}
 
-	req.Header.Add("file", p.Filename)
-	req.Header.Add("email", email)
-	req.Header.Add("sign", p.Signature)
-	if p.Owner != "" {
-		req.Header.Add("owner", p.Owner)
+	f, err := os.ReadFile(pkgpath + ".sig")
+	if err != nil {
+		return err
 	}
-	if p.Force {
+
+	req.Header.Add("file", md.FileName)
+	req.Header.Add("email", email)
+	req.Header.Add("sign", base64.RawStdEncoding.EncodeToString(f))
+	// req.Header.Add("description", md.Description)
+	req.Header.Add("owner", md.Owner)
+	if pp.Force {
 		req.Header.Add("force", "true")
 	}
 
@@ -258,7 +217,7 @@ func push(p pushpkg, email string, i, t int) error {
 		if err != nil {
 			return errors.Join(err, errors.New(resp.Status))
 		}
-		return fmt.Errorf("%s, %s - %s", resp.Status, string(b), p.Filename)
+		return fmt.Errorf("%s, %s - %s", resp.Status, string(b), md.FileName)
 	}
 	return nil
 }

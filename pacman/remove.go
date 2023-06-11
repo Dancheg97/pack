@@ -12,7 +12,11 @@ import (
 )
 
 // Optional parameters for pacman remove command.
-type RemoveOptions struct {
+type RemoveParameters struct {
+	Stdout io.Writer
+	Stderr io.Writer
+	Stdin  io.Reader
+
 	// Run with sudo priveleges. [sudo]
 	Sudo bool
 	// Do not ask for any confirmation. [--noconfirm]
@@ -23,18 +27,12 @@ type RemoveOptions struct {
 	ForceRecursive bool
 	// Remove configuration files aswell. [--nosave]
 	WithConfigs bool
-	// Where command will write output text.
-	Stdout io.Writer
-	// Where command will write output text.
-	Stderr io.Writer
-	// Stdin from user is command will ask for something.
-	Stdin io.Reader
 	// Additional parameters, that will be appended to command as arguements.
 	AdditionalParams []string
 }
 
-func RemoveDefault() *RemoveOptions {
-	return &RemoveOptions{
+func RemoveDefault() *RemoveParameters {
+	return &RemoveParameters{
 		Recursive:   true,
 		WithConfigs: true,
 		Stdout:      os.Stdout,
@@ -44,12 +42,12 @@ func RemoveDefault() *RemoveOptions {
 }
 
 // Remove packages from system.
-func Remove(pkgs string, opts ...RemoveOptions) error {
+func Remove(pkgs string, opts ...RemoveParameters) error {
 	return RemoveList(strings.Split(pkgs, " "), opts...)
 }
 
 // Remove packages from system.
-func RemoveList(pkgs []string, opts ...RemoveOptions) error {
+func RemoveList(pkgs []string, opts ...RemoveParameters) error {
 	o := formOptions(opts, RemoveDefault)
 
 	var args = []string{"-R"}
@@ -75,5 +73,5 @@ func RemoveList(pkgs []string, opts ...RemoveOptions) error {
 
 	mu.Lock()
 	defer mu.Unlock()
-	return cmd.Run()
+	return call(cmd)
 }

@@ -14,7 +14,11 @@ import (
 )
 
 // Query parameters for pacman packages.
-type QueryOptions struct {
+type QueryParameters struct {
+	Stdout io.Writer
+	Stderr io.Writer
+	Stdin  io.Reader
+
 	// List packages explicitly installed.
 	Explicit bool
 	// List packages installed as dependencies.
@@ -35,18 +39,12 @@ type QueryOptions struct {
 	List []bool
 	// Query a package file instead of the database.
 	File string
-	// Where command will write output text.
-	Stdout io.Writer
-	// Where command will write output text.
-	Stderr io.Writer
-	// Stdin from user is command will ask for something.
-	Stdin io.Reader
 	// Additional queue parameters.
 	AdditionalParams []string
 }
 
-func QueryDefault() *QueryOptions {
-	return &QueryOptions{}
+func QueryDefault() *QueryParameters {
+	return &QueryParameters{}
 }
 
 type PackageInfo struct {
@@ -55,7 +53,7 @@ type PackageInfo struct {
 }
 
 // Get information about installed packages.
-func Query(pkgs []string, opts ...QueryOptions) error {
+func Query(pkgs []string, opts ...QueryParameters) error {
 	o := formOptions(opts, QueryDefault)
 
 	args := []string{"-Q"}
@@ -99,7 +97,7 @@ func Query(pkgs []string, opts ...QueryOptions) error {
 	cmd.Stderr = o.Stderr
 	cmd.Stdin = o.Stdin
 
-	return cmd.Run()
+	return call(cmd)
 }
 
 type PackageInfoFull struct {
@@ -208,4 +206,13 @@ func parseOutdated(o string) []OutdatedPackage {
 		})
 	}
 	return rez
+}
+
+// Get raw file infor for provided package using `pacman -Qp`.
+func RawFileInfo(filepath string) (string, error) {
+	var b bytes.Buffer
+	cmd := exec.Command("pacman", "-Qpi", filepath)
+	cmd.Stdout = &b
+	err := call(cmd)
+	return b.String(), err
 }

@@ -17,12 +17,10 @@ import (
 
 // Parameters to run pack registry.
 type OpenParameters struct {
-	// Where command will write output text.
 	Stdout io.Writer
-	// Where command will write output text.
 	Stderr io.Writer
-	// Stdin from user is command will ask for something.
-	Stdin io.Reader
+	Stdin  io.Reader
+
 	// Endpoint that will be mounted for provided directory. This endpoint
 	// can be used as connection in pacman.conf file. Also creates push subpath
 	// /push, which can accept packages from end user

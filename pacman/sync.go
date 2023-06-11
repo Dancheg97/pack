@@ -14,7 +14,11 @@ import (
 )
 
 // Optional parameters for pacman sync command.
-type SyncOptions struct {
+type SyncParameters struct {
+	Stdout io.Writer
+	Stderr io.Writer
+	Stdin  io.Reader
+
 	// Run with sudo priveleges. [sudo]
 	Sudo bool
 	// Do not reinstall up to date packages. [--needed]
@@ -25,6 +29,8 @@ type SyncOptions struct {
 	NoProgressBar bool
 	// Do not execute the install scriptlet if one exists. [--noscriptlet]
 	NoScriptlet bool
+	// Use relaxed timout when loading packages. [--disable-download-timeout]
+	NoTimeout bool
 	// Install packages as non-explicitly installed. [--asdeps]
 	AsDeps bool
 	// Install packages as explictly installed. [--asexplict]
@@ -41,18 +47,12 @@ type SyncOptions struct {
 	Clean bool
 	// Clean all packages from cache directory. [-cc]
 	CleanAll bool
-	// Where command will write output text.
-	Stdout io.Writer
-	// Where command will write output text.
-	Stderr io.Writer
-	// Stdin from user is command will ask for something.
-	Stdin io.Reader
 	// Additional parameters, that will be appended to command as arguements.
 	AdditionalParams []string
 }
 
-func SyncDefault() *SyncOptions {
-	return &SyncOptions{
+func SyncDefault() *SyncParameters {
+	return &SyncParameters{
 		Sudo:      true,
 		Needed:    true,
 		NoConfirm: true,
@@ -65,12 +65,12 @@ func SyncDefault() *SyncOptions {
 
 // Executes pacman sync command. This command will read sync options and form
 // command based on first elements from the array.
-func Sync(pkgs string, opts ...SyncOptions) error {
+func Sync(pkgs string, opts ...SyncParameters) error {
 	return SyncList(strings.Split(pkgs, " "), opts...)
 }
 
 // Sync command for package string list.
-func SyncList(pkgs []string, opts ...SyncOptions) error {
+func SyncList(pkgs []string, opts ...SyncParameters) error {
 	o := formOptions(opts, SyncDefault)
 
 	args := []string{"-S"}
@@ -85,6 +85,9 @@ func SyncList(pkgs []string, opts ...SyncOptions) error {
 	}
 	if o.NoScriptlet {
 		args = append(args, "--noscriptlet")
+	}
+	if o.NoTimeout {
+		args = append(args, "--disable-download-timeout")
 	}
 	if o.AsDeps {
 		args = append(args, "--asdeps")
@@ -123,7 +126,7 @@ func SyncList(pkgs []string, opts ...SyncOptions) error {
 
 	mu.Lock()
 	defer mu.Unlock()
-	return cmd.Run()
+	return call(cmd)
 }
 
 // Options to apply when searching for some package.

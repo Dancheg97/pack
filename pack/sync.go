@@ -14,16 +14,15 @@ import (
 	"strings"
 
 	"fmnx.su/core/pack/pacman"
+	"fmnx.su/core/pack/tmpl"
 )
 
 // Syncronize packages with pack.
 type SyncParameters struct {
-	// Where command will write output text.
 	Stdout io.Writer
-	// Where command will write output text.
 	Stderr io.Writer
-	// Stdin from user is command will ask for something.
-	Stdin io.Reader
+	Stdin  io.Reader
+
 	// Download fresh package databases from the server (-yy force)
 	Refresh []bool
 	// Upgrade installed packages (-uu enables downgrade)
@@ -58,139 +57,91 @@ func syncdefault() *SyncParameters {
 func Sync(args []string, prms ...SyncParameters) error {
 	p := formOptions(prms, syncdefault)
 
-	pkgs, fmtpkgs, err := formatpkgs(args)
+	tmpl.Amsg(p.Stdout, "Syncronizing packages")
+
+	tmpl.Smsg(p.Stdout, "Adding missing databases to pacman.conf", 1, 2)
+	conf, err := addMissingDatabases(args, p.Insecure)
 	if err != nil {
 		return err
 	}
 
-	protocol := "https"
-	if p.Insecure {
-		protocol = "http"
-	}
+	tmpl.Smsg(p.Stdout, "Preparing packages to sync format", 2, 2)
+	syncpkg := formatPackages(args)
 
-	initial, err := prepareconf(pkgs, p.Stdout, protocol)
-	if err != nil {
-		return err
-	}
-
-	err = pacman.SyncList(fmtpkgs, pacman.SyncOptions{
+	err = pacman.SyncList(syncpkg, pacman.SyncParameters{
 		Sudo:      true,
-		Needed:    p.Force,
+		Needed:    !p.Force,
 		NoConfirm: p.Quick,
 		Refresh:   p.Refresh,
 		Upgrade:   p.Upgrade,
+		NoTimeout: p.Notimeout,
 		List:      p.List,
 		Stdout:    p.Stdout,
 		Stderr:    p.Stderr,
 		Stdin:     p.Stdin,
 	})
 	if err != nil || p.Keepcfg {
-		rollbackconf(*initial)
-		return err
+		return errors.Join(err, rollbackconf(*conf))
 	}
 	return nil
 }
 
-// Pakcage with owner and registry for further pack operations.
-type registrypkg struct {
-	Registry string
-	Owner    string
-	Name     string
-}
-
-// Format packages to pack compatible formats for operations with registries.
-func formatpkgs(pkgs []string) ([]registrypkg, []string, error) {
-	var rez []registrypkg
-	var fmtpkgs []string
-	for _, pkg := range pkgs {
-		splt := strings.Split(pkg, "/")
-		switch len(splt) {
-		case 1:
-			rez = append(rez, registrypkg{
-				Name: splt[0],
-			})
-			fmtpkgs = append(fmtpkgs, pkg)
-		case 2:
-			rez = append(rez, registrypkg{
-				Registry: splt[0],
-				Name:     splt[1],
-			})
-			fmtpkgs = append(fmtpkgs, pkg)
-		case 3:
-			rez = append(rez, registrypkg{
-				Registry: splt[0],
-				Owner:    splt[1],
-				Name:     splt[2],
-			})
-			fmtpkgs = append(fmtpkgs, splt[0]+"/"+splt[2])
-		default:
-			return nil, nil, errors.New("broken package: " + pkg)
-		}
+// Iterate over packages, check wether package database is present, if not
+// add new database to pacman.conf. Return previous version of pacman.conf.
+func addMissingDatabases(pkgs []string, insecure bool) (*string, error) {
+	protocol := "https"
+	if insecure {
+		protocol = "http"
 	}
-	return rez, fmtpkgs, nil
-}
-
-// Add missing registries to pacman configuration file and return file before
-// modifications.
-func prepareconf(pkgs []registrypkg, ow io.Writer, protocol string) (*string, error) {
 	f, err := os.ReadFile("/etc/pacman.conf")
 	if err != nil {
 		return nil, err
 	}
 	conf := string(f)
-
 	for _, pkg := range pkgs {
-		if pkg.Owner != "" && checkexistowner(conf, pkg.Registry, pkg.Owner) {
-			return &conf, nil
+		splt := strings.Split(pkg, "/")
+		if strings.Contains(conf, fmt.Sprintf("://%s/api/pack", splt[0])) {
+			continue
 		}
-		if checkexistsroot(pkg.Registry, pkg.Owner) {
-			return &conf, nil
-		}
-		err = addconfdb(pkg, ow, protocol)
-		if err != nil {
-			return nil, err
+		switch len(splt) {
+		case 2:
+			addConfDatabase(protocol, splt[0], splt[0])
+		case 3:
+			addConfDatabase(protocol, splt[1]+"."+splt[0], splt[0])
 		}
 	}
 	return &conf, nil
 }
 
-func checkexistowner(conf string, registry string, owner string) bool {
-	return strings.Contains(conf, "\n["+registry+"."+owner+"]\n")
+// Simple function to add database to pacman.conf.
+func addConfDatabase(protocol string, database string, domain string) error {
+	const confroot = "\n[%s]\nServer = %s://%s/api/pack\n"
+	tmpl := fmt.Sprintf(confroot, database, protocol, domain)
+	command := "cat <<EOF >> /etc/pacman.conf" + tmpl + "EOF"
+	return call(exec.Command("sudo", "bash", "-c", command))
 }
 
-func checkexistsroot(conf string, registry string) bool {
-	return strings.Contains(conf, "\n["+registry+"]\n")
-}
-
-func addconfdb(pkg registrypkg, ow io.Writer, protocol string) error {
-	var t string
-	if pkg.Owner == "" {
-		t = fmt.Sprintf(confroot, pkg.Registry, protocol, pkg.Registry)
-	} else {
-		t = fmt.Sprintf(confuser, pkg.Owner, pkg.Registry, protocol, pkg.Registry)
+// Format packages to pre-sync format.
+func formatPackages(pkgs []string) []string {
+	var out []string
+	for _, pkg := range pkgs {
+		splt := strings.Split(pkg, "/")
+		switch len(splt) {
+		case 1:
+			out = append(out, pkg)
+		case 2:
+			out = append(out, splt[0]+"/"+splt[1])
+		case 3:
+			out = append(out, splt[1]+"."+splt[0]+"/"+splt[2])
+		}
 	}
-	command := "cat <<EOF >> /etc/pacman.conf" + t + "EOF"
-	err := exec.Command("sudo", "bash", "-c", command).Run()
-	if err != nil {
-		return errors.New("unable to add to pacman.conf: " + t)
-	}
-	// ow.Write([]byte(tmpl.Dots + tmpl.DbAdded + pkg.Registry + "\n"))
-	return nil
+	return out
 }
 
-func rollbackconf(s string) {
-	exec.Command(
+// Return pacman.conf to initial state before execution.
+func rollbackconf(s string) error {
+	return call(exec.Command(
 		"sudo", "bash", "-c",
 		"cat <<EOF > /etc/pacman.conf\n"+s+"EOF",
-	).Run()
+	))
 }
-
-const confroot = `
-[%s]
-Server = %s://%s/api/pack
-`
-
-const confuser = `
-[%s.%s]
-Server = %s://%s/api/pack
-`

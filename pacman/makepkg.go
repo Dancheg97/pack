@@ -12,15 +12,13 @@ import (
 )
 
 // Options for building packages.
-type MakepkgOptions struct {
+type MakepkgParameters struct {
+	Stdout io.Writer
+	Stderr io.Writer
+	Stdin  io.Reader
+
 	// Additional parameters, that will be appended to command as arguements.
 	AdditionalParams []string
-	// Where command will write output text.
-	Stdout io.Writer
-	// Where command will write output text.
-	Stderr io.Writer
-	// Stdin from user is command will ask for something.
-	Stdin io.Reader
 	// Directory where process will be executed.
 	Dir string
 	// Specify a key to use for gpg signing instead of the default. [--key <key>]
@@ -85,8 +83,8 @@ type MakepkgOptions struct {
 	AsDeps bool
 }
 
-func makepkgdefault() *MakepkgOptions {
-	return &MakepkgOptions{
+func makepkgdefault() *MakepkgParameters {
+	return &MakepkgParameters{
 		Clean:      true,
 		Force:      true,
 		Sign:       true,
@@ -101,7 +99,7 @@ func makepkgdefault() *MakepkgOptions {
 // This command will build a package in directory provided in options.
 // Function is safe for concurrent usage. Can be called from multiple
 // goruotines, when options Install or SyncDeps are false.
-func Makepkg(opts ...MakepkgOptions) error {
+func Makepkg(opts ...MakepkgParameters) error {
 	o := formOptions(opts, makepkgdefault)
 
 	var args []string
@@ -211,5 +209,5 @@ func Makepkg(opts ...MakepkgOptions) error {
 	cmd.Stdout = o.Stdout
 	cmd.Stderr = o.Stderr
 
-	return cmd.Run()
+	return call(cmd)
 }

@@ -120,7 +120,7 @@ func main() {
 		return
 
 	case opts.Remove:
-		CheckErr(pacman.RemoveList(args(), pacman.RemoveOptions{
+		CheckErr(pacman.RemoveList(args(), pacman.RemoveParameters{
 			Sudo:        true,
 			NoConfirm:   !opts.Confirm,
 			Recursive:   !opts.Norecursive,
@@ -136,7 +136,7 @@ func main() {
 		return
 
 	case opts.Query:
-		CheckErr(pacman.Query(args(), pacman.QueryOptions{
+		CheckErr(pacman.Query(args(), pacman.QueryParameters{
 			Explicit:   opts.Explicit,
 			Deps:       opts.Deps,
 			Native:     opts.Native,
