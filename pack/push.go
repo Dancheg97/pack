@@ -114,7 +114,7 @@ func prepareMetadata(dir string, filenames, pkgs []string) ([]PackageMetadata, e
 		}
 
 		var err error
-		md.FileName, err = getLastverCachedPkgFile(pkg, filenames)
+		md.FileName, err = getLastverCachedPkgFile(md.Name, filenames)
 		if err != nil {
 			return nil, err
 		}
@@ -123,6 +123,7 @@ func prepareMetadata(dir string, filenames, pkgs []string) ([]PackageMetadata, e
 		if err != nil {
 			return nil, err
 		}
+		mds = append(mds, md)
 	}
 	return mds, nil
 }
@@ -200,7 +201,7 @@ func push(pp PushParameters, md PackageMetadata, email string, i, t int) error {
 	req.Header.Add("file", md.FileName)
 	req.Header.Add("email", email)
 	req.Header.Add("sign", base64.RawStdEncoding.EncodeToString(f))
-	req.Header.Add("description", md.Description)
+	// req.Header.Add("description", md.Description)
 	req.Header.Add("owner", md.Owner)
 	if pp.Force {
 		req.Header.Add("force", "true")
