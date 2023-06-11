@@ -207,3 +207,12 @@ func parseOutdated(o string) []OutdatedPackage {
 	}
 	return rez
 }
+
+// Get raw file infor for provided package using `pacman -Qp`.
+func RawFileInfo(filepath string) (string, error) {
+	var b bytes.Buffer
+	cmd := exec.Command("pacman", "-Qpi", filepath)
+	cmd.Stdout = &b
+	err := call(cmd)
+	return b.String(), err
+}

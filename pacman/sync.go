@@ -29,6 +29,8 @@ type SyncParameters struct {
 	NoProgressBar bool
 	// Do not execute the install scriptlet if one exists. [--noscriptlet]
 	NoScriptlet bool
+	// Use relaxed timout when loading packages. [--disable-download-timeout]
+	NoTimeout bool
 	// Install packages as non-explicitly installed. [--asdeps]
 	AsDeps bool
 	// Install packages as explictly installed. [--asexplict]
@@ -83,6 +85,9 @@ func SyncList(pkgs []string, opts ...SyncParameters) error {
 	}
 	if o.NoScriptlet {
 		args = append(args, "--noscriptlet")
+	}
+	if o.NoTimeout {
+		args = append(args, "--disable-download-timeout")
 	}
 	if o.AsDeps {
 		args = append(args, "--asdeps")
