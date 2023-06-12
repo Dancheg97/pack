@@ -73,7 +73,7 @@ func Build(prms ...BuildParameters) error {
 	}
 
 	tmpl.Smsg(p.Stdout, "Validating packager identity", 2, 2)
-	err = validatePackager()
+	err = validatePackager(p.Stdin, p.Stdout)
 	if err != nil {
 		return err
 	}
@@ -123,7 +123,7 @@ func checkGnupg() error {
 
 // Validate, that packager defined in /etc/makepkg.conf matches signer
 // authority in GnuPG.
-func validatePackager() error {
+func validatePackager(i io.Reader, o io.Writer) error {
 	keySigner, err := gnuPGIdentity()
 	if err != nil {
 		return err
@@ -134,15 +134,26 @@ func validatePackager() error {
 	}
 	splt := strings.Split(string(f), "\nPACKAGER=\"")
 	if len(splt) != 2 {
+		mes := "You did not set PACKAGER in /etc/makepkg.conf. " +
+			"Set GnuPG authority as pacman packager"
+		if tmpl.AskForConfirmation(i, o, mes) {
+			return updateMakepkgPackager(keySigner)
+		}
 		return errors.New(tmpl.ErrNoPackager)
 	}
 	confPackager := strings.Split(splt[1], "\"\n")[0]
 	if confPackager != keySigner {
+		mes := "Your GnuPG authority and pacman PACKAGER differs. " +
+			"Write GnuPG authority to /etc/makepkg.conf"
+		if tmpl.AskForConfirmation(i, o, mes) {
+			return updateMakepkgPackager(keySigner)
+		}
 		return errors.New(tmpl.ErrSignerMissmatch)
 	}
 	return nil
 }
 
+// Returns name and email from GnuPG. Error, if did not succeed.
 func gnuPGIdentity() (string, error) {
 	gnukey := `gpg --with-colons -k | awk -F: '$1=="uid" {print $10; exit}'`
 	cmd := exec.Command("bash", "-c", gnukey)
@@ -157,6 +168,8 @@ func gnuPGIdentity() (string, error) {
 	return strings.ReplaceAll(b.String(), "\n", ""), nil
 }
 
+// Function generated project template based on current directory name and
+// identity in GnuPG.
 func template() error {
 	ident, err := gnuPGIdentity()
 	if err != nil {
@@ -182,8 +195,25 @@ func template() error {
 	return errors.Join(derr, serr, perr)
 }
 
+// Return armored public key string from GnuPG.
 func armored(o io.Writer) error {
 	cmd := exec.Command("gpg", "--armor", "--export")
 	cmd.Stdout = o
 	return call(cmd)
+}
+
+// Update /etc/makepkg.conf packager to one provided in string. First, comment
+// previous packager, then add new one to the end of file.
+func updateMakepkgPackager(packager string) error {
+	comment := "sed -i 's|PACKAGER|#PACKAGER|g' /etc/makepkg.conf"
+	err := call(exec.Command("sudo", "bash", "-c", comment))
+	if err != nil {
+		return err
+	}
+	addnew := fmt.Sprintf("echo \"PACKAGER='%s'\" >> /etc/makepkg.conf", packager)
+	err = call(exec.Command("sudo", "bash", "-c", addnew))
+	if err != nil {
+		return err
+	}
+	return nil
 }

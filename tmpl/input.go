@@ -23,7 +23,7 @@ func AskForConfirmation(in io.Reader, out io.Writer, msg string) bool {
 	reader := bufio.NewReader(os.Stdin)
 
 	dots := color.New(color.FgWhite, color.Bold, color.FgHiBlue).Sprintf(":: ")
-	msg = color.New(color.Bold).Sprintf(msg + "? [y/N]")
+	msg = color.New(color.Bold).Sprintf(msg + "? [Y/n] ")
 	msg = dots + msg
 
 	for {

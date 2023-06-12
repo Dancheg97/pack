@@ -8,7 +8,6 @@ package pack
 import (
 	"bytes"
 	"errors"
-	"io"
 	"os/exec"
 )
 
@@ -21,7 +20,7 @@ func formOptions[Opts any](arr []Opts, getdefault func() *Opts) *Opts {
 
 func call(cmd *exec.Cmd) error {
 	var buf bytes.Buffer
-	cmd.Stderr = io.MultiWriter(cmd.Stderr, &buf)
+	cmd.Stderr = &buf
 	err := cmd.Run()
 	if err != nil {
 		return errors.New(buf.String())
