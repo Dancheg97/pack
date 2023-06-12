@@ -178,9 +178,15 @@ func push(pp PushParameters, md PackageMetadata, email string, i, t int) error {
 		http.MethodPut,
 		prfx+path.Join(md.Registry, md.Owner, pp.Endpoint, "push"),
 		&ioprogress.Reader{
-			Reader:   packagefile,
-			Size:     pkgInfo.Size(),
-			DrawFunc: tmpl.Loader(md.Registry, md.Owner, md.Name, i, t),
+			Reader: packagefile,
+			Size:   pkgInfo.Size(),
+			DrawFunc: tmpl.Loader(&tmpl.LoaderParameters{
+				Current:     i,
+				Total:       t,
+				Destinaton:  path.Join(md.Registry, md.Owner),
+				PackageName: md.Name,
+				Output:      pp.Stdout,
+			}),
 		},
 	)
 	if err != nil {

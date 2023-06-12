@@ -7,26 +7,44 @@ package tmpl
 
 import (
 	"fmt"
-	"os"
-	"path"
+	"io"
 	"strings"
 
-	bar "github.com/mitchellh/ioprogress"
+	"github.com/mitchellh/ioprogress"
 	"golang.org/x/term"
 )
 
-func Loader(registry, owner, pkg string, i, t int) func(int64, int64) error {
-	w, _, err := term.GetSize(0)
+type LoaderParameters struct {
+	Current     int
+	Total       int
+	Destinaton  string
+	PackageName string
+	Output      io.Writer
+}
+
+func Loader(p *LoaderParameters) func(int64, int64) error {
+	width, _, err := term.GetSize(0)
 	if err != nil {
 		return nil
 	}
-	w = w - 24 - len(registry) - len(owner) - len(pkg)
-	msg := fmt.Sprintf("(%d/%d) Package %s to %s", i, t, pkg, path.Join(registry, owner))
-	return bar.DrawTerminalf(os.Stdout, func(progress, total int64) string {
-		percentage := float32(progress) / float32(total)
-		fill := strings.Repeat("#", int(float32(w)*0.52*percentage))
-		rest := strings.Repeat("-", int(float32(w)*0.52*(1-percentage)))
-		prg := percentage * 100
-		return fmt.Sprintf("%s %*s %.0f", msg, w, "["+fill+rest+"]", prg) + "%"
+	prefix := fmt.Sprintf(
+		"(%d/%d) Package %s to %s...",
+		p.Current, p.Total,
+		p.PackageName, p.Destinaton,
+	)
+	loaderwidth := int(float64(width) * 0.35)
+	padding := strings.Repeat(" ", width-len(prefix)-loaderwidth-7)
+
+	return ioprogress.DrawTerminalf(p.Output, func(progress, total int64) string {
+		prcntg := float32(progress) / float32(total) * 100
+
+		current := int((float64(progress) / float64(total)) * float64(loaderwidth))
+		bar := fmt.Sprintf(
+			"[%s%s]",
+			strings.Repeat("#", int(current)),
+			strings.Repeat("-", int(loaderwidth-current)),
+		)
+
+		return fmt.Sprintf("%s%s%s %.0f", prefix, padding, bar, prcntg) + "%"
 	})
 }
