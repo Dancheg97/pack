@@ -15,23 +15,20 @@ import (
 )
 
 type LoaderParameters struct {
-	Current     int
-	Total       int
-	Destinaton  string
-	PackageName string
-	Output      io.Writer
+	Current int
+	Total   int
+	Msg     string
+	Output  io.Writer
 }
 
+// Function that will give terminal drawer for provided message, that can be
+// further used in different IO operations.
 func Loader(p *LoaderParameters) func(int64, int64) error {
 	width, _, err := term.GetSize(0)
 	if err != nil {
 		return nil
 	}
-	prefix := fmt.Sprintf(
-		"(%d/%d) Package %s to %s...",
-		p.Current, p.Total,
-		p.PackageName, p.Destinaton,
-	)
+	prefix := fmt.Sprintf("(%d/%d) %s", p.Current, p.Total, p.Msg)
 
 	if len(prefix) > width {
 		return ioprogress.DrawTerminalf(p.Output, func(i1, i2 int64) string {

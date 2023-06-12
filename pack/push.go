@@ -181,11 +181,13 @@ func push(pp PushParameters, md PackageMetadata, email string, i, t int) error {
 			Reader: packagefile,
 			Size:   pkgInfo.Size(),
 			DrawFunc: tmpl.Loader(&tmpl.LoaderParameters{
-				Current:     i,
-				Total:       t,
-				Destinaton:  path.Join(md.Registry, md.Owner),
-				PackageName: md.Name,
-				Output:      pp.Stdout,
+				Current: i,
+				Total:   t,
+				Msg: fmt.Sprintf(
+					"Pushing %s to %s...", md.Name,
+					path.Join(md.Registry, md.Owner),
+				),
+				Output: pp.Stdout,
 			}),
 		},
 	)
