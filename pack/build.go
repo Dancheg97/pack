@@ -37,6 +37,8 @@ type BuildParameters struct {
 	Garbage bool
 	// Generate pacakge template and exit.
 	Template bool
+	// Export public armored string key to Stdout and exit.
+	ExportArmored bool
 }
 
 func builddefault() *BuildParameters {
@@ -52,6 +54,10 @@ func Build(prms ...BuildParameters) error {
 
 	if p.Template {
 		return template()
+	}
+
+	if p.ExportArmored {
+		return armored(p.Stdout)
 	}
 
 	tmpl.Amsg(p.Stdout, "Building package")
@@ -170,4 +176,10 @@ func template() error {
 	perr := os.WriteFile(`PKGBUILD`, []byte(p), 0600)
 
 	return errors.Join(derr, serr, perr)
+}
+
+func armored(o io.Writer) error {
+	cmd := exec.Command("gpg", "--armor", "--export")
+	cmd.Stdout = o
+	return call(cmd)
 }

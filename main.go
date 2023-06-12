@@ -64,6 +64,7 @@ var opts struct {
 	Rmdeps    bool `short:"r" long:"rmdeps"`
 	Garbage   bool `short:"g" long:"garbage"`
 	Template  bool `short:"t" long:"template"`
+	Export    bool `short:"e" long:"exp-arm"`
 
 	// Open options.
 	Name   string `short:"n" long:"name" default:"localhost"`

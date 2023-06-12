@@ -61,7 +61,7 @@ options:
 	-f, --force       Reinstall up to date targets
 	-k, --keepcfg     Do not save new registries in pacman.conf
 
-usage:  pack {-S --sync} [options] <registry/owner/package(s)>`
+usage:  pack {-S --sync} [options] <registry/(owner)/package(s)>`
 
 var PushHelp = `Push packages
 
@@ -71,7 +71,7 @@ options:
 	-w, --insecure  Push package over HTTP instead of HTTPS
 	    --endpoint  Use custom API endpoint (default /api/pack)
 
-usage:  pack {-P --push} [options] <registry/owner/package(s)>`
+usage:  pack {-P --push} [options] <registry/(owner)/package(s)>`
 
 var RemoveHelp = `Remove packages
 
@@ -108,6 +108,7 @@ options:
 	-r, --rmdeps    Remove installed dependencies after a successful build
 	-g, --garbage   Do not clean workspace before and after build
 	-t, --template  Generate PKGBUILD, app.sh and app.desktop and exit
+	-e, --exp-arm   Export public GnuPG key armored string and exit
 
 usage:  pack {-B --build} [options]`
 
