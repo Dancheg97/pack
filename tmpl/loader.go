@@ -32,9 +32,23 @@ func Loader(p *LoaderParameters) func(int64, int64) error {
 		p.Current, p.Total,
 		p.PackageName, p.Destinaton,
 	)
-	loaderwidth := int(float64(width) * 0.35)
-	padding := strings.Repeat(" ", width-len(prefix)-loaderwidth-7)
 
+	if len(prefix) > width {
+		return ioprogress.DrawTerminalf(p.Output, func(i1, i2 int64) string {
+			return prefix[:width-3] + "..."
+		})
+	}
+
+	loaderwidth := int(float64(width) * 0.35)
+	paddingWidth := width - len(prefix) - loaderwidth - 7
+
+	if paddingWidth < 0 {
+		return ioprogress.DrawTerminalf(p.Output, func(i1, i2 int64) string {
+			return prefix
+		})
+	}
+
+	padding := strings.Repeat(" ", paddingWidth)
 	return ioprogress.DrawTerminalf(p.Output, func(progress, total int64) string {
 		prcntg := float32(progress) / float32(total) * 100
 
