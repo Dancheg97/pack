@@ -99,7 +99,7 @@ options:
 
 usage:  pack {-Q --query} [options] [package(s)]`
 
-var BuildHelp = `Build package in current directory
+var BuildHelp = `Build package
 
 options:
 	-q, --quick     Do not ask for any confirmation (noconfirm)
@@ -108,11 +108,11 @@ options:
 	-r, --rmdeps    Remove installed dependencies after a successful build
 	-g, --garbage   Do not clean workspace before and after build
 	-t, --template  Generate PKGBUILD, app.sh and app.desktop and exit
-	-e, --exp-arm   Export public GnuPG key armored string and exit
+	-e, --exp-key   Export public GnuPG key armored string and exit
 
 usage:  pack {-B --build} [options]`
 
-var OpenHelp = `Launch package registry
+var OpenHelp = `Run package registry
 
 options:
 	-d, --dir      Exposed directory (default /var/cache/pacman/pkg)

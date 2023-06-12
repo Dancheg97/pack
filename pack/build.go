@@ -38,13 +38,17 @@ type BuildParameters struct {
 	// Generate pacakge template and exit.
 	Template bool
 	// Export public armored string key to Stdout and exit.
-	ExportArmored bool
+	ExportKey bool
 }
 
 func builddefault() *BuildParameters {
 	return &BuildParameters{
+		Stdout:    os.Stdout,
+		Stderr:    os.Stderr,
+		Stdin:     os.Stdin,
 		Dir:       "/var/cache/pacman/pkg",
 		Syncbuild: true,
+		Rmdeps:    true,
 	}
 }
 
@@ -56,29 +60,29 @@ func Build(prms ...BuildParameters) error {
 		return template()
 	}
 
-	if p.ExportArmored {
+	if p.ExportKey {
 		return armored(p.Stdout)
 	}
 
 	tmpl.Amsg(p.Stdout, "Building package")
 
-	tmpl.Smsg(p.Stdout, "Running GnuPG check", 1, 4)
+	tmpl.Smsg(p.Stdout, "Running GnuPG check", 1, 2)
 	err := checkGnupg()
 	if err != nil {
 		return err
 	}
 
-	tmpl.Smsg(p.Stdout, "Validating packager identity", 2, 3)
+	tmpl.Smsg(p.Stdout, "Validating packager identity", 2, 2)
 	err = validatePackager()
 	if err != nil {
 		return err
 	}
 
-	tmpl.Smsg(p.Stdout, "Calling makepkg", 3, 3)
+	tmpl.Amsg(p.Stdout, "Building package with makepkg")
 	err = pacman.Makepkg(pacman.MakepkgParameters{
 		Sign:       true,
 		Stdout:     p.Stdout,
-		Stderr:     p.Stdout,
+		Stderr:     p.Stderr,
 		Stdin:      p.Stdin,
 		Clean:      !p.Garbage,
 		CleanBuild: !p.Garbage,

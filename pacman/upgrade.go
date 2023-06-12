@@ -83,5 +83,5 @@ func UpgradeList(files []string, opts ...UpgradeParameters) error {
 
 	mu.Lock()
 	defer mu.Unlock()
-	return call(cmd)
+	return cmd.Run()
 }

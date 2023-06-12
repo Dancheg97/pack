@@ -64,7 +64,7 @@ var opts struct {
 	Rmdeps    bool `short:"r" long:"rmdeps"`
 	Garbage   bool `short:"g" long:"garbage"`
 	Template  bool `short:"t" long:"template"`
-	Export    bool `short:"e" long:"exp-arm"`
+	ExportKey bool `short:"e" long:"exp-key"`
 
 	// Open options.
 	Name   string `short:"n" long:"name" default:"localhost"`
@@ -93,10 +93,10 @@ func main() {
 			Notimeout: opts.Notimeout,
 			Force:     opts.Force,
 			Keepcfg:   opts.Keepcfg,
+			Insecure:  opts.Insecure,
 			Stdout:    os.Stdout,
 			Stderr:    os.Stderr,
 			Stdin:     os.Stdin,
-			Insecure:  opts.Insecure,
 		}))
 		return
 
@@ -160,15 +160,16 @@ func main() {
 
 	case opts.Build:
 		CheckErr(pack.Build(pack.BuildParameters{
-			Stdout:    os.Stdout,
-			Stderr:    os.Stderr,
-			Stdin:     os.Stdin,
-			Quick:     opts.Quick,
 			Dir:       opts.Dir,
+			Quick:     opts.Quick,
 			Syncbuild: opts.Syncbuild,
 			Rmdeps:    opts.Rmdeps,
 			Garbage:   opts.Garbage,
 			Template:  opts.Template,
+			ExportKey: opts.ExportKey,
+			Stdout:    os.Stdout,
+			Stderr:    os.Stderr,
+			Stdin:     os.Stdin,
 		}))
 		return
 
@@ -178,9 +179,6 @@ func main() {
 
 	case opts.Open:
 		CheckErr(pack.Open(pack.OpenParameters{
-			Stdout:   os.Stdout,
-			Stderr:   os.Stderr,
-			Stdin:    os.Stdin,
 			Endpoint: opts.Endpoint,
 			Dir:      opts.Dir,
 			Name:     opts.Name,
@@ -188,6 +186,9 @@ func main() {
 			Cert:     opts.Cert,
 			Key:      opts.Key,
 			GpgDir:   opts.GpgDir,
+			Stdout:   os.Stdout,
+			Stderr:   os.Stderr,
+			Stdin:    os.Stdin,
 		}))
 		return
 
@@ -214,6 +215,10 @@ func CheckErr(err error) {
 	}
 }
 
+// This gets list of all arguements and removes command, string args and bool
+// args from list. New string arguements should be added to stringargs variable
+// for command to work properly.
+// TODO: later rewrite with reflect to avoid unexpected behaviour.
 func args() []string {
 	var stringargs = []string{
 		"-n", "--name", "-p", "--port", "--cert", "--key", "--ring",
