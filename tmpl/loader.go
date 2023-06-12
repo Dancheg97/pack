@@ -51,8 +51,7 @@ func Loader(p *LoaderParameters) func(int64, int64) error {
 
 		current := int((float64(progress) / float64(total)) * float64(loaderwidth))
 		bar := fmt.Sprintf(
-			"[%s%s]",
-			strings.Repeat("#", int(current)),
+			"[%s%s]", strings.Repeat("#", int(current)),
 			strings.Repeat("-", int(loaderwidth-current)),
 		)
 

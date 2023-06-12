@@ -81,7 +81,7 @@ func Sync(args []string, prms ...SyncParameters) error {
 		Stdin:     p.Stdin,
 	})
 	if err != nil || p.Keepcfg {
-		return errors.Join(err, rollbackconf(*conf))
+		return errors.Join(err, writeconf(*conf))
 	}
 	return nil
 }
@@ -138,8 +138,8 @@ func formatPackages(pkgs []string) []string {
 	return out
 }
 
-// Return pacman.conf to initial state before execution.
-func rollbackconf(s string) error {
+// Overwrite pacman.conf with provided string.
+func writeconf(s string) error {
 	return call(exec.Command(
 		"sudo", "bash", "-c",
 		"cat <<EOF > /etc/pacman.conf\n"+s+"EOF",
