@@ -210,8 +210,11 @@ func updateMakepkgPackager(packager string) error {
 	if err != nil {
 		return err
 	}
-	addnew := fmt.Sprintf("echo \"PACKAGER='%s'\" >> /etc/makepkg.conf", packager)
-	err = call(exec.Command("sudo", "bash", "-c", addnew))
+	addnew := fmt.Sprintf("\nPACKAGER=\"%s\"\n", packager)
+	err = call(exec.Command(
+		"sudo", "bash", "-c",
+		"cat <<EOF >> /etc/makepkg.conf\n"+addnew+"EOF",
+	))
 	if err != nil {
 		return err
 	}
