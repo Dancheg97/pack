@@ -127,7 +127,9 @@ func (p *Registry) Push(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var rabuf bytes.Buffer
-	repoaddcmd := exec.Command("repo-add", dbname, pkgfilepath)
+	dbarchivepath := path.Join(tmpdir, dbarchivename)
+	repoaddcmd := exec.Command("repo-add", dbarchivepath, pkgfilepath)
+	repoaddcmd.Stdout = os.Stdout
 	repoaddcmd.Stderr = &rabuf
 	if err := repoaddcmd.Run(); err != nil {
 		p.end(w, http.StatusInternalServerError, errors.New(rabuf.String()))

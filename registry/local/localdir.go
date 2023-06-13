@@ -25,7 +25,10 @@ func (d *DirStorage) Save(key string, content io.Reader) error {
 	os.RemoveAll(path)
 	f, err := os.Open(path)
 	if err != nil {
-		return err
+		f, err = os.Create(path)
+		if err != nil {
+			return err
+		}
 	}
 	_, err = f.ReadFrom(content)
 	return err
