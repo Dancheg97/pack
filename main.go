@@ -109,7 +109,6 @@ func main() {
 			Directory: opts.Dir,
 			Insecure:  opts.Insecure,
 			Endpoint:  opts.Endpoint,
-			Force:     opts.Force,
 			Stdout:    os.Stdout,
 			Stderr:    os.Stderr,
 			Stdin:     os.Stdin,

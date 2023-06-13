@@ -8,11 +8,7 @@ package pack
 import (
 	"fmt"
 	"io"
-	"net/http"
 	"os"
-
-	"fmnx.su/core/pack/registry"
-	"fmnx.su/core/pack/tmpl"
 )
 
 // Parameters to run pack registry.
@@ -61,33 +57,34 @@ func Open(prms ...OpenParameters) error {
 		return fmt.Errorf("expose dir not found: %+v", err)
 	}
 
-	d := registry.LocalDirDb{
-		Dir:    p.Dir,
-		DbName: p.Name,
-	}
+	// d := registry.LocalDirDb{
+	// 	Dir:    p.Dir,
+	// 	DbName: p.Name,
+	// }
 
-	k := registry.LocalGpgDir{
-		GpgDir: p.GpgDir,
-	}
+	// k := registry.LocalGpgDir{
+	// 	GpgDir: p.GpgDir,
+	// }
 
-	s := registry.Pusher{
-		Stdout:    p.Stdout,
-		Stderr:    p.Stderr,
-		KeySource: &k,
-		DbFormer:  &d,
-	}
+	// s := registry.Pusher{
+	// 	Stdout:    p.Stdout,
+	// 	Stderr:    p.Stderr,
+	// 	KeySource: &k,
+	// 	DbFormer:  &d,
+	// }
 
-	fs := http.FileServer(http.Dir(p.Dir))
-	http.Handle(p.Endpoint+"/", http.StripPrefix(p.Endpoint+"/", fs))
-	http.HandleFunc(p.Endpoint+"/push", s.Push)
+	// fs := http.FileServer(http.Dir(p.Dir))
+	// http.Handle(p.Endpoint+"/", http.StripPrefix(p.Endpoint+"/", fs))
+	// http.HandleFunc(p.Endpoint+"/push", s.Push)
 
-	msg := fmt.Sprintf("Starting registry %s on port %s", p.Name, p.Port)
-	tmpl.Amsg(p.Stdout, msg)
-	if p.Cert != "" && p.Key != "" {
-		return http.ListenAndServeTLS(
-			":"+p.Port, p.Cert, p.Key,
-			http.DefaultServeMux,
-		)
-	}
-	return http.ListenAndServe(":"+p.Port, http.DefaultServeMux)
+	// msg := fmt.Sprintf("Starting registry %s on port %s", p.Name, p.Port)
+	// tmpl.Amsg(p.Stdout, msg)
+	// if p.Cert != "" && p.Key != "" {
+	// 	return http.ListenAndServeTLS(
+	// 		":"+p.Port, p.Cert, p.Key,
+	// 		http.DefaultServeMux,
+	// 	)
+	// }
+	// return http.ListenAndServe(":"+p.Port, http.DefaultServeMux)
+	return nil
 }

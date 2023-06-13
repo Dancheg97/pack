@@ -31,8 +31,6 @@ type PushParameters struct {
 	Insecure bool
 	// Custom endpoint for package push
 	Endpoint string
-	// Owerwrite package with same version if exists.
-	Force bool
 }
 
 func pushdefault() *PushParameters {
@@ -204,9 +202,6 @@ func push(pp PushParameters, md PackageMetadata, email string, i, t int) error {
 	req.Header.Add("email", email)
 	req.Header.Add("sign", base64.RawStdEncoding.EncodeToString(f))
 	req.Header.Add("owner", md.Owner)
-	if pp.Force {
-		req.Header.Add("force", "true")
-	}
 
 	var client http.Client
 	resp, err := client.Do(req)

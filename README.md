@@ -19,7 +19,7 @@ Pack can be used to create registries that serve as regular arch package mirrors
 
 Also pack has slightly reworked API to make some operations faster. For example, flag `-q`, or `--quick`, can be used as shortcut alternative to `--noconfirm`.
 
-Run `pack -Sh`, `pack -Rh`, `pack -Ph`, `pack -Oh` to get full description of for pack commands.
+Run `pack -Sh`, `pack -Rh`, `pack -Ph`, `pack -Oh` to get full description for pack commands.
 
 ![](pack/push.png)
 
