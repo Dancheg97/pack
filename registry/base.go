@@ -37,7 +37,7 @@ type Registry struct {
 // File storage, that will be used to save/retrieve data related to specific
 // packages.
 type FileStorage interface {
-	Get(key string) (io.Reader, error)
+	Get(key string) ([]byte, error)
 	Save(key string, content io.Writer) error
 }
 

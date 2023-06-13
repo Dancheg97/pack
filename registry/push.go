@@ -20,6 +20,7 @@ import (
 	"github.com/google/uuid"
 )
 
+// Push packages to registry.
 func (p *Registry) Push(w http.ResponseWriter, r *http.Request) {
 	filename := r.Header.Get("file")
 	email := r.Header.Get("email")
@@ -100,34 +101,22 @@ func (p *Registry) Push(w http.ResponseWriter, r *http.Request) {
 	dbname := strings.Join([]string{owner, p.Dbname, "db"}, ".")
 	db, err := p.FileStorage.Get(dbname)
 	if err == nil {
-		f, err := os.Open(path.Join(tmpdir, dbname))
+		err = os.WriteFile(path.Join(tmpdir, dbname), db, 0600)
 		if err != nil {
 			p.end(w, http.StatusInternalServerError, err)
 			return
 		}
-		_, err = f.ReadFrom(db)
-		if err != nil {
-			p.end(w, http.StatusInternalServerError, err)
-			return
-		}
-		f.Close()
 	}
 
 	p.Smsg("Loading old database archive if exists", 8, 12)
 	dbarchivename := strings.Join([]string{owner, p.Dbname, "db.tar.gz"}, ".")
 	dbarchive, err := p.FileStorage.Get(dbarchivename)
 	if err == nil {
-		f, err := os.Open(path.Join(tmpdir, dbarchivename))
+		err = os.WriteFile(path.Join(tmpdir, dbarchivename), dbarchive, 0600)
 		if err != nil {
 			p.end(w, http.StatusInternalServerError, err)
 			return
 		}
-		_, err = f.ReadFrom(dbarchive)
-		if err != nil {
-			p.end(w, http.StatusInternalServerError, err)
-			return
-		}
-		f.Close()
 	}
 
 	p.Smsg("Adding package to database", 9, 12)
