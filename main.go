@@ -41,7 +41,7 @@ var opts struct {
 	// Push options.
 	Dir      string `short:"d" long:"dir" default:"/var/cache/pacman/pkg"`
 	Insecure bool   `short:"w" long:"insecure"`
-	Endpoint string `long:"endpoint" default:"/api/pack"`
+	Endpoint string `long:"endpoint" default:"/api/packages/arch"`
 
 	// Remove options.
 	Confirm     bool `short:"o" long:"confirm"`

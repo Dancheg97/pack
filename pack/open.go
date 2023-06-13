@@ -8,7 +8,13 @@ package pack
 import (
 	"fmt"
 	"io"
+	"net/http"
 	"os"
+
+	"fmnx.su/core/pack/registry"
+	"fmnx.su/core/pack/registry/local"
+	"fmnx.su/core/pack/tmpl"
+	"github.com/gorilla/mux"
 )
 
 // Parameters to run pack registry.
@@ -42,7 +48,7 @@ func opendefault() *OpenParameters {
 		Stdout:   os.Stdout,
 		Stderr:   os.Stderr,
 		Stdin:    os.Stdin,
-		Endpoint: "/api/pack",
+		Endpoint: "/api/packages/arch",
 		Dir:      "/var/cache/pacman/pkg",
 		Name:     "localhost",
 		Port:     "8080",
@@ -57,34 +63,34 @@ func Open(prms ...OpenParameters) error {
 		return fmt.Errorf("expose dir not found: %+v", err)
 	}
 
-	// d := registry.LocalDirDb{
-	// 	Dir:    p.Dir,
-	// 	DbName: p.Name,
-	// }
+	d := local.DirStorage{
+		Dir: p.Dir,
+	}
 
-	// k := registry.LocalGpgDir{
-	// 	GpgDir: p.GpgDir,
-	// }
+	k := local.LocalKeyDir{
+		Dir: p.GpgDir,
+	}
 
-	// s := registry.Pusher{
-	// 	Stdout:    p.Stdout,
-	// 	Stderr:    p.Stderr,
-	// 	KeySource: &k,
-	// 	DbFormer:  &d,
-	// }
+	r := registry.Registry{
+		Stdout:      p.Stdout,
+		Stderr:      p.Stderr,
+		TmpDir:      "/tmp",
+		Dbname:      p.Name,
+		FileStorage: &d,
+		KeyReader:   &k,
+	}
 
-	// fs := http.FileServer(http.Dir(p.Dir))
-	// http.Handle(p.Endpoint+"/", http.StripPrefix(p.Endpoint+"/", fs))
-	// http.HandleFunc(p.Endpoint+"/push", s.Push)
+	router := mux.NewRouter()
 
-	// msg := fmt.Sprintf("Starting registry %s on port %s", p.Name, p.Port)
-	// tmpl.Amsg(p.Stdout, msg)
-	// if p.Cert != "" && p.Key != "" {
-	// 	return http.ListenAndServeTLS(
-	// 		":"+p.Port, p.Cert, p.Key,
-	// 		http.DefaultServeMux,
-	// 	)
-	// }
-	// return http.ListenAndServe(":"+p.Port, http.DefaultServeMux)
-	return nil
+	router.HandleFunc(p.Endpoint+"/push", r.Push)
+	router.HandleFunc(p.Endpoint+"/{owner}/{file}", r.Get)
+	router.HandleFunc(p.Endpoint+"/{file}", r.Get)
+
+	msg := fmt.Sprintf("Starting registry %s on port %s", p.Name, p.Port)
+	tmpl.Amsg(p.Stdout, msg)
+
+	if p.Key != "" && p.Cert != "" {
+		return http.ListenAndServeTLS(":"+p.Port, p.Cert, p.Key, router)
+	}
+	return http.ListenAndServe(":"+p.Port, router)
 }

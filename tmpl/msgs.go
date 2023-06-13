@@ -69,7 +69,7 @@ options:
 	-d, --dir <dir> Use custom source dir with packages (default /var/cache/pacman/pkg)
 	-f, --force     Owerwrite package with same version if exists
 	-w, --insecure  Push package over HTTP instead of HTTPS
-	    --endpoint  Use custom API endpoint (default /api/pack)
+	    --endpoint  Use custom API endpoint (default /api/packages/arch)
 
 usage:  pack {-P --push} [options] <registry/(owner)/package(s)>`
 
@@ -121,7 +121,7 @@ options:
 	    --cert     Certificate file for TLS server
 	    --key      Key file for TLS server
 	    --gpgdir   Directory containing files with GnuPG keys (sign validation)
-	    --endpoint Use custom API endpoint (default /api/pack)
+	    --endpoint Use custom API endpoint (default /api/packages/arch)
 
 usage:  pack {-O --open} [options]`
 

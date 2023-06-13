@@ -38,7 +38,7 @@ type Registry struct {
 // packages.
 type FileStorage interface {
 	Get(key string) ([]byte, error)
-	Save(key string, content io.Writer) error
+	Save(key string, content io.Reader) error
 }
 
 // Interface, that will be used to obtain all keys, that might be used to

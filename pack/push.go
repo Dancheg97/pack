@@ -35,7 +35,7 @@ type PushParameters struct {
 
 func pushdefault() *PushParameters {
 	return &PushParameters{
-		Endpoint:  "/api/pack",
+		Endpoint:  "/api/packages/arch",
 		Directory: "/var/cache/pacman/pkg",
 	}
 }

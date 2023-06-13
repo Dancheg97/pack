@@ -31,8 +31,8 @@ func main() {
 	}
 
 	fs := http.FileServer(http.Dir(p.Dir))
-	http.Handle("/api/pack", http.StripPrefix("/api/pack", fs))
-	http.HandleFunc("/api/pack/push", s.Push)
+	http.Handle("/api/packages/arch", http.StripPrefix("/api/packages/arch", fs))
+	http.HandleFunc("/api/packages/arch/push", s.Push)
 
 	return http.ListenAndServe(":"+p.Port, http.DefaultServeMux)
 }

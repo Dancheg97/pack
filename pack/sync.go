@@ -100,7 +100,7 @@ func addMissingDatabases(pkgs []string, insecure bool) (*string, error) {
 	conf := string(f)
 	for _, pkg := range pkgs {
 		splt := strings.Split(pkg, "/")
-		if strings.Contains(conf, fmt.Sprintf("://%s/api/pack", splt[0])) {
+		if strings.Contains(conf, fmt.Sprintf("://%s/api/packages/arch", splt[0])) {
 			continue
 		}
 		switch len(splt) {
@@ -115,7 +115,7 @@ func addMissingDatabases(pkgs []string, insecure bool) (*string, error) {
 
 // Simple function to add database to pacman.conf.
 func addConfDatabase(protocol string, database string, domain string) error {
-	const confroot = "\n[%s]\nServer = %s://%s/api/pack\n"
+	const confroot = "\n[%s]\nServer = %s://%s/api/packages/arch\n"
 	tmpl := fmt.Sprintf(confroot, database, protocol, domain)
 	command := "cat <<EOF >> /etc/pacman.conf" + tmpl + "EOF"
 	return call(exec.Command("sudo", "bash", "-c", command))
