@@ -133,7 +133,7 @@ $$ |  $$ |$$  __$$ |$$ |      $$  _$$\   This program may be freely redistribute
 $$$$$$$  |\$$$$$$$ |\$$$$$$$\ $$ | \$$\   the terms of the GNU General Public License.
 $$  ____/  \_______| \_______|\__|  \__|      Web page: https://fmnx.su/core/pack
 $$ |
-$$ |                                                    Version: 0.4.10
+$$ |                                                    Version: 0.5.1
 \__|`
 
 const PKGBUILD = `# Maintainer: %s
