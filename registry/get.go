@@ -14,8 +14,8 @@ import (
 
 func (p *Registry) Get(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	file := strings.Join([]string{vars["owner"], vars["file"]}, ".")
-	data, err := p.FileStorage.Get(file)
+	trimmedfile := strings.TrimPrefix(vars["file"], vars["owner"]+".")
+	data, err := p.FileStorage.Get(Join(vars["owner"], trimmedfile))
 	if err != nil {
 		p.end(w, http.StatusNotFound, err)
 		return

@@ -174,7 +174,7 @@ func push(pp PushParameters, md PackageMetadata, email string, i, t int) error {
 
 	req, err := http.NewRequest(
 		http.MethodPut,
-		prfx+path.Join(md.Registry, md.Owner, pp.Endpoint, "push"),
+		prfx+path.Join(md.Registry, pp.Endpoint, "push"),
 		&ioprogress.Reader{
 			Reader: packagefile,
 			Size:   pkgInfo.Size(),

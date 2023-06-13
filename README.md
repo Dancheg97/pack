@@ -21,7 +21,7 @@ Also pack has slightly reworked API to make some operations faster. For example,
 
 Run `pack -Sh`, `pack -Rh`, `pack -Ph`, `pack -Oh` to get full description for pack commands.
 
-![](pack/push.png)
+![](push.png)
 
 ### Installation
 

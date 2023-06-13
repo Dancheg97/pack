@@ -100,23 +100,26 @@ func addMissingDatabases(pkgs []string, insecure bool) (*string, error) {
 	conf := string(f)
 	for _, pkg := range pkgs {
 		splt := strings.Split(pkg, "/")
-		if strings.Contains(conf, fmt.Sprintf("://%s/api/packages/arch", splt[0])) {
-			continue
-		}
 		switch len(splt) {
 		case 2:
-			addConfDatabase(protocol, splt[0], splt[0])
+			if strings.Contains(conf, splt[0]+"/api/packages/arch") {
+				continue
+			}
+			addConfDatabase(protocol, splt[0], splt[0], "")
 		case 3:
-			addConfDatabase(protocol, splt[1]+"."+splt[0], splt[0])
+			if strings.Contains(conf, splt[0]+"/api/packages/arch/"+splt[1]) {
+				continue
+			}
+			addConfDatabase(protocol, splt[1]+"."+splt[0], splt[0], "/"+splt[1])
 		}
 	}
 	return &conf, nil
 }
 
 // Simple function to add database to pacman.conf.
-func addConfDatabase(protocol string, database string, domain string) error {
-	const confroot = "\n[%s]\nServer = %s://%s/api/packages/arch\n"
-	tmpl := fmt.Sprintf(confroot, database, protocol, domain)
+func addConfDatabase(protocol, database, domain, postfix string) error {
+	const confroot = "\n[%s]\nServer = %s://%s/api/packages/arch%s\n"
+	tmpl := fmt.Sprintf(confroot, database, protocol, domain, postfix)
 	command := "cat <<EOF >> /etc/pacman.conf" + tmpl + "EOF"
 	return call(exec.Command("sudo", "bash", "-c", command))
 }

@@ -9,6 +9,7 @@ import (
 	"bytes"
 	"errors"
 	"os/exec"
+	"strings"
 )
 
 func formOptions[Opts any](arr []Opts, getdefault func() *Opts) *Opts {
@@ -23,7 +24,8 @@ func call(cmd *exec.Cmd) error {
 	cmd.Stderr = &buf
 	err := cmd.Run()
 	if err != nil {
-		return errors.New(buf.String())
+		out := strings.ReplaceAll(buf.String(), "error: ", "")
+		return errors.New(strings.TrimSuffix(out, "\n"))
 	}
 	return nil
 }

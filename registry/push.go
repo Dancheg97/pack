@@ -14,7 +14,6 @@ import (
 	"os"
 	"os/exec"
 	"path"
-	"strings"
 
 	"github.com/ProtonMail/gopenpgp/v2/crypto"
 	"github.com/google/uuid"
@@ -98,7 +97,7 @@ func (p *Registry) Push(w http.ResponseWriter, r *http.Request) {
 	}
 
 	p.Smsg("Loading old database if exists", 7, 12)
-	dbname := strings.Join([]string{owner, p.Dbname, "db"}, ".")
+	dbname := Join(owner, p.Dbname, "db")
 	db, err := p.FileStorage.Get(dbname)
 	if err == nil {
 		err = os.WriteFile(path.Join(tmpdir, dbname), db, 0600)
@@ -109,7 +108,7 @@ func (p *Registry) Push(w http.ResponseWriter, r *http.Request) {
 	}
 
 	p.Smsg("Loading old database archive if exists", 8, 12)
-	dbarchivename := strings.Join([]string{owner, p.Dbname, "db.tar.gz"}, ".")
+	dbarchivename := Join(owner, p.Dbname, "db.tar.gz")
 	dbarchive, err := p.FileStorage.Get(dbarchivename)
 	if err == nil {
 		err = os.WriteFile(path.Join(tmpdir, dbarchivename), dbarchive, 0600)
@@ -143,7 +142,7 @@ func (p *Registry) Push(w http.ResponseWriter, r *http.Request) {
 		p.end(w, http.StatusInternalServerError, err)
 		return
 	}
-	savefile := strings.Join([]string{owner, filename}, ".")
+	savefile := Join(owner, filename)
 	err = p.FileStorage.Save(savefile, &filebuf)
 	if err != nil {
 		p.end(w, http.StatusInternalServerError, err)

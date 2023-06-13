@@ -126,7 +126,7 @@ func main() {
 			Recursive:   !opts.Norecursive,
 			WithConfigs: !opts.Nocfgs,
 			Stdout:      os.Stdout,
-			Stderr:      os.Stderr,
+			Stderr:      nil,
 			Stdin:       os.Stdin,
 		}))
 		return
