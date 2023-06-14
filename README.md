@@ -75,11 +75,11 @@ It is recommend to use container environment for security purposes, also that ma
 
 ```yml
 # This compose can be used as a starting point to launch pack registry.
-# By default pack works properly only over https, but you can provide http
-# flag to {-S --sync} command (hidden by default) for local testing.
+# To use pack via http (for local testing), you can provide -w option to
+# syncronization and push operations on packages.
 
 services:
-  registry:
+  pack:
     image: fmnx.su/core/pack
     container_name: pack
     ports:
@@ -89,14 +89,20 @@ services:
     command: |
       -O
       --port 80
-      --cert /data/cert.pem
       --gpgdir /data/keys
       --dir /data/pkgs
     # --key /data/key.pem
-    # --dir /data/pkgs
+    # --cert /data/cert.pem
 ```
 
-To get complete working registry, you need to pass directory with public GPG keys, so pushed package signatures could be validated with. You should name files containing GPG keys with accordance to email. Directory, provided by `--gpgdir` flag should contain keys that will be used for push validation.
+To get complete working registry, you need to pass directory containing public GPG armored keys related to emails, so that pushed package signatures could be validated. You should name files containing GPG keys with accordance to email. Example:
+
+```
+/gpgdir
+  -email1@example.com
+  -email2@example.com
+  -email3@example.com
+```
 
 After setup you can test `pack` locally with push and sync commands. Example:
 
@@ -106,7 +112,7 @@ cd flutter
 pack -Bqs
 pack -Pw localhost/flutter
 pack -R flutter
-pack -Skw localhost/package
+pack -Skyw localhost/flutter
 ```
 
 If do not like docker, you can run registry with `pack -O` command on your machine.

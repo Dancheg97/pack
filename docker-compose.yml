@@ -10,8 +10,7 @@ services:
     command: | 
       -O
       --port 80
-      --cert /data/cert.pem
       --gpgdir /data/keys
       --dir /data/pkgs
     # --key /data/key.pem
-    # --dir /data/pkgs
+    # --cert /data/cert.pem

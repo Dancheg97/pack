@@ -14,27 +14,32 @@ Example of usage:
 import "fmnx.su/core/pack/registry"
 
 func main() {
-	d := registry.LocalDirDb{
-		Dir:    "/var/cache/pacman/pkg",
-		DbName: "localhost",
+	d := local.DirStorage{
+		Dir: "/dir/with/packages",
 	}
 
-	k := registry.LocalGpgDir{
-		GpgDir: "/home/user/gpg",
+	k := local.LocalKeyDir{
+		Dir: "/dir/with/gpg/keys",
 	}
 
-	s := registry.Pusher{
-		Stdout:          os.Stdout,
-		Stderr:          os.Stderr,
-		GPGVireivicator: &k,
-		DbFormer:        &d,
+	r := registry.Registry{
+		TmpDir:      "/tmp",
+		Dbname:      "domain.com",
+		FileStorage: &d,
+		KeyReader:   &k,
 	}
 
-	fs := http.FileServer(http.Dir(p.Dir))
-	http.Handle("/api/packages/arch", http.StripPrefix("/api/packages/arch", fs))
-	http.HandleFunc("/api/packages/arch/push", s.Push)
+	router := mux.NewRouter()
 
-	return http.ListenAndServe(":"+p.Port, http.DefaultServeMux)
+	router.HandleFunc(p.Endpoint+"/push", r.Push)
+	router.HandleFunc(p.Endpoint+"/{owner}/{file}", r.Get)
+	router.HandleFunc(p.Endpoint+"/{file}", r.Get)
+
+	msg := fmt.Sprintf("Starting registry %s on port %s", p.Name, p.Port)
+
+	tmpl.Amsg(p.Stdout, msg)
+
+	return http.ListenAndServe(":"+p.Port, router)
 }
 
 ```
