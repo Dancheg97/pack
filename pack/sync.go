@@ -57,18 +57,24 @@ func syncdefault() *SyncParameters {
 func Sync(args []string, prms ...SyncParameters) error {
 	p := formOptions(prms, syncdefault)
 
-	tmpl.Amsg(p.Stdout, "Syncronizing packages")
+	var err error
+	var conf *string
+	var pkgs []string
 
-	tmpl.Smsg(p.Stdout, "Adding missing databases to pacman.conf", 1, 2)
-	conf, err := addMissingDatabases(args, p.Insecure)
-	if err != nil {
-		return err
+	if len(args) > 0 {
+		tmpl.Amsg(p.Stdout, "Syncronizing packages")
+
+		tmpl.Smsg(p.Stdout, "Adding missing databases to pacman.conf", 1, 2)
+		conf, err = addMissingDatabases(args, p.Insecure)
+		if err != nil {
+			return err
+		}
+
+		tmpl.Smsg(p.Stdout, "Preparing packages to sync format", 2, 2)
+		pkgs = formatPackages(args)
 	}
 
-	tmpl.Smsg(p.Stdout, "Preparing packages to sync format", 2, 2)
-	syncpkg := formatPackages(args)
-
-	err = pacman.SyncList(syncpkg, pacman.SyncParameters{
+	err = pacman.SyncList(pkgs, pacman.SyncParameters{
 		Sudo:      true,
 		Needed:    !p.Force,
 		NoConfirm: p.Quick,
