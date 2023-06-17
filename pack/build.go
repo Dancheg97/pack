@@ -73,7 +73,7 @@ func Build(prms ...BuildParameters) error {
 	}
 
 	tmpl.Smsg(p.Stdout, "Validating packager identity", 2, 2)
-	err = validatePackager(p.Stdin, p.Stdout)
+	err = validatePackager()
 	if err != nil {
 		return err
 	}
@@ -111,7 +111,7 @@ func checkGnupg() error {
 	}
 	gpgdir, err := os.ReadDir(path.Join(hd, ".gnupg"))
 	if err != nil {
-		return err
+		return errors.New(tmpl.ErrGnuPGprivkeyNotFound)
 	}
 	for _, de := range gpgdir {
 		if strings.Contains(de.Name(), "private-keys") {
@@ -123,7 +123,7 @@ func checkGnupg() error {
 
 // Validate, that packager defined in /etc/makepkg.conf matches signer
 // authority in GnuPG.
-func validatePackager(i io.Reader, o io.Writer) error {
+func validatePackager() error {
 	keySigner, err := gnuPGIdentity()
 	if err != nil {
 		return err
@@ -134,20 +134,10 @@ func validatePackager(i io.Reader, o io.Writer) error {
 	}
 	splt := strings.Split(string(f), "\nPACKAGER=\"")
 	if len(splt) != 2 {
-		mes := "You did not set PACKAGER in /etc/makepkg.conf. " +
-			"Set GnuPG authority as pacman packager"
-		if tmpl.AskForConfirmation(i, o, mes) {
-			return updateMakepkgPackager(keySigner)
-		}
 		return errors.New(tmpl.ErrNoPackager)
 	}
 	confPackager := strings.Split(splt[1], "\"\n")[0]
 	if confPackager != keySigner {
-		mes := "Your GnuPG authority and pacman PACKAGER differs. " +
-			"Write GnuPG authority to /etc/makepkg.conf"
-		if tmpl.AskForConfirmation(i, o, mes) {
-			return updateMakepkgPackager(keySigner)
-		}
 		return errors.New(tmpl.ErrSignerMissmatch)
 	}
 	return nil
@@ -200,23 +190,4 @@ func armored(o io.Writer) error {
 	cmd := exec.Command("gpg", "--armor", "--export")
 	cmd.Stdout = o
 	return call(cmd)
-}
-
-// Update /etc/makepkg.conf packager to one provided in string. First, comment
-// previous packager, then add new one to the end of file.
-func updateMakepkgPackager(packager string) error {
-	comment := "sed -i 's|PACKAGER|#PACKAGER|g' /etc/makepkg.conf"
-	err := call(exec.Command("sudo", "bash", "-c", comment))
-	if err != nil {
-		return err
-	}
-	addnew := fmt.Sprintf("\nPACKAGER=\"%s\"\n", packager)
-	err = call(exec.Command(
-		"sudo", "bash", "-c",
-		"cat <<EOF >> /etc/makepkg.conf\n"+addnew+"EOF",
-	))
-	if err != nil {
-		return err
-	}
-	return nil
 }

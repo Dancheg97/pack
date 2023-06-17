@@ -93,5 +93,5 @@ func RepoAdd(dbfile, pkgfile string, opts ...RepoAddParameters) error {
 	cmd.Stdout = o.Stdout
 	cmd.Stdin = o.Stdin
 
-	return call(cmd)
+	return cmd.Run()
 }

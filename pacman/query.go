@@ -97,7 +97,7 @@ func Query(pkgs []string, opts ...QueryParameters) error {
 	cmd.Stderr = o.Stderr
 	cmd.Stdin = o.Stdin
 
-	return call(cmd)
+	return cmd.Run()
 }
 
 type PackageInfoFull struct {
@@ -213,6 +213,10 @@ func RawFileInfo(filepath string) (string, error) {
 	var b bytes.Buffer
 	cmd := exec.Command("pacman", "-Qpi", filepath)
 	cmd.Stdout = &b
-	err := call(cmd)
-	return b.String(), err
+	cmd.Stderr = &b
+	err := cmd.Run()
+	if err != nil {
+		return ``, errors.New(b.String())
+	}
+	return b.String(), nil
 }

@@ -40,8 +40,8 @@ func init() {
 var Help = `Simplified version of pacman
 
 operations:
-	pack {-S --sync}   [options] [registry/(owner)/package(s)]
-	pack {-P --push}   [options] [registry/(owner)/package(s)]
+	pack {-S --sync}   [options] [(registry)/(owner)/package(s)]
+	pack {-P --push}   [options] [(registry)/(owner)/package(s)]
 	pack {-R --remove} [options] [package(s)]
 	pack {-Q --query}  [options] [package(s)]
 	pack {-B --build}  [options]
@@ -61,7 +61,7 @@ options:
 	-f, --force       Reinstall up to date targets
 	-k, --keepcfg     Do not save new registries in pacman.conf
 
-usage:  pack {-S --sync} [options] <registry/(owner)/package(s)>`
+usage:  pack {-S --sync} [options] <(registry)/(owner)/package(s)>`
 
 var PushHelp = `Push packages
 
@@ -125,16 +125,14 @@ options:
 
 usage:  pack {-O --open} [options]`
 
-var Version = `
-$$$$$$\   $$$$$$\   $$$$$$$\  $$ |  $$\             Pack - package manager.
-$$  __$$\  \____$$\ $$  ____| $$ | $$  |          Copyright (C) 2023 FMNX team
-$$ /  $$ | $$$$$$$ |$$ /      $$$$$$  / 
-$$ |  $$ |$$  __$$ |$$ |      $$  _$$\   This program may be freely redistributed under
-$$$$$$$  |\$$$$$$$ |\$$$$$$$\ $$ | \$$\   the terms of the GNU General Public License.
-$$  ____/  \_______| \_______|\__|  \__|      Web page: https://fmnx.su/core/pack
-$$ |
-$$ |                                                    Version: 0.5.1
-\__|`
+var Version = `             Pack - package manager.
+          Copyright (C) 2023 FMNX team
+     
+  This program may be freely redistributed under
+   the terms of the GNU General Public License.
+       Web page: https://fmnx.su/core/pack
+ 
+                 Version: 0.5.2`
 
 const PKGBUILD = `# Maintainer: %s
 

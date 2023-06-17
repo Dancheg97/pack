@@ -6,10 +6,7 @@
 package pacman
 
 import (
-	"bytes"
-	"errors"
 	"os/exec"
-	"strings"
 	"sync"
 )
 
@@ -36,15 +33,4 @@ func sudoCommand(sudo bool, command string, args ...string) *exec.Cmd {
 		return exec.Command(`sudo`, args...)
 	}
 	return exec.Command(command, args...)
-}
-
-func call(cmd *exec.Cmd) error {
-	var buf bytes.Buffer
-	cmd.Stderr = &buf
-	err := cmd.Run()
-	if err != nil {
-		out := strings.ReplaceAll(buf.String(), "error: ", "")
-		return errors.New(strings.TrimSuffix(out, "\n"))
-	}
-	return nil
 }
