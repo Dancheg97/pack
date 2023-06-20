@@ -15,7 +15,7 @@ import (
 	"path"
 	"strings"
 
-	"fmnx.su/core/pack/tmpl"
+	"fmnx.su/core/pack/msgs"
 	"github.com/mitchellh/ioprogress"
 )
 
@@ -47,27 +47,27 @@ func pushdefault() *PushParameters {
 func Push(args []string, prms ...PushParameters) error {
 	p := formOptions(prms, pushdefault)
 
-	tmpl.Amsg(p.Stdout, "Preparing pushed packages")
+	msgs.Amsg(p.Stdout, "Preparing pushed packages")
 
 	email, err := gnupgEmail()
 	if err != nil {
 		return err
 	}
-	tmpl.Smsg(p.Stdout, "Pushing as: "+email, 1, 3)
+	msgs.Smsg(p.Stdout, "Pushing as: "+email, 1, 3)
 
 	cachedpkgs, err := listPkgFilenames(p.Directory)
 	if err != nil {
 		return err
 	}
-	tmpl.Smsg(p.Stdout, "Scanning cached packages", 2, 3)
+	msgs.Smsg(p.Stdout, "Scanning cached packages", 2, 3)
 
 	mds, err := prepareMetadata(p.Directory, cachedpkgs, args)
 	if err != nil {
 		return err
 	}
-	tmpl.Smsg(p.Stdout, "Preparing package metadata", 3, 3)
+	msgs.Smsg(p.Stdout, "Preparing package metadata", 3, 3)
 
-	tmpl.Amsg(p.Stdout, "Pushing packages")
+	msgs.Amsg(p.Stdout, "Pushing packages")
 	for i, md := range mds {
 		err = push(*p, md, email, i+1, len(mds))
 		if err != nil {
@@ -181,7 +181,7 @@ func push(pp PushParameters, md PackageMetadata, email string, i, t int) error {
 		&ioprogress.Reader{
 			Reader: packagefile,
 			Size:   pkgInfo.Size(),
-			DrawFunc: tmpl.Loader(&tmpl.LoaderParameters{
+			DrawFunc: msgs.Loader(&msgs.LoaderParameters{
 				Current: i,
 				Total:   t,
 				Msg: fmt.Sprintf(

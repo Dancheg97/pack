@@ -15,8 +15,8 @@ import (
 	"path"
 	"strings"
 
+	"fmnx.su/core/pack/msgs"
 	"fmnx.su/core/pack/pacman"
-	"fmnx.su/core/pack/tmpl"
 )
 
 // Parameters that can be used to build packages.
@@ -64,21 +64,21 @@ func Build(prms ...BuildParameters) error {
 		return armored(p.Stdout)
 	}
 
-	tmpl.Amsg(p.Stdout, "Building package")
+	msgs.Amsg(p.Stdout, "Building package")
 
-	tmpl.Smsg(p.Stdout, "Running GnuPG check", 1, 2)
+	msgs.Smsg(p.Stdout, "Running GnuPG check", 1, 2)
 	err := checkGnupg()
 	if err != nil {
 		return err
 	}
 
-	tmpl.Smsg(p.Stdout, "Validating packager identity", 2, 2)
+	msgs.Smsg(p.Stdout, "Validating packager identity", 2, 2)
 	err = validatePackager()
 	if err != nil {
 		return err
 	}
 
-	tmpl.Amsg(p.Stdout, "Building package with makepkg")
+	msgs.Amsg(p.Stdout, "Building package with makepkg")
 	err = pacman.Makepkg(pacman.MakepkgParameters{
 		Sign:       true,
 		Stdout:     p.Stdout,
@@ -97,7 +97,7 @@ func Build(prms ...BuildParameters) error {
 		return errors.Join(err)
 	}
 
-	tmpl.Amsg(p.Stdout, "Moving package to cache")
+	msgs.Amsg(p.Stdout, "Moving package to cache")
 	cmd := exec.Command("bash", "-c", "sudo mv *.pkg.tar.zst* "+p.Dir)
 	return call(cmd)
 }
@@ -111,14 +111,14 @@ func checkGnupg() error {
 	}
 	gpgdir, err := os.ReadDir(path.Join(hd, ".gnupg"))
 	if err != nil {
-		return errors.New(tmpl.ErrGnuPGprivkeyNotFound)
+		return errors.New(msgs.ErrGnuPGprivkeyNotFound)
 	}
 	for _, de := range gpgdir {
 		if strings.Contains(de.Name(), "private-keys") {
 			return nil
 		}
 	}
-	return errors.New(tmpl.ErrGnuPGprivkeyNotFound)
+	return errors.New(msgs.ErrGnuPGprivkeyNotFound)
 }
 
 // Validate, that packager defined in /etc/makepkg.conf matches signer
@@ -134,11 +134,11 @@ func validatePackager() error {
 	}
 	splt := strings.Split(string(f), "\nPACKAGER=\"")
 	if len(splt) != 2 {
-		return errors.New(tmpl.ErrNoPackager)
+		return errors.New(msgs.ErrNoPackager)
 	}
 	confPackager := strings.Split(splt[1], "\"\n")[0]
 	if confPackager != keySigner {
-		return errors.New(tmpl.ErrSignerMissmatch)
+		return errors.New(msgs.ErrSignerMissmatch)
 	}
 	return nil
 }
@@ -173,13 +173,13 @@ func template() error {
 	splt := strings.Split(dir, "/")
 	n := splt[len(splt)-1]
 
-	d := fmt.Sprintf(tmpl.Desktop, n, n, n, n, n)
+	d := fmt.Sprintf(msgs.Desktop, n, n, n, n, n)
 	derr := os.WriteFile(n+".desktop", []byte(d), 0600)
 
-	s := fmt.Sprintf(tmpl.ShFile, n, n)
+	s := fmt.Sprintf(msgs.ShFile, n, n)
 	serr := os.WriteFile(n+".sh", []byte(s), 0600)
 
-	p := fmt.Sprintf(tmpl.PKGBUILD, ident, n, n, n, n, n, n, n, n)
+	p := fmt.Sprintf(msgs.PKGBUILD, ident, n, n, n, n, n, n, n, n)
 	perr := os.WriteFile(`PKGBUILD`, []byte(p), 0600)
 
 	return errors.Join(derr, serr, perr)

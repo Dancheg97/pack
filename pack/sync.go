@@ -14,8 +14,8 @@ import (
 	"runtime"
 	"strings"
 
+	"fmnx.su/core/pack/msgs"
 	"fmnx.su/core/pack/pacman"
-	"fmnx.su/core/pack/tmpl"
 )
 
 // Syncronize packages with pack.
@@ -63,15 +63,15 @@ func Sync(args []string, prms ...SyncParameters) error {
 	var pkgs []string
 
 	if len(args) > 0 {
-		tmpl.Amsg(p.Stdout, "Syncronizing packages")
+		msgs.Amsg(p.Stdout, "Syncronizing packages")
 
-		tmpl.Smsg(p.Stdout, "Adding missing databases to pacman.conf", 1, 2)
+		msgs.Smsg(p.Stdout, "Adding missing databases to pacman.conf", 1, 2)
 		conf, err = addMissingDatabases(args, p.Insecure)
 		if err != nil {
 			return err
 		}
 
-		tmpl.Smsg(p.Stdout, "Preparing packages to sync format", 2, 2)
+		msgs.Smsg(p.Stdout, "Preparing packages to sync format", 2, 2)
 		pkgs = formatPackages(args)
 	}
 

@@ -10,9 +10,9 @@ import (
 	"os"
 	"strings"
 
+	"fmnx.su/core/pack/msgs"
 	"fmnx.su/core/pack/pack"
 	"fmnx.su/core/pack/pacman"
-	"fmnx.su/core/pack/tmpl"
 	"github.com/jessevdk/go-flags"
 )
 
@@ -68,16 +68,26 @@ var opts struct {
 }
 
 func main() {
+	err := run()
+	if err != nil {
+		fmt.Println(msgs.Err + err.Error())
+		os.Exit(1)
+	}
+}
+
+func run() error {
 	_, err := flags.NewParser(&opts, flags.None).Parse()
-	CheckErr(err)
+	if err != nil {
+		return err
+	}
 
 	switch {
 	case opts.Sync && opts.Help:
-		fmt.Println(tmpl.SyncHelp)
-		return
+		fmt.Println(msgs.SyncHelp)
+		return nil
 
 	case opts.Sync:
-		CheckErr(pack.Sync(args(), pack.SyncParameters{
+		return pack.Sync(args(), pack.SyncParameters{
 			Quick:     opts.Quick,
 			Refresh:   opts.Refresh,
 			Upgrade:   opts.Upgrade,
@@ -90,15 +100,14 @@ func main() {
 			Stdout:    os.Stdout,
 			Stderr:    os.Stderr,
 			Stdin:     os.Stdin,
-		}))
-		return
+		})
 
 	case opts.Push && opts.Help:
-		fmt.Println(tmpl.PushHelp)
-		return
+		fmt.Println(msgs.PushHelp)
+		return nil
 
 	case opts.Push:
-		CheckErr(pack.Push(args(), pack.PushParameters{
+		return pack.Push(args(), pack.PushParameters{
 			Stdout:    os.Stdout,
 			Stderr:    os.Stderr,
 			Stdin:     os.Stdin,
@@ -106,15 +115,14 @@ func main() {
 			Insecure:  opts.Insecure,
 			Endpoint:  opts.Endpoint,
 			Distro:    opts.Distro,
-		}))
-		return
+		})
 
 	case opts.Remove && opts.Help:
-		fmt.Println(tmpl.RemoveHelp)
-		return
+		fmt.Println(msgs.RemoveHelp)
+		return nil
 
 	case opts.Remove:
-		CheckErr(pacman.RemoveList(args(), pacman.RemoveParameters{
+		return pacman.RemoveList(args(), pacman.RemoveParameters{
 			Sudo:        true,
 			NoConfirm:   !opts.Confirm,
 			Recursive:   !opts.Norecursive,
@@ -122,15 +130,14 @@ func main() {
 			Stdout:      os.Stdout,
 			Stderr:      nil,
 			Stdin:       os.Stdin,
-		}))
-		return
+		})
 
 	case opts.Query && opts.Help:
-		fmt.Println(tmpl.QueryHelp)
-		return
+		fmt.Println(msgs.QueryHelp)
+		return nil
 
 	case opts.Query:
-		CheckErr(pacman.Query(args(), pacman.QueryParameters{
+		return pacman.Query(args(), pacman.QueryParameters{
 			Explicit:   opts.Explicit,
 			Deps:       opts.Deps,
 			Native:     opts.Native,
@@ -144,15 +151,14 @@ func main() {
 			Stdout:     os.Stdout,
 			Stderr:     os.Stderr,
 			Stdin:      os.Stdin,
-		}))
-		return
+		})
 
 	case opts.Build && opts.Help:
-		fmt.Println(tmpl.BuildHelp)
-		return
+		fmt.Println(msgs.BuildHelp)
+		return nil
 
 	case opts.Build:
-		CheckErr(pack.Build(pack.BuildParameters{
+		return pack.Build(pack.BuildParameters{
 			Dir:       opts.Dir,
 			Quick:     opts.Quick,
 			Syncbuild: opts.Syncbuild,
@@ -163,29 +169,18 @@ func main() {
 			Stdout:    os.Stdout,
 			Stderr:    os.Stderr,
 			Stdin:     os.Stdin,
-		}))
-		return
+		})
 
 	case opts.Version:
-		fmt.Println(tmpl.Version)
-		return
+		fmt.Println(msgs.Version)
+		return nil
 
 	case opts.Help:
-		fmt.Println(tmpl.Help)
-		return
+		fmt.Println(msgs.Help)
+		return nil
 
 	default:
-		fmt.Println("Please, specify at least one root flag (pack -h)")
-		os.Exit(1)
-		return
-	}
-}
-
-// Herlper function to exit on unexpected errors.
-func CheckErr(err error) {
-	if err != nil {
-		fmt.Println(tmpl.Err + err.Error())
-		os.Exit(1)
+		return fmt.Errorf("specify at least one root flag (pack -h)")
 	}
 }
 
