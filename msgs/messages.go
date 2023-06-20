@@ -10,9 +10,24 @@ import (
 	"io"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/mitchellh/ioprogress"
 	"golang.org/x/term"
 )
+
+// Write an announcement message with dots prefix and bold text to provided
+// io.Writer.
+func Amsg(w io.Writer, msg string) {
+	dots := color.New(color.FgWhite, color.Bold, color.FgHiBlue).Sprintf(":: ")
+	msg = color.New(color.Bold).Sprintf(msg)
+	w.Write([]byte(dots + msg + "...\n"))
+}
+
+// Write step message, with enumeration which should represent state of program
+// execution.
+func Smsg(w io.Writer, msg string, i, t int) {
+	w.Write([]byte(fmt.Sprintf("(%d/%d) %s...\n", i, t, msg)))
+}
 
 type LoaderParameters struct {
 	Current int

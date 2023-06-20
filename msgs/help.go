@@ -7,7 +7,6 @@ package msgs
 
 import (
 	"fmt"
-	"io"
 	"os"
 	"strings"
 
@@ -15,26 +14,6 @@ import (
 )
 
 var Color bool
-
-func init() {
-	b, err := os.ReadFile("/etc/pacman.conf")
-	if err != nil {
-		fmt.Println("unable to read pacman configuration")
-		os.Exit(1)
-	}
-	Color = strings.Contains(string(b), "\nColor\n")
-	if !Color {
-		color.NoColor = true
-	}
-	if Color {
-		Help = strings.Join([]string{"📦", Help}, " ")
-		QueryHelp = strings.Join([]string{"🔎", QueryHelp}, " ")
-		RemoveHelp = strings.Join([]string{"📍", RemoveHelp}, " ")
-		SyncHelp = strings.Join([]string{"⚡", SyncHelp}, " ")
-		PushHelp = strings.Join([]string{"🚀", PushHelp}, " ")
-		BuildHelp = strings.Join([]string{"🔐", BuildHelp}, " ")
-	}
-}
 
 var Help = `Simplified version of pacman
 
@@ -120,59 +99,22 @@ var Version = `             Pack - package manager.
  
                  Version: 0.5.3`
 
-const PKGBUILD = `# Maintainer: %s
-
-pkgname="%s"
-pkgdesc="Small description"
-pkgver="1"
-pkgrel="1"
-arch=('x86_64')
-url="https://example.com/owner/repo"
-depends=()
-makedepends=(
-  "flutter"
-  "clang"
-  "cmake"
-)
-
-build() {
-  cd ..
-  flutter build linux
-}
-
-package() {
-  cd ..
-  install -Dm755 %s.sh $pkgdir/usr/bin/%s
-  install -Dm755 %s.desktop $pkgdir/usr/share/applications/%s.desktop
-  install -Dm755 assets/%s.png $pkgdir/usr/share/icons/hicolor/512x512/apps/%s.png
-  cd build/linux/x64/release/bundle
-  find . -type f -exec install -Dm755 {} $pkgdir/usr/share/%s/{} \;
-}
-`
-
-const Desktop = `[Desktop Entry]
-Name=Awesome Application
-GenericName=Awesome Application
-Comment=Awesome Application
-Exec=/usr/share/%s/%s
-WMClass=%s
-Icon=/usr/share/%s/data/flutter_assets/assets/%s.png
-Type=Application
-`
-
-const ShFile = `#!/usr/bin/env sh
-exec /usr/share/%s/%s`
-
-// Write an announcement message with dots prefix and bold text to provided
-// io.Writer.
-func Amsg(w io.Writer, msg string) {
-	dots := color.New(color.FgWhite, color.Bold, color.FgHiBlue).Sprintf(":: ")
-	msg = color.New(color.Bold).Sprintf(msg)
-	w.Write([]byte(dots + msg + "...\n"))
-}
-
-// Write step message, with enumeration which should represent state of program
-// execution.
-func Smsg(w io.Writer, msg string, i, t int) {
-	w.Write([]byte(fmt.Sprintf("(%d/%d) %s...\n", i, t, msg)))
+func init() {
+	b, err := os.ReadFile("/etc/pacman.conf")
+	if err != nil {
+		fmt.Println("unable to read pacman configuration")
+		os.Exit(1)
+	}
+	Color = strings.Contains(string(b), "\nColor\n")
+	if !Color {
+		color.NoColor = true
+	}
+	if Color {
+		Help = strings.Join([]string{"📦", Help}, " ")
+		QueryHelp = strings.Join([]string{"🔎", QueryHelp}, " ")
+		RemoveHelp = strings.Join([]string{"📍", RemoveHelp}, " ")
+		SyncHelp = strings.Join([]string{"⚡", SyncHelp}, " ")
+		PushHelp = strings.Join([]string{"🚀", PushHelp}, " ")
+		BuildHelp = strings.Join([]string{"🔐", BuildHelp}, " ")
+	}
 }
