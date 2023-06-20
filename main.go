@@ -99,12 +99,13 @@ func main() {
 
 	case opts.Push:
 		CheckErr(pack.Push(args(), pack.PushParameters{
-			Directory: opts.Dir,
-			Insecure:  opts.Insecure,
-			Endpoint:  opts.Endpoint,
 			Stdout:    os.Stdout,
 			Stderr:    os.Stderr,
 			Stdin:     os.Stdin,
+			Directory: opts.Dir,
+			Insecure:  opts.Insecure,
+			Endpoint:  opts.Endpoint,
+			Distro:    opts.Distro,
 		}))
 		return
 
