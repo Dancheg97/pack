@@ -118,7 +118,7 @@ var Version = `             Pack - package manager.
    the terms of the GNU General Public License.
        Web page: https://fmnx.su/core/pack
  
-                 Version: 0.5.2`
+                 Version: 0.5.3`
 
 const PKGBUILD = `# Maintainer: %s
 
