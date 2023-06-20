@@ -11,6 +11,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"runtime"
 	"strings"
 
 	"fmnx.su/core/pack/pacman"
@@ -124,8 +125,10 @@ func addMissingDatabases(pkgs []string, insecure bool) (*string, error) {
 
 // Simple function to add database to pacman.conf.
 func addConfDatabase(protocol, database, domain, postfix string) error {
-	const confroot = "\n[%s]\nServer = %s://%s/api/packages/arch%s\n"
-	tmpl := fmt.Sprintf(confroot, database, protocol, domain, postfix)
+	const confroot = "\n[%s]\nServer = %s://%s/api/packages/arch/%s/%s/%s\n"
+	os := "archlinux"
+	arch := runtime.GOARCH
+	tmpl := fmt.Sprintf(confroot, database, protocol, domain, os, arch, postfix)
 	command := "cat <<EOF >> /etc/pacman.conf" + tmpl + "EOF"
 	return call(exec.Command("sudo", "bash", "-c", command))
 }

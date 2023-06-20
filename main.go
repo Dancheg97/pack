@@ -25,7 +25,6 @@ var opts struct {
 	Remove bool `short:"R" long:"remove"`
 	Sync   bool `short:"S" long:"sync"`
 	Push   bool `short:"P" long:"push"`
-	Open   bool `short:"O" long:"open"`
 	Build  bool `short:"B" long:"build"`
 
 	// Sync options.
@@ -42,6 +41,7 @@ var opts struct {
 	Dir      string `short:"d" long:"dir" default:"/var/cache/pacman/pkg"`
 	Insecure bool   `short:"w" long:"insecure"`
 	Endpoint string `long:"endpoint" default:"/api/packages/arch"`
+	Distro   string `long:"distro" default:"archlinux"`
 
 	// Remove options.
 	Confirm     bool `short:"o" long:"confirm"`
@@ -65,13 +65,6 @@ var opts struct {
 	Garbage   bool `short:"g" long:"garbage"`
 	Template  bool `short:"t" long:"template"`
 	ExportKey bool `short:"e" long:"exp-key"`
-
-	// Open options.
-	Name   string `short:"n" long:"name" default:"localhost"`
-	Port   string `short:"p" long:"port" default:"80"`
-	Cert   string `long:"cert"`
-	Key    string `long:"key"`
-	GpgDir string `long:"gpgdir"`
 }
 
 func main() {
@@ -172,25 +165,6 @@ func main() {
 		}))
 		return
 
-	case opts.Open && opts.Help:
-		fmt.Println(tmpl.OpenHelp)
-		return
-
-	case opts.Open:
-		CheckErr(pack.Open(pack.OpenParameters{
-			Endpoint: opts.Endpoint,
-			Dir:      opts.Dir,
-			Name:     opts.Name,
-			Port:     opts.Port,
-			Cert:     opts.Cert,
-			Key:      opts.Key,
-			GpgDir:   opts.GpgDir,
-			Stdout:   os.Stdout,
-			Stderr:   os.Stderr,
-			Stdin:    os.Stdin,
-		}))
-		return
-
 	case opts.Version:
 		fmt.Println(tmpl.Version)
 		return
@@ -220,8 +194,8 @@ func CheckErr(err error) {
 // TODO: later rewrite with reflect to avoid unexpected behaviour.
 func args() []string {
 	var stringargs = []string{
-		"-n", "--name", "-p", "--port", "--cert", "--key", "--ring",
-		"--file", "--protocol", "--endopint", "-d", "--dir",
+		"-n", "--name", "-p", "--port", "--cert", "--key", "--ring", "--file",
+		"--protocol", "--endopint", "-d", "--dir", "--arch", "--distro",
 	}
 	var filtered []string
 	for i, v := range os.Args {

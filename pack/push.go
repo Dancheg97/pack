@@ -6,7 +6,7 @@
 package pack
 
 import (
-	"encoding/base64"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -31,12 +31,15 @@ type PushParameters struct {
 	Insecure bool
 	// Custom endpoint for package push
 	Endpoint string
+	// Custom distribution for which package is built.
+	Distro string
 }
 
 func pushdefault() *PushParameters {
 	return &PushParameters{
 		Endpoint:  "/api/packages/arch",
 		Directory: "/var/cache/pacman/pkg",
+		Distro:    "archlinux",
 	}
 }
 
@@ -198,10 +201,11 @@ func push(pp PushParameters, md PackageMetadata, email string, i, t int) error {
 		return err
 	}
 
-	req.Header.Add("file", md.FileName)
+	req.Header.Add("filename", md.FileName)
 	req.Header.Add("email", email)
-	req.Header.Add("sign", base64.RawStdEncoding.EncodeToString(f))
+	req.Header.Add("sign", hex.EncodeToString(f))
 	req.Header.Add("owner", md.Owner)
+	req.Header.Add("distro", pp.Distro)
 
 	var client http.Client
 	resp, err := client.Do(req)

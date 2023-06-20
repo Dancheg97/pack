@@ -33,7 +33,6 @@ func init() {
 		SyncHelp = strings.Join([]string{"⚡", SyncHelp}, " ")
 		PushHelp = strings.Join([]string{"🚀", PushHelp}, " ")
 		BuildHelp = strings.Join([]string{"🔐", BuildHelp}, " ")
-		OpenHelp = strings.Join([]string{"🌐", OpenHelp}, " ")
 	}
 }
 
@@ -45,7 +44,6 @@ operations:
 	pack {-R --remove} [options] [package(s)]
 	pack {-Q --query}  [options] [package(s)]
 	pack {-B --build}  [options]
-	pack {-O --open}   [options]
 
 use 'pack {-h --help}' with an operation for available options`
 
@@ -69,6 +67,7 @@ options:
 	-d, --dir <dir> Use custom source dir with packages (default /var/cache/pacman/pkg)
 	-f, --force     Owerwrite package with same version if exists
 	-w, --insecure  Push package over HTTP instead of HTTPS
+		--distro    Assign custom distribution in registry (default archlinux)
 	    --endpoint  Use custom API endpoint (default /api/packages/arch)
 
 usage:  pack {-P --push} [options] <registry/(owner)/package(s)>`
@@ -111,19 +110,6 @@ options:
 	-e, --exp-key   Export public GnuPG key armored string and exit
 
 usage:  pack {-B --build} [options]`
-
-var OpenHelp = `Run package registry
-
-options:
-	-d, --dir      Exposed directory (default /var/cache/pacman/pkg)
-	-p, --port     Port to run on (default 80)
-	-n, --name     Name of registry database (default localhost)
-	    --cert     Certificate file for TLS server
-	    --key      Key file for TLS server
-	    --gpgdir   Directory containing files with GnuPG keys (sign validation)
-	    --endpoint Use custom API endpoint (default /api/packages/arch)
-
-usage:  pack {-O --open} [options]`
 
 var Version = `             Pack - package manager.
           Copyright (C) 2023 FMNX team
