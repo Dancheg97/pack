@@ -17,11 +17,11 @@ Pack is utility that aims to simplify user interaction with pacman, automate som
 
 Pack can be used to push your packages to [pacman resgistries](https://fmnx.su/core/registry) and install software from them. You can test it on our [public gitea instance](https://fmnx.su/core/-/packages).
 
-Pack API sligtly differs from pacman, to make some operations faster. For example, flag `-q`, or `--quick`, can be used as shortcut alternative to `--noconfirm`. Some other flags also might be changed, run `pack -Sh`, `pack -Rh`, `pack -Ph`, `pack -Oh` to get full description for pack commands.
+Pack API differs from pacman - it is much smaller. For example, flag `-q`, or `--quick`, can be used as shortcut alternative to `--noconfirm`. Some other flags also might be changed, run `pack -Sh`, `pack -Rh`, `pack -Ph`, `pack -Oh` to get full description for pack commands.
 
 If pack does not cover your needs, leave an issue in github/codeberg/fmnx repository.
 
-![](push.png)
+---
 
 ### Installation
 
@@ -36,6 +36,8 @@ Alternatively, you can install pack with `go`:
 ```sh
 go install fmnx.su/core/pack
 ```
+
+---
 
 ### Examples
 

@@ -29,7 +29,7 @@ type PushParameters struct {
 	Directory string
 	// Which protocol to use for connection.
 	Insecure bool
-	// Custom endpoint for package push
+	// Custom endpoints rootpath.
 	Endpoint string
 	// Custom distribution for which package is built.
 	Distro string

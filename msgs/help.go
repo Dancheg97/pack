@@ -29,25 +29,24 @@ use 'pack {-h --help}' with an operation for available options`
 var SyncHelp = `Syncronize packages
 
 options:
-	-q, --quick       Do not ask for any confirmation (noconfirm)
+	-q, --quick       Do not ask for any confirmation (noconfirm shortcut)
 	-y, --refresh     Download fresh package databases from the server (-yy force)
 	-u, --upgrade     Upgrade installed packages (-uu enables downgrade)
 	-i, --info        View package information (-ii for extended information)
 	-l, --list <repo> View a list of packages in a repo
 	-j, --notimeout   Use relaxed timeouts for download
 	-f, --force       Reinstall up to date targets
-	-k, --keepcfg     Do not save new registries in pacman.conf
+	-k, --keepcfg     Do not save new registries in pacman configuration
 
 usage:  pack {-S --sync} [options] <(registry)/(owner)/package(s)>`
 
 var PushHelp = `Push packages
 
 options:
-	-d, --dir <dir> Use custom source dir with packages (default /var/cache/pacman/pkg)
-	-f, --force     Owerwrite package with same version if exists
+	-d, --dir <dir> Use custom source dir with packages (default pacman cache)
 	-w, --insecure  Push package over HTTP instead of HTTPS
-		--distro    Assign custom distribution in registry (default archlinux)
-	    --endpoint  Use custom API endpoint (default /api/packages/arch)
+	    --distro    Assign custom distribution in registry (default archlinux)
+	    --endpoint  Use custom API endpoints rootpath
 
 usage:  pack {-P --push} [options] <registry/(owner)/package(s)>`
 
