@@ -9,17 +9,17 @@
 [![Generic badge](https://img.shields.io/badge/fmnx-repo-006db0.svg)](https://fmnx.su/core/pack)
 [![Generic badge](https://img.shields.io/badge/codeberg-repo-45a3fb.svg)](https://codeberg.org/fmnx/pack)
 [![Generic badge](https://img.shields.io/badge/github-repo-white.svg)](https://github.com/fmnx-io/pack)
-[![Generic badge](https://img.shields.io/badge/docker-info-blue.svg)](https://fmnx.su/core/-/packages/container/pack/latest)
+[![Generic badge](https://img.shields.io/badge/arch-package-00bcd4.svg)](https://fmnx.su/core/-/packages/arch/pack)
 
 > **Warning!** Project is in alpha stage, API's might be changed.
 
 Pack is utility that aims to simplify user interaction with pacman, automate some operations and provide additional functionality for software delivery.
 
-Pack can be used to create registries that serve as regular arch package mirrors, and provides automated form of interaction them.
+Pack can be used to push your packages to [pacman resgistries](https://fmnx.su/core/registry) and install software from them. You can test it on our [public gitea instance](https://fmnx.su/core/-/packages).
 
-Also pack has slightly reworked API to make some operations faster. For example, flag `-q`, or `--quick`, can be used as shortcut alternative to `--noconfirm`.
+Pack API sligtly differs from pacman, to make some operations faster. For example, flag `-q`, or `--quick`, can be used as shortcut alternative to `--noconfirm`. Some other flags also might be changed, run `pack -Sh`, `pack -Rh`, `pack -Ph`, `pack -Oh` to get full description for pack commands.
 
-Run `pack -Sh`, `pack -Rh`, `pack -Ph`, `pack -Oh` to get full description for pack commands.
+If pack does not cover your needs, leave an issue in github/codeberg/fmnx repository.
 
 ![](push.png)
 
@@ -57,14 +57,8 @@ pack -Syuq
 pack -Bqs
 ```
 
-- Package delivery (push package):
+- Push package:
 
 ```sh
-pack -Pf example.com/group/package
-```
-
-- Run pack registry:
-
-```sh
-sudo pack -O
+pack -P example.com/group/package
 ```
