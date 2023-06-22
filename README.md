@@ -19,8 +19,6 @@ Pack can be used to push your packages to [pacman resgistries](https://fmnx.su/c
 
 Pack API differs from pacman - it is much smaller. For example, flag `-q`, or `--quick`, can be used as shortcut alternative to `--noconfirm`. Some other flags also might be changed, run `pack -Sh`, `pack -Rh`, `pack -Ph`, `pack -Oh` to get full description for pack commands.
 
-If pack does not cover your needs, leave an issue in github/codeberg/fmnx repository.
-
 ---
 
 ### Installation

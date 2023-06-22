@@ -29,15 +29,12 @@ type PushParameters struct {
 	Directory string
 	// Which protocol to use for connection.
 	Insecure bool
-	// Custom endpoints rootpath.
-	Endpoint string
 	// Custom distribution for which package is built.
 	Distro string
 }
 
 func pushdefault() *PushParameters {
 	return &PushParameters{
-		Endpoint:  "/api/packages/arch",
 		Directory: "/var/cache/pacman/pkg",
 		Distro:    "archlinux",
 	}
@@ -177,7 +174,7 @@ func push(pp PushParameters, md PackageMetadata, email string, i, t int) error {
 
 	req, err := http.NewRequest(
 		http.MethodPut,
-		prfx+path.Join(md.Registry, pp.Endpoint, "push"),
+		prfx+path.Join(md.Registry, "api/packages", md.Owner, "arch/push"),
 		&ioprogress.Reader{
 			Reader: packagefile,
 			Size:   pkgInfo.Size(),
@@ -204,7 +201,6 @@ func push(pp PushParameters, md PackageMetadata, email string, i, t int) error {
 	req.Header.Add("filename", md.FileName)
 	req.Header.Add("email", email)
 	req.Header.Add("sign", hex.EncodeToString(f))
-	req.Header.Add("owner", md.Owner)
 	req.Header.Add("distro", pp.Distro)
 
 	var client http.Client

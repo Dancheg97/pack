@@ -113,7 +113,6 @@ func run() error {
 			Stdin:     os.Stdin,
 			Directory: opts.Dir,
 			Insecure:  opts.Insecure,
-			Endpoint:  opts.Endpoint,
 			Distro:    opts.Distro,
 		})
 
