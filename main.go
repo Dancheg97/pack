@@ -28,14 +28,10 @@ var opts struct {
 	Build  bool `short:"B" long:"build"`
 
 	// Sync options.
-	Quick     bool   `short:"q" long:"quick"`
-	Refresh   []bool `short:"y" long:"refresh"`
-	Upgrade   []bool `short:"u" long:"upgrade"`
-	Info      []bool `short:"i" long:"info"`
-	List      []bool `short:"l" long:"list"`
-	Notimeout bool   `short:"j" long:"notimeout"`
-	Force     bool   `short:"f" long:"force"`
-	Keepcfg   bool   `short:"k" long:"keepcfg"`
+	Quick   bool   `short:"q" long:"quick"`
+	Refresh []bool `short:"y" long:"refresh"`
+	Upgrade []bool `short:"u" long:"upgrade"`
+	Force   bool   `short:"f" long:"force"`
 
 	// Push options.
 	Dir      string `short:"d" long:"dir" default:"/var/cache/pacman/pkg"`
@@ -44,20 +40,15 @@ var opts struct {
 	Distro   string `long:"distro" default:"archlinux"`
 
 	// Remove options.
-	Confirm     bool `short:"o" long:"confirm"`
-	Norecursive bool `long:"norecursive"`
-	Nocfgs      bool `long:"nocfgs"`
+	Confirm     bool `short:"c" long:"confirm"`
+	Norecursive bool `short:"a" long:"norecursive"`
+	Nocfgs      bool `short:"w" long:"nocfgs"`
 	Cascade     bool `long:"cascade"`
 
 	// Query options.
-	Explicit bool   `long:"explicit"`
-	Unreq    bool   `long:"unreq"`
-	File     string `long:"file"`
-	Foreign  bool   `long:"foreign"`
-	Deps     bool   `long:"deps"`
-	Native   bool   `long:"native"`
-	Groups   bool   `long:"groups"`
-	Check    []bool `long:"check"`
+	Info     []bool `short:"i" long:"info"`
+	List     []bool `short:"l" long:"list"`
+	Outdated bool   `short:"o" long:"outdated"`
 
 	// Build options.
 	Syncbuild bool `short:"s" long:"syncbuild"`
@@ -88,24 +79,21 @@ func run() error {
 
 	case opts.Sync:
 		return pack.Sync(args(), pack.SyncParameters{
-			Quick:     opts.Quick,
-			Refresh:   opts.Refresh,
-			Upgrade:   opts.Upgrade,
-			Info:      opts.Info,
-			List:      opts.List,
-			Notimeout: opts.Notimeout,
-			Force:     opts.Force,
-			Keepcfg:   opts.Keepcfg,
-			Insecure:  opts.Insecure,
-			Stdout:    os.Stdout,
-			Stderr:    os.Stderr,
-			Stdin:     os.Stdin,
+			Quick:    opts.Quick,
+			Refresh:  opts.Refresh,
+			Upgrade:  opts.Upgrade,
+			Force:    opts.Force,
+			Insecure: opts.Insecure,
+			Stdout:   os.Stdout,
+			Stderr:   os.Stderr,
+			Stdin:    os.Stdin,
 		})
 
 	case opts.Push && opts.Help:
 		fmt.Println(msgs.PushHelp)
 		return nil
 
+	// TODO: when multiple architectures found in cache push them all.
 	case opts.Push:
 		return pack.Push(args(), pack.PushParameters{
 			Stdout:    os.Stdout,
@@ -121,14 +109,14 @@ func run() error {
 		return nil
 
 	case opts.Remove:
-		return pacman.RemoveList(args(), pacman.RemoveParameters{
-			Sudo:        true,
-			NoConfirm:   !opts.Confirm,
-			Recursive:   !opts.Norecursive,
-			WithConfigs: !opts.Nocfgs,
+		return pack.Remove(args(), pack.RemoveParameters{
 			Stdout:      os.Stdout,
-			Stderr:      nil,
+			Stderr:      os.Stderr,
 			Stdin:       os.Stdin,
+			Confirm:     opts.Confirm,
+			Norecursive: opts.Norecursive,
+			Nocfgs:      opts.Nocfgs,
+			Cascade:     opts.Cascade,
 		})
 
 	case opts.Query && opts.Help:
@@ -137,25 +125,19 @@ func run() error {
 
 	case opts.Query:
 		return pacman.Query(args(), pacman.QueryParameters{
-			Explicit:   opts.Explicit,
-			Deps:       opts.Deps,
-			Native:     opts.Native,
-			Foreign:    opts.Foreign,
-			Unrequired: opts.Unreq,
-			Groups:     opts.Groups,
-			Info:       opts.Info,
-			Check:      opts.Check,
-			List:       opts.List,
-			File:       opts.File,
-			Stdout:     os.Stdout,
-			Stderr:     os.Stderr,
-			Stdin:      os.Stdin,
+			// TODO: add outdated.
+			Info:   opts.Info,
+			List:   opts.List,
+			Stdout: os.Stdout,
+			Stderr: os.Stderr,
+			Stdin:  os.Stdin,
 		})
 
 	case opts.Build && opts.Help:
 		fmt.Println(msgs.BuildHelp)
 		return nil
 
+	// TODO: Provide ability to built for different architectures.
 	case opts.Build:
 		return pack.Build(pack.BuildParameters{
 			Dir:       opts.Dir,

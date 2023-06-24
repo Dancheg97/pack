@@ -13,15 +13,13 @@ import (
 	"github.com/fatih/color"
 )
 
-var Color bool
-
 var Help = `Simplified version of pacman
 
 operations:
 	pack {-S --sync}   [options] [(registry)/(owner)/package(s)]
 	pack {-P --push}   [options] [(registry)/(owner)/package(s)]
-	pack {-R --remove} [options] [package(s)]
-	pack {-Q --query}  [options] [package(s)]
+	pack {-R --remove} [options] [(registry)/(owner)/package(s)]
+	pack {-Q --query}  [options] [(registry)/(owner)/package(s)]
 	pack {-B --build}  [options]
 
 use 'pack {-h --help}' with an operation for available options`
@@ -32,11 +30,7 @@ options:
 	-q, --quick       Do not ask for any confirmation (noconfirm shortcut)
 	-y, --refresh     Download fresh package databases from the server (-yy force)
 	-u, --upgrade     Upgrade installed packages (-uu enables downgrade)
-	-i, --info        View package information (-ii for extended information)
-	-l, --list <repo> View a list of packages in a repo
-	-j, --notimeout   Use relaxed timeouts for download
 	-f, --force       Reinstall up to date targets
-	-k, --keepcfg     Do not save new registries in pacman configuration
 
 usage:  pack {-S --sync} [options] <(registry)/(owner)/package(s)>`
 
@@ -53,28 +47,21 @@ usage:  pack {-P --push} [options] <registry/(owner)/package(s)>`
 var RemoveHelp = `Remove packages
 
 options:
-	-o, --confirm  Ask for confirmation when deleting package
+	-c, --confirm  Ask for confirmation when deleting package
 	-a, --norecurs Leave package dependencies in the system (removed by default)
 	-w, --nocfgs   Leave package configs in the system (removed by default)
 	    --cascade  Remove packages and all packages that depend on them
 
-usage:  pack {-R --remove} [options] <package(s)>`
+usage:  pack {-R --remove} [options] <(registry)/(owner)/package(s)>`
 
 var QueryHelp = `Query packages
 
 options:
 	-i, --info     View package information (-ii for backup files)
 	-l, --list     List the files owned by the queried package
-	    --explicit List packages explicitly installed [filter]
-	    --unreq    List packages not (optionally) required by any
-	    --file     Query a package file instead of the database
-	    --deps     List packages installed as dependencies [filter]
-	    --foreign  List installed packages not found in sync db(s) [filter]
-	    --native   List installed packages only found in sync db(s) [filter]
-	    --check    Check that package files exist (-kk for file properties)
-	    --groups   View all members of a package group
+	-o, --outdated List outdated packages
 
-usage:  pack {-Q --query} [options] [package(s)]`
+usage:  pack {-Q --query} [options] <(registry)/(owner)/package(s)>`
 
 var BuildHelp = `Build package
 
@@ -97,6 +84,8 @@ var Version = `             Pack - package manager.
        Web page: https://fmnx.su/core/pack
  
                  Version: 0.5.3`
+
+var Color bool
 
 func init() {
 	b, err := os.ReadFile("/etc/pacman.conf")

@@ -17,7 +17,6 @@ import (
 	"fmnx.su/core/pack/pacman"
 )
 
-// Syncronize packages with pack.
 type SyncParameters struct {
 	Stdout io.Writer
 	Stderr io.Writer
@@ -27,18 +26,10 @@ type SyncParameters struct {
 	Refresh []bool
 	// Upgrade installed packages (-uu enables downgrade)
 	Upgrade []bool
-	// View package information (-ii for extended information)
-	Info []bool
-	// View a list of packages in a repo
-	List []bool
 	// Don't ask for any confirmation (--noconfirm)
 	Quick bool
-	// Use relaxed timeouts for download
-	Notimeout bool
 	// Reinstall up to date targets
 	Force bool
-	// Do not save new registries in pacman.conf
-	Keepcfg bool
 	// Use HTTP instead of https
 	Insecure bool
 }
@@ -80,13 +71,11 @@ func Sync(args []string, prms ...SyncParameters) error {
 		NoConfirm: p.Quick,
 		Refresh:   p.Refresh,
 		Upgrade:   p.Upgrade,
-		NoTimeout: p.Notimeout,
-		List:      p.List,
 		Stdout:    p.Stdout,
 		Stderr:    p.Stderr,
 		Stdin:     p.Stdin,
 	})
-	if err != nil || p.Keepcfg {
+	if err != nil {
 		return errors.Join(err, writeconf(*conf))
 	}
 	return nil

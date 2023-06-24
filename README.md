@@ -37,28 +37,51 @@ go install fmnx.su/core/pack
 
 ---
 
-### Examples
+### Operations
 
-- Package installation:
+1. Sync packages - operation that you use to install packages to the system. You can mix packages with and without registries in command input. This command will add missing registries to `pacman.conf` and try to syncronize packages with pacman.
 
 ```sh
-pack -S nano git vim
+⚡ Syncronize packages
+
+options:
+	-q, --quick       Do not ask for any confirmation (noconfirm shortcut)
+	-y, --refresh     Download fresh package databases from the server (-yy force)
+	-u, --upgrade     Upgrade installed packages (-uu enables downgrade)
+	-f, --force       Reinstall up to date targets
+
+usage:  pack {-S --sync} [options] <(registry)/(owner)/package(s)>
 ```
 
-- Full system upgrade:
+2. Push packages - operation that you use to deliver your software to any pack registry (standalone registry or gitea). Registry parameter is required, owner paarameter is optional.
 
 ```sh
-pack -Syuq
+🚀 Push packages
+
+options:
+        -d, --dir <dir> Use custom source dir with packages (default pacman cache)
+        -w, --insecure  Push package over HTTP instead of HTTPS
+            --distro    Assign custom distribution in registry (default archlinux)
+            --endpoint  Use custom API endpoints rootpath
+
+usage:  pack {-P --push} [options] <registry/(owner)/package(s)>
 ```
 
-- Package build (you should be in directory containing valid `PKGBUILD`):
+3. Remove packages - this operation will remove packages from system or remote depending on provided arguement. If reigsty and owner are provided, then remote deletion will be executed, otherwise package will be deleted on local system.
 
 ```sh
-pack -Bqs
+📍 Remove packages
+
+options:
+        -o, --confirm  Ask for confirmation when deleting package
+        -a, --norecurs Leave package dependencies in the system (removed by default)
+        -w, --nocfgs   Leave package configs in the system (removed by default)
+            --cascade  Remove packages and all packages that depend on them
+
+usage:  pack {-R --remove} [options] <package(s)>
 ```
 
-- Push package:
+4. Query packages - this command can be executed to get information about local or remote packages. For targets without registry and owner specified local description will be provided, for targets with registry remote information
 
 ```sh
-pack -P example.com/group/package
 ```

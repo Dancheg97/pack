@@ -25,6 +25,8 @@ type RemoveParameters struct {
 	Recursive bool
 	// Remove with all explicitly installed deps. [-ss]
 	ForceRecursive bool
+	// Use cascade when removing packages. [--cascade]
+	Cascade bool
 	// Remove configuration files aswell. [--nosave]
 	WithConfigs bool
 	// Additional parameters, that will be appended to command as arguements.
@@ -59,6 +61,9 @@ func RemoveList(pkgs []string, opts ...RemoveParameters) error {
 	}
 	if o.ForceRecursive {
 		args = append(args, "-ss")
+	}
+	if o.Cascade {
+		args = append(args, "--cascade")
 	}
 	if o.WithConfigs {
 		args = append(args, "--nosave")
