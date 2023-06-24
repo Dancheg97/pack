@@ -124,11 +124,11 @@ func addMissingDatabases(pkgs []string, insecure bool) (*string, error) {
 }
 
 // Simple function to add database to pacman.conf.
-func addConfDatabase(protocol, database, domain, postfix string) error {
-	const confroot = "\n[%s]\nServer = %s://%s/api/packages/arch/%s/%s/%s\n"
+func addConfDatabase(protocol, database, domain, owner string) error {
+	const confroot = "\n[%s]\nServer = %s://%s/api/packages/%s/arch/%s/%s\n"
 	os := "archlinux"
 	arch := runtime.GOARCH
-	tmpl := fmt.Sprintf(confroot, database, protocol, domain, os, arch, postfix)
+	tmpl := fmt.Sprintf(confroot, database, protocol, domain, owner, os, arch)
 	command := "cat <<EOF >> /etc/pacman.conf" + tmpl + "EOF"
 	return call(exec.Command("sudo", "bash", "-c", command))
 }
