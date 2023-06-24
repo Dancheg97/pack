@@ -42,7 +42,7 @@ var opts struct {
 	// Remove options.
 	Confirm     bool `short:"c" long:"confirm"`
 	Norecursive bool `short:"a" long:"norecursive"`
-	Nocfgs      bool `short:"w" long:"nocfgs"`
+	Nocfgs      bool `short:"j" long:"nocfgs"`
 	Cascade     bool `long:"cascade"`
 
 	// Query options.

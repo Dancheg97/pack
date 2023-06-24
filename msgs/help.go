@@ -49,7 +49,7 @@ var RemoveHelp = `Remove packages
 options:
 	-c, --confirm  Ask for confirmation when deleting package
 	-a, --norecurs Leave package dependencies in the system (removed by default)
-	-w, --nocfgs   Leave package configs in the system (removed by default)
+	-j, --nocfgs   Leave package configs in the system (removed by default)
 	    --cascade  Remove packages and all packages that depend on them
 
 usage:  pack {-R --remove} [options] <(registry)/(owner)/package(s)>`
