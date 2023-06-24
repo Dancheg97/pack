@@ -20,7 +20,7 @@ operations:
 	pack {-P --push}   [options] [(registry)/(owner)/package(s)]
 	pack {-R --remove} [options] [(registry)/(owner)/package(s)]
 	pack {-Q --query}  [options] [(registry)/(owner)/package(s)]
-	pack {-B --build}  [options]
+	pack {-B --build}  [options] [(registry)/(owner)/package(s)]
 
 use 'pack {-h --help}' with an operation for available options`
 
@@ -74,7 +74,7 @@ options:
 	-t, --template  Generate PKGBUILD, app.sh and app.desktop and exit
 	-e, --exp-key   Export public GnuPG key armored string and exit
 
-usage:  pack {-B --build} [options]`
+usage:  pack {-B --build} [options] <(registry)/(owner)/package(s)>`
 
 var Version = `             Pack - package manager.
           Copyright (C) 2023 FMNX team

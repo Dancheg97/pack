@@ -8,9 +8,10 @@ arch=('x86_64')
 url="https://fmnx.su/core/pack"
 license=('GPL')
 depends=(
+  'sudo'
   'pacman'
   'gnupg'
-  'sudo'
+  'git'
 )
 makedepends=('go')
 

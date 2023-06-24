@@ -13,11 +13,7 @@
 
 > **Warning!** Project is in alpha stage, API's might be changed.
 
-Pack is utility that aims to simplify user interaction with pacman, automate some operations and provide additional functionality for software delivery.
-
-Pack can be used to push your packages to [pacman resgistries](https://fmnx.su/core/registry) and install software from them. You can test it on our [public gitea instance](https://fmnx.su/core/-/packages).
-
-Pack API differs from pacman - it is much smaller. For example, flag `-q`, or `--quick`, can be used as shortcut alternative to `--noconfirm`. Some other flags also might be changed, run `pack -Sh`, `pack -Rh`, `pack -Ph`, `pack -Oh` to get full description for pack commands.
+Pack is package manager that works as a wrapper over pacman and provides additional functionality for software delivery, distributed registry management with much simpler API. With pack you can push your packages to compatible registries and provide your software as a links to simplify software access for end-user.
 
 ---
 
@@ -84,4 +80,29 @@ usage:  pack {-R --remove} [options] <package(s)>
 4. Query packages - this command can be executed to get information about local or remote packages. For targets without registry and owner specified local description will be provided, for targets with registry remote information
 
 ```sh
+🔎 Query packages
+
+options:
+        -i, --info     View package information (-ii for backup files)
+        -l, --list     List the files owned by the queried package
+        -o, --outdated List outdated packages
+
+usage:  pack {-Q --query} [options] <(registry)/(owner)/package(s)>
+```
+
+5. Build packages - command that will build package in current directory if no arguements provided, otherwise it will treat packages as git repositories, clone them to `~/.packcache` directory, build and remove directory afterwards.
+
+```sh
+🔐 Build package
+
+options:
+        -q, --quick     Do not ask for any confirmation (noconfirm)
+        -d, --dir <dir> Use custom dir to store result (default /var/cache/pacman/pkg)
+        -s, --syncbuild Syncronize dependencies and build target
+        -r, --rmdeps    Remove installed dependencies after a successful build
+        -g, --garbage   Do not clean workspace before and after build
+        -t, --template  Generate PKGBUILD, app.sh and app.desktop and exit
+        -e, --exp-key   Export public GnuPG key armored string and exit
+
+usage:  pack {-B --build} [options]
 ```
