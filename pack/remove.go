@@ -6,9 +6,16 @@
 package pack
 
 import (
+	"bytes"
+	"errors"
+	"fmt"
 	"io"
+	"net/http"
 	"os"
+	"os/exec"
+	"path"
 	"strings"
+	"time"
 
 	"fmnx.su/core/pack/msgs"
 	"fmnx.su/core/pack/pacman"
@@ -27,6 +34,10 @@ type RemoveParameters struct {
 	Nocfgs bool
 	// Remove packages and all packages that depend on them.
 	Cascade bool
+	// Custom distribution name that will be used for package deletion.
+	Distro string
+	// Use insecure connection for remote deletions.
+	Insecure bool
 }
 
 func removeDefault() *RemoveParameters {
@@ -59,10 +70,14 @@ func Remove(args []string, prms ...RemoveParameters) error {
 	}
 
 	if len(remote) > 0 {
-		msgs.Amsg(p.Stdout, "Removing remote packages")
-		for i, v := range remote {
-			msgs.Smsg(p.Stdout, "Removing "+v, i, len(remote))
-			err := rmRemote(v)
+		email, err := gnupgEmail()
+		if err != nil {
+			return err
+		}
+		msgs.Amsg(p.Stdout, "Removing remote packages as "+email)
+		for i, pkg := range remote {
+			msgs.Smsg(p.Stdout, "Removing "+pkg, i, len(remote))
+			err := rmRemote(p, pkg, email)
 			if err != nil {
 				return err
 			}
@@ -86,7 +101,67 @@ func splitRemoved(pkgs []string) ([]string, []string) {
 	return local, remote
 }
 
+func splitPkg(pkg string) (string, string, string) {
+	splt := strings.Split(pkg, "/")
+	if len(splt) == 2 {
+		return splt[0], ``, splt[1]
+	}
+	return splt[0], splt[1], splt[2]
+}
+
 // Function that will be used to remove remote package.
-func rmRemote(pkg string) error {
+func rmRemote(p *RemoveParameters, pkg, email string) error {
+	t := time.Now().Format(time.RFC3339)
+
+	remote, owner, target := splitPkg(pkg)
+
+	err := os.WriteFile("packdel", []byte(t+remote+owner+target), os.ModePerm)
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll("packdel")
+
+	cmd := exec.Command("gpg", "--sign", "packdel")
+	cmd.Stdout = p.Stdout
+	cmd.Stderr = p.Stderr
+	err = cmd.Run()
+	if err != nil {
+		return err
+	}
+
+	sigdata, err := os.ReadFile("packdel")
+	if err != nil {
+		return err
+	}
+
+	prfx := "https://"
+	if p.Insecure {
+		prfx = "http://"
+	}
+
+	req, err := http.NewRequest(
+		http.MethodDelete,
+		prfx+path.Join(remote, "api/packages", owner, "arch/remove"),
+		bytes.NewReader(sigdata),
+	)
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("email", email)
+	req.Header.Add("distro", p.Distro)
+
+	var client http.Client
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode != http.StatusOK {
+		b, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return errors.Join(err, errors.New(resp.Status))
+		}
+		return fmt.Errorf("%s, %s %s", resp.Status, string(b), pkg)
+	}
 	return nil
 }

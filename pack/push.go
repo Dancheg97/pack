@@ -213,7 +213,7 @@ func push(pp PushParameters, md PackageMetadata, email string, i, t int) error {
 		if err != nil {
 			return errors.Join(err, errors.New(resp.Status))
 		}
-		return fmt.Errorf("%s, %s - %s", resp.Status, string(b), md.FileName)
+		return fmt.Errorf("%s, %s %s", resp.Status, string(b), md.FileName)
 	}
 	return nil
 }
