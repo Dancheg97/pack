@@ -154,6 +154,7 @@ func rmRemote(p *RemoveParameters, pkg, email string) error {
 
 	req.Header.Add("email", email)
 	req.Header.Add("distro", p.Distro)
+	req.Header.Add("target", target)
 
 	var client http.Client
 	resp, err := client.Do(req)
