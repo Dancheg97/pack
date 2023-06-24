@@ -104,5 +104,5 @@ options:
         -t, --template  Generate PKGBUILD, app.sh and app.desktop and exit
         -e, --exp-key   Export public GnuPG key armored string and exit
 
-usage:  pack {-B --build} [options]
+usage:  pack {-B --build} [options] <(registry)/(owner)/package(s)>
 ```
