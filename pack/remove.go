@@ -45,6 +45,7 @@ func removeDefault() *RemoveParameters {
 		Stdout: os.Stdout,
 		Stderr: os.Stderr,
 		Stdin:  os.Stdin,
+		Distro: "archlinux",
 	}
 }
 
@@ -73,6 +74,9 @@ func Remove(args []string, prms ...RemoveParameters) error {
 		email, err := gnupgEmail()
 		if err != nil {
 			return err
+		}
+		if p.Distro == "" {
+			p.Distro = "archlinux"
 		}
 		msgs.Amsg(p.Stdout, "Removing remote packages as "+email)
 		for i, pkg := range remote {

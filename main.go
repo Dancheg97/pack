@@ -117,6 +117,8 @@ func run() error {
 			Norecursive: opts.Norecursive,
 			Nocfgs:      opts.Nocfgs,
 			Cascade:     opts.Cascade,
+			Distro:      opts.Distro,
+			Insecure:    opts.Insecure,
 		})
 
 	case opts.Query && opts.Help:
