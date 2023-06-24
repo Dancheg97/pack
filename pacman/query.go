@@ -39,6 +39,8 @@ type QueryParameters struct {
 	List []bool
 	// Query a package file instead of the database.
 	File string
+	// List packages to upgrade. [-u]
+	Upgrade bool
 	// Additional queue parameters.
 	AdditionalParams []string
 }
@@ -83,6 +85,9 @@ func Query(pkgs []string, opts ...QueryParameters) error {
 	}
 	for range o.Check {
 		args = append(args, "-k")
+	}
+	if o.Upgrade {
+		args = append(args, "-u")
 	}
 	if o.File != "" {
 		args = append(args, "--file")

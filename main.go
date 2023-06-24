@@ -61,7 +61,9 @@ var opts struct {
 func main() {
 	err := run()
 	if err != nil {
-		fmt.Println(msgs.Err + err.Error())
+		if !strings.Contains(err.Error(), "exit status 1") {
+			fmt.Println(msgs.Err + err.Error())
+		}
 		os.Exit(1)
 	}
 }
@@ -126,8 +128,15 @@ func run() error {
 		return nil
 
 	case opts.Query:
+		if opts.Outdated {
+			return pacman.Query(nil, pacman.QueryParameters{
+				Stdout:  os.Stdout,
+				Stderr:  os.Stderr,
+				Stdin:   os.Stdin,
+				Upgrade: true,
+			})
+		}
 		return pacman.Query(args(), pacman.QueryParameters{
-			// TODO: add outdated.
 			Info:   opts.Info,
 			List:   opts.List,
 			Stdout: os.Stdout,

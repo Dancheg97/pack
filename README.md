@@ -77,7 +77,8 @@ options:
 usage:  pack {-R --remove} [options] <package(s)>
 ```
 
-4. Query packages - this command can be executed to get information about local or remote packages. For targets without registry and owner specified local description will be provided, for targets with registry remote information
+4. Query packages - this command can be executed to get information about local or remote packages. For targets without registry and owner specified local description will be provided, for targets with registry remote information.
+<!-- If you want to search for a package on remote, just put @ before target package -->
 
 ```sh
 🔎 Query packages

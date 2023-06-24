@@ -52,18 +52,29 @@ func Sync(args []string, prms ...SyncParameters) error {
 	var conf *string
 	var pkgs []string
 
-	if len(args) > 0 {
-		msgs.Amsg(p.Stdout, "Syncronizing packages")
-
-		msgs.Smsg(p.Stdout, "Adding missing databases to pacman.conf", 1, 2)
-		conf, err = addMissingDatabases(args, p.Insecure)
-		if err != nil {
-			return err
-		}
-
-		msgs.Smsg(p.Stdout, "Preparing packages to sync format", 2, 2)
-		pkgs = formatPackages(args)
+	if len(args) == 0 {
+		return pacman.SyncList(pkgs, pacman.SyncParameters{
+			Sudo:      true,
+			Needed:    !p.Force,
+			NoConfirm: p.Quick,
+			Refresh:   p.Refresh,
+			Upgrade:   p.Upgrade,
+			Stdout:    p.Stdout,
+			Stderr:    p.Stderr,
+			Stdin:     p.Stdin,
+		})
 	}
+
+	msgs.Amsg(p.Stdout, "Syncronizing packages")
+
+	msgs.Smsg(p.Stdout, "Adding missing databases to pacman.conf", 1, 2)
+	conf, err = addMissingDatabases(args, p.Insecure)
+	if err != nil {
+		return err
+	}
+
+	msgs.Smsg(p.Stdout, "Preparing packages to sync format", 2, 2)
+	pkgs = formatPackages(args)
 
 	err = pacman.SyncList(pkgs, pacman.SyncParameters{
 		Sudo:      true,
