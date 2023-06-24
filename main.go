@@ -40,10 +40,11 @@ var opts struct {
 	Distro   string `long:"distro" default:"archlinux"`
 
 	// Remove options.
-	Confirm     bool `short:"c" long:"confirm"`
-	Norecursive bool `short:"a" long:"norecursive"`
-	Nocfgs      bool `short:"j" long:"nocfgs"`
-	Cascade     bool `long:"cascade"`
+	Confirm     bool   `short:"c" long:"confirm"`
+	Norecursive bool   `short:"a" long:"norecursive"`
+	Nocfgs      bool   `short:"j" long:"nocfgs"`
+	Cascade     bool   `long:"cascade"`
+	Arch        string `long:"architecture" default:"x86_64"`
 
 	// Query options.
 	Info     []bool `short:"i" long:"info"`
@@ -121,6 +122,7 @@ func run() error {
 			Cascade:     opts.Cascade,
 			Distro:      opts.Distro,
 			Insecure:    opts.Insecure,
+			Arch:        opts.Arch,
 		})
 
 	case opts.Query && opts.Help:

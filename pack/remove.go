@@ -38,6 +38,8 @@ type RemoveParameters struct {
 	Distro string
 	// Use insecure connection for remote deletions.
 	Insecure bool
+	// Set custom architectures for deletion.
+	Arch string
 }
 
 func removeDefault() *RemoveParameters {
@@ -46,6 +48,7 @@ func removeDefault() *RemoveParameters {
 		Stderr: os.Stderr,
 		Stdin:  os.Stdin,
 		Distro: "archlinux",
+		Arch:   "x86_64",
 	}
 }
 
@@ -105,21 +108,35 @@ func splitRemoved(pkgs []string) ([]string, []string) {
 	return local, remote
 }
 
-func splitPkg(pkg string) (string, string, string) {
+// Get remote, owner, target and version from input arguement.
+func splitPkg(pkg string) (string, string, string, string, error) {
 	splt := strings.Split(pkg, "/")
 	if len(splt) == 2 {
-		return splt[0], ``, splt[1]
+		pkg, ver, err := splitVer(splt[1])
+		return splt[0], ``, pkg, ver, err
 	}
-	return splt[0], splt[1], splt[2]
+	pkg, ver, err := splitVer(splt[2])
+	return splt[0], splt[1], pkg, ver, err
+}
+
+func splitVer(pkg string) (string, string, error) {
+	splt := strings.Split(pkg, "@")
+	if len(splt) != 2 {
+		return "", "", fmt.Errorf("unable to eject version from %s", pkg)
+	}
+	return splt[0], splt[1], nil
 }
 
 // Function that will be used to remove remote package.
 func rmRemote(p *RemoveParameters, pkg, email string) error {
 	t := time.Now().Format(time.RFC3339)
 
-	remote, owner, target := splitPkg(pkg)
+	remote, owner, target, version, err := splitPkg(pkg)
+	if err != nil {
+		return err
+	}
 
-	err := os.WriteFile("packdel", []byte(t+remote+owner+target), os.ModePerm)
+	err = os.WriteFile("packdel", []byte(t+owner+target), os.ModePerm)
 	if err != nil {
 		return err
 	}
@@ -156,6 +173,8 @@ func rmRemote(p *RemoveParameters, pkg, email string) error {
 	req.Header.Add("distro", p.Distro)
 	req.Header.Add("target", target)
 	req.Header.Add("time", t)
+	req.Header.Add("version", version)
+	req.Header.Add("arch", p.Arch)
 
 	var client http.Client
 	resp, err := client.Do(req)
