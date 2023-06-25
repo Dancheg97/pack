@@ -26,6 +26,7 @@ var opts struct {
 	Sync   bool `short:"S" long:"sync"`
 	Push   bool `short:"P" long:"push"`
 	Build  bool `short:"B" long:"build"`
+	Util   bool `short:"U" long:"util"`
 
 	// Sync options.
 	Quick   bool   `short:"q" long:"quick"`
@@ -55,8 +56,11 @@ var opts struct {
 	Syncbuild bool `short:"s" long:"syncbuild"`
 	Rmdeps    bool `short:"r" long:"rmdeps"`
 	Garbage   bool `short:"g" long:"garbage"`
-	Template  bool `short:"t" long:"template"`
-	ExportKey bool `short:"e" long:"exp-key"`
+
+	// Util options.
+	Flutter   bool `long:"flutter"`
+	Gocli     bool `long:"gocli"`
+	ExportKey bool `long:"key"`
 }
 
 func main() {
@@ -150,7 +154,6 @@ func run() error {
 		fmt.Println(msgs.BuildHelp)
 		return nil
 
-	// TODO: Provide ability to built for different architectures.
 	case opts.Build:
 		return pack.Build(pack.BuildParameters{
 			Dir:       opts.Dir,
@@ -158,11 +161,23 @@ func run() error {
 			Syncbuild: opts.Syncbuild,
 			Rmdeps:    opts.Rmdeps,
 			Garbage:   opts.Garbage,
-			Template:  opts.Template,
-			ExportKey: opts.ExportKey,
 			Stdout:    os.Stdout,
 			Stderr:    os.Stderr,
 			Stdin:     os.Stdin,
+		})
+
+	case opts.Util && opts.Help:
+		fmt.Print(msgs.UtilHelp)
+		return nil
+
+	case opts.Util:
+		return pack.Util(args(), pack.UtilParameters{
+			Stdout:    os.Stdout,
+			Stderr:    os.Stderr,
+			Stdin:     os.Stdin,
+			Flutter:   opts.Flutter,
+			Gocli:     opts.Gocli,
+			ExportKey: opts.ExportKey,
 		})
 
 	case opts.Version:

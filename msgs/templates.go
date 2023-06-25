@@ -5,10 +5,10 @@
 
 package msgs
 
-const PKGBUILD = `# Maintainer: %s
+const PKGBUILDflutter = `# Maintainer: %s
 
 pkgname="%s"
-pkgdesc="Small description"
+pkgdesc="Useful description"
 pkgver="1"
 pkgrel="1"
 arch=('x86_64')
@@ -32,6 +32,29 @@ package() {
   install -Dm755 assets/%s.png $pkgdir/usr/share/icons/hicolor/512x512/apps/%s.png
   cd build/linux/x64/release/bundle
   find . -type f -exec install -Dm755 {} $pkgdir/usr/share/%s/{} \;
+}
+`
+
+const PKGBUILDgocli = `# Maintainer: %s
+
+pkgname="%s"
+pkgdesc="Useful description"
+pkgver="1"
+pkgrel="1"
+arch=('x86_64')
+url="https://example.com/owner/repo"
+depends=()
+makedepends=(
+  "go"
+)
+
+build() {
+  cd ..
+  go build -o src/p .
+}
+
+package() {
+  install -Dm755 p $pkgdir/usr/bin/%s
 }
 `
 

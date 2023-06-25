@@ -8,7 +8,6 @@ package pack
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"io"
 	"os"
 	"os/exec"
@@ -35,10 +34,6 @@ type BuildParameters struct {
 	Rmdeps bool
 	// Do not clean workspace before and after build.
 	Garbage bool
-	// Generate pacakge template and exit.
-	Template bool
-	// Export public armored string key to Stdout and exit.
-	ExportKey bool
 }
 
 func builddefault() *BuildParameters {
@@ -55,14 +50,6 @@ func builddefault() *BuildParameters {
 // Build package in current directory with provided arguements
 func Build(prms ...BuildParameters) error {
 	p := formOptions(prms, builddefault)
-
-	if p.Template {
-		return template()
-	}
-
-	if p.ExportKey {
-		return armored(p.Stdout)
-	}
 
 	msgs.Amsg(p.Stdout, "Building package")
 
@@ -156,38 +143,4 @@ func gnuPGIdentity() (string, error) {
 		return ``, errors.New("unable to get gnupg identity: " + o)
 	}
 	return strings.ReplaceAll(b.String(), "\n", ""), nil
-}
-
-// Function generated project template based on current directory name and
-// identity in GnuPG.
-func template() error {
-	ident, err := gnuPGIdentity()
-	if err != nil {
-		return err
-	}
-
-	dir, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-	splt := strings.Split(dir, "/")
-	n := splt[len(splt)-1]
-
-	d := fmt.Sprintf(msgs.Desktop, n, n, n, n, n)
-	derr := os.WriteFile(n+".desktop", []byte(d), 0600)
-
-	s := fmt.Sprintf(msgs.ShFile, n, n)
-	serr := os.WriteFile(n+".sh", []byte(s), 0600)
-
-	p := fmt.Sprintf(msgs.PKGBUILD, ident, n, n, n, n, n, n, n, n)
-	perr := os.WriteFile(`PKGBUILD`, []byte(p), 0600)
-
-	return errors.Join(derr, serr, perr)
-}
-
-// Return armored public key string from GnuPG.
-func armored(o io.Writer) error {
-	cmd := exec.Command("gpg", "--armor", "--export")
-	cmd.Stdout = o
-	return call(cmd)
 }

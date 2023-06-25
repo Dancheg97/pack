@@ -21,6 +21,7 @@ operations:
 	pack {-R --remove} [options] [(registry)/(owner)/package(s)]
 	pack {-Q --query}  [options] [(registry)/(owner)/package(s)]
 	pack {-B --build}  [options] [(registry)/(owner)/package(s)]
+	pack {-U --util}   [options] [args]
 
 use 'pack {-h --help}' with an operation for available options`
 
@@ -71,10 +72,17 @@ options:
 	-s, --syncbuild Syncronize dependencies and build target
 	-r, --rmdeps    Remove installed dependencies after a successful build
 	-g, --garbage   Do not clean workspace before and after build
-	-t, --template  Generate PKGBUILD, app.sh and app.desktop and exit
-	-e, --exp-key   Export public GnuPG key armored string and exit
 
 usage:  pack {-B --build} [options] <(registry)/(owner)/package(s)>`
+
+var UtilHelp = `Additional utilities
+
+options:
+	--key     Export public GnuPG key armor
+	--flutter Generate PKGBUILD, app.sh and app.desktop for flutter application
+	--gocli   Generate PKGBUILD for CLI utility in go
+
+usage:  pack {-U --util} [options] <(args)>`
 
 var Version = `             Pack - package manager.
           Copyright (C) 2023 FMNX team
@@ -104,5 +112,6 @@ func init() {
 		SyncHelp = strings.Join([]string{"⚡", SyncHelp}, " ")
 		PushHelp = strings.Join([]string{"🚀", PushHelp}, " ")
 		BuildHelp = strings.Join([]string{"🔐", BuildHelp}, " ")
+		UtilHelp = strings.Join([]string{"📄", UtilHelp}, " ")
 	}
 }
