@@ -13,7 +13,9 @@
 
 > **Warning!** Project is in alpha stage, API's might be changed.
 
-Pack is package manager that works as a wrapper over pacman and provides additional functionality for software delivery, distributed registry management with much simpler API. With pack you can push your packages to compatible registries and provide your software as a links to simplify software access for end-user.
+Pack works as a wrapper over pacman providing additional functionality for software delivery and server management. Main goal of pack is to remove intermediate nodes between software vendors and users.
+
+For users pack provides ability to install packages from any compatible registry using package URL. For developers pack is offering simple interface for quick package delivery.
 
 ---
 
