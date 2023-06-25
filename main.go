@@ -199,8 +199,7 @@ func run() error {
 // TODO: later rewrite with reflect to avoid unexpected behaviour.
 func args() []string {
 	var stringargs = []string{
-		"-n", "--name", "-p", "--port", "--cert", "--key", "--ring", "--file",
-		"--protocol", "--endopint", "-d", "--dir", "--arch", "--distro",
+		"-d", "--dir", "--endpoint", "--distro", "--architecture",
 	}
 	var filtered []string
 	for i, v := range os.Args {
