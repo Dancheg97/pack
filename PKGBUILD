@@ -3,7 +3,7 @@
 pkgname=pack
 pkgver='0.6.1'
 pkgrel=1
-pkgdesc="Simplified version of pacman written in go."
+pkgdesc="Decentralized package manager based on pacman."
 arch=('x86_64')
 url="https://fmnx.su/core/pack"
 license=('GPL')

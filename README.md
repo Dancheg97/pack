@@ -4,16 +4,17 @@
 
 <h2 align="center">Pack - package manager</h2>
 
-![Generic badge](https://img.shields.io/badge/status-beta-orange.svg)
 [![Generic badge](https://img.shields.io/badge/license-gpl-orange.svg)](https://fmnx.su/core/pack/src/branch/main/LICENSE)
 [![Generic badge](https://img.shields.io/badge/fmnx-repo-006db0.svg)](https://fmnx.su/core/pack)
 [![Generic badge](https://img.shields.io/badge/codeberg-repo-45a3fb.svg)](https://codeberg.org/fmnx/pack)
 [![Generic badge](https://img.shields.io/badge/github-repo-white.svg)](https://github.com/fmnx-io/pack)
-[![Generic badge](https://img.shields.io/badge/arch-package-00bcd4.svg)](https://fmnx.su/core/-/packages/arch/pack)
+[![Generic badge](https://img.shields.io/badge/package-0.6.1_beta-00bcd4.svg)](https://fmnx.su/core/-/packages/arch/pack)
 
-Pack works as a wrapper over pacman providing additional functionality for software delivery and server management. Main goal of pack is to remove intermediate nodes between software vendors and users.
+Pack works as a wrapper over pacman providing additional functionality for software delivery and connection management.
 
 For users pack provides ability to install packages from any compatible registry using package URL. For developers pack is offering simple interface for quick package delivery.
+
+Share and install software without any intermediate regulator.
 
 ---
 
