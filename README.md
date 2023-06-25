@@ -102,8 +102,19 @@ options:
         -s, --syncbuild Syncronize dependencies and build target
         -r, --rmdeps    Remove installed dependencies after a successful build
         -g, --garbage   Do not clean workspace before and after build
-        -t, --template  Generate PKGBUILD, app.sh and app.desktop and exit
-        -e, --exp-key   Export public GnuPG key armored string and exit
 
 usage:  pack {-B --build} [options] <(registry)/(owner)/package(s)>
+```
+
+6. Util - small assistant that can generate generate tempaltes or help with GnuPG related operations.
+
+```sh
+📄 Additional utilities
+
+options:
+        --key     Export public GnuPG key armor
+        --flutter Generate PKGBUILD, app.sh and app.desktop for flutter application
+        --gocli   Generate PKGBUILD for CLI utility in go
+
+usage:  pack {-U --util} [options] <(args)>
 ```

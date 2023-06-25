@@ -91,7 +91,7 @@ var Version = `             Pack - package manager.
    the terms of the GNU General Public License.
        Web page: https://fmnx.su/core/pack
  
-                 Version: 0.5.4`
+                 Version: 0.6.0`
 
 var Color bool
 

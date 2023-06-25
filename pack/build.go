@@ -48,10 +48,10 @@ func builddefault() *BuildParameters {
 }
 
 // Build package in current directory with provided arguements
-func Build(prms ...BuildParameters) error {
+func Build(args []string, prms ...BuildParameters) error {
 	p := formOptions(prms, builddefault)
 
-	msgs.Amsg(p.Stdout, "Building package")
+	msgs.Amsg(p.Stdout, "Building packages")
 
 	msgs.Smsg(p.Stdout, "Running GnuPG check", 1, 2)
 	err := checkGnupg()
@@ -65,28 +65,54 @@ func Build(prms ...BuildParameters) error {
 		return err
 	}
 
-	msgs.Amsg(p.Stdout, "Building package with makepkg")
-	err = pacman.Makepkg(pacman.MakepkgParameters{
-		Sign:       true,
-		Stdout:     p.Stdout,
-		Stderr:     p.Stderr,
-		Stdin:      p.Stdin,
-		Clean:      !p.Garbage,
-		CleanBuild: !p.Garbage,
-		Force:      !p.Garbage,
-		Install:    p.Syncbuild,
-		RmDeps:     p.Rmdeps,
-		SyncDeps:   p.Syncbuild,
-		Needed:     !p.Syncbuild,
-		NoConfirm:  p.Quick,
-	})
-	if err != nil {
-		return errors.Join(err)
+	var builddirs []string
+
+	if len(args) == 0 {
+		currdir, err := os.Getwd()
+		if err != nil {
+			return err
+		}
+		builddirs = append(args, currdir)
 	}
 
-	msgs.Amsg(p.Stdout, "Moving package to cache")
-	cmd := exec.Command("bash", "-c", "sudo mv *.pkg.tar.zst* "+p.Dir)
-	return call(cmd)
+	for _, arg := range args {
+		dir, err := cloneOrPullDir(p.Stdout, p.Stderr, arg)
+		if err != nil {
+			return err
+		}
+		builddirs = append(builddirs, dir)
+	}
+
+	for _, dir := range builddirs {
+		msgs.Amsg(p.Stdout, "Building package with makepkg")
+		err = pacman.Makepkg(pacman.MakepkgParameters{
+			Sign:       true,
+			Dir:        dir,
+			Stdout:     p.Stdout,
+			Stderr:     p.Stderr,
+			Stdin:      p.Stdin,
+			Clean:      !p.Garbage,
+			CleanBuild: !p.Garbage,
+			Force:      !p.Garbage,
+			Install:    p.Syncbuild,
+			RmDeps:     p.Rmdeps,
+			SyncDeps:   p.Syncbuild,
+			Needed:     !p.Syncbuild,
+			NoConfirm:  p.Quick,
+		})
+		if err != nil {
+			return errors.Join(err)
+		}
+
+		msgs.Amsg(p.Stdout, "Moving package to cache")
+		movecommand := "sudo mv " + dir + "/*.pkg.tar.zst* " + p.Dir
+		cmd := exec.Command("bash", "-c", movecommand)
+		err = call(cmd)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // Ensure, that user have created gnupg keys for package signing before package
@@ -143,4 +169,47 @@ func gnuPGIdentity() (string, error) {
 		return ``, errors.New("unable to get gnupg identity: " + o)
 	}
 	return strings.ReplaceAll(b.String(), "\n", ""), nil
+}
+
+// Eject last name from directory or link.
+func ejectLastPathArg(s string) string {
+	splt := strings.Split(s, "/")
+	return splt[len(splt)-1]
+}
+
+// This function will clone provided repository to cache directory and return
+// name of that directory.
+func cloneOrPullDir(outw, errw io.Writer, repo string) (string, error) {
+	uhd, err := os.UserHomeDir()
+	if err != nil {
+		return ``, err
+	}
+	err = os.MkdirAll(path.Join(uhd, ".packcache"), os.ModePerm)
+	if err != nil {
+		return ``, err
+	}
+	project := ejectLastPathArg(repo)
+	msgs.Amsg(outw, "Cloning repository: "+project)
+	gitdir := path.Join(uhd, ".packcache", project)
+
+	var errbuf bytes.Buffer
+	cmd := exec.Command("git", "clone", "https://"+repo, gitdir)
+	cmd.Stderr = io.MultiWriter(errw, &errbuf)
+	cmd.Stdout = outw
+	err = cmd.Run()
+	if err != nil {
+		if strings.Contains(errbuf.String(), "and is not an empty directory") {
+			msgs.Amsg(outw, "Pulling changes")
+			err = os.Chdir(gitdir)
+			if err != nil {
+				return ``, err
+			}
+			cmd := exec.Command("git", "pull")
+			cmd.Stderr = errw
+			cmd.Stdout = outw
+			return gitdir, cmd.Run()
+		}
+		return ``, err
+	}
+	return gitdir, nil
 }

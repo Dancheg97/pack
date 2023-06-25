@@ -155,7 +155,7 @@ func run() error {
 		return nil
 
 	case opts.Build:
-		return pack.Build(pack.BuildParameters{
+		return pack.Build(args(), pack.BuildParameters{
 			Dir:       opts.Dir,
 			Quick:     opts.Quick,
 			Syncbuild: opts.Syncbuild,
@@ -167,7 +167,7 @@ func run() error {
 		})
 
 	case opts.Util && opts.Help:
-		fmt.Print(msgs.UtilHelp)
+		fmt.Println(msgs.UtilHelp)
 		return nil
 
 	case opts.Util:
