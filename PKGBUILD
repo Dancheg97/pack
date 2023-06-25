@@ -1,7 +1,7 @@
 # Maintainer: Danila Fominykh <dancheg97@fmnx.su>
 
 pkgname=pack
-pkgver='0.6.0'
+pkgver='0.6.1'
 pkgrel=1
 pkgdesc="Simplified version of pacman written in go."
 arch=('x86_64')
