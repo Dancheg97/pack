@@ -83,7 +83,7 @@ func Remove(args []string, prms ...RemoveParameters) error {
 		}
 		msgs.Amsg(p.Stdout, "Removing remote packages as "+email)
 		for i, pkg := range remote {
-			msgs.Smsg(p.Stdout, "Removing "+pkg, i, len(remote))
+			msgs.Smsg(p.Stdout, "Removing "+pkg, i+1, len(remote))
 			err := rmRemote(p, pkg, email)
 			if err != nil {
 				return err
@@ -140,17 +140,22 @@ func rmRemote(p *RemoveParameters, pkg, email string) error {
 	if err != nil {
 		return err
 	}
-	defer os.RemoveAll("packdel")
 
-	cmd := exec.Command("gpg", "--sign", "packdel")
+	var errbuf bytes.Buffer
+	cmd := exec.Command("gpg", "--detach-sign", "packdel")
 	cmd.Stdout = p.Stdout
-	cmd.Stderr = p.Stderr
+	cmd.Stderr = &errbuf
 	err = cmd.Run()
+	if err != nil {
+		return errors.Join(errors.New(errbuf.String()), err)
+	}
+
+	err = os.RemoveAll("packdel")
 	if err != nil {
 		return err
 	}
 
-	sigdata, err := os.ReadFile("packdel")
+	signature, err := os.Open("packdel.sig")
 	if err != nil {
 		return err
 	}
@@ -163,7 +168,7 @@ func rmRemote(p *RemoveParameters, pkg, email string) error {
 	req, err := http.NewRequest(
 		http.MethodDelete,
 		prfx+path.Join(remote, "api/packages", owner, "arch/remove"),
-		bytes.NewReader(sigdata),
+		signature,
 	)
 	if err != nil {
 		return err
@@ -178,6 +183,7 @@ func rmRemote(p *RemoveParameters, pkg, email string) error {
 
 	var client http.Client
 	resp, err := client.Do(req)
+	err = errors.Join(os.RemoveAll("packdel.sig"), err)
 	if err != nil {
 		return err
 	}
@@ -186,7 +192,7 @@ func rmRemote(p *RemoveParameters, pkg, email string) error {
 		if err != nil {
 			return errors.Join(err, errors.New(resp.Status))
 		}
-		return fmt.Errorf("%s, %s %s", resp.Status, string(b), pkg)
+		return fmt.Errorf("%s %s", resp.Status, string(b))
 	}
 	return nil
 }

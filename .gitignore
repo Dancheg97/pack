@@ -2,6 +2,6 @@ pkg/**
 src/**
 pkgs/**
 **.pkg.tar.zst
-**.pkg.tar.zst.sig
 **.gpg
+**.sig
 docker/**
