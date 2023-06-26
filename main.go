@@ -58,9 +58,12 @@ var opts struct {
 	Garbage   bool `short:"g" long:"garbage"`
 
 	// Util options.
-	Flutter   bool `long:"flutter"`
-	Gocli     bool `long:"gocli"`
-	ExportKey bool `long:"key"`
+	Gen     bool `long:"gen"`
+	Armor   bool `long:"armor"`
+	Recv    bool `long:"recv"`
+	Setpkgr bool `long:"setpkgr"`
+	Flutter bool `long:"flutter"`
+	Gocli   bool `long:"gocli"`
 }
 
 func main() {
@@ -172,12 +175,15 @@ func run() error {
 
 	case opts.Util:
 		return pack.Util(args(), pack.UtilParameters{
-			Stdout:    os.Stdout,
-			Stderr:    os.Stderr,
-			Stdin:     os.Stdin,
-			Flutter:   opts.Flutter,
-			Gocli:     opts.Gocli,
-			ExportKey: opts.ExportKey,
+			Stdout:  os.Stdout,
+			Stderr:  os.Stderr,
+			Stdin:   os.Stdin,
+			Gen:     opts.Gen,
+			Armor:   opts.Armor,
+			Recv:    opts.Recv,
+			Setpkgr: opts.Setpkgr,
+			Flutter: opts.Flutter,
+			Gocli:   opts.Gocli,
 		})
 
 	case opts.Version:

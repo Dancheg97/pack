@@ -22,12 +22,18 @@ type UtilParameters struct {
 	Stderr io.Writer
 	Stdin  io.Reader
 
-	// Generate flutter pacakge template and exit.
+	// Generate GnuPG key.
+	Gen bool
+	// Export existing GnuPG key armored string.
+	Armor bool
+	// Run gpg --recv-key to avoid pacman signing problems.
+	Recv bool
+	// Set packager in pacman.conf
+	Setpkgr bool
+	// Generate flutter template.
 	Flutter bool
-	// Generate go CLI pacakge template and exit.
+	// Generate go cli utility template.
 	Gocli bool
-	// Export public armored string key to Stdout and exit.
-	ExportKey bool
 }
 
 func utildefault() *UtilParameters {
@@ -41,19 +47,49 @@ func utildefault() *UtilParameters {
 func Util(args []string, prms ...UtilParameters) error {
 	p := formOptions(prms, utildefault)
 
-	if p.ExportKey {
+	switch {
+	case p.Recv:
+		return recv(args[0], p)
+	case p.Setpkgr:
+		return setpkgr(args[0], p)
+	case p.Gen:
+		return generate(p)
+	case p.Armor:
 		return armored(p.Stdout)
-	}
-
-	if p.Flutter {
+	case p.Flutter:
 		return fluttertemplate()
-	}
-
-	if p.Gocli {
+	case p.Gocli:
 		return goclitemplate()
 	}
+	return errors.New("specify command options, run 'pack -Uh'")
+}
 
-	return nil
+// Add packager line to makepkg.conf
+func setpkgr(pkgr string, p *UtilParameters) error {
+	c := fmt.Sprintf("echo PACKAGER='%s' >> /etc/makepkg.conf", pkgr)
+	cmd := exec.Command("bash", "-c", c)
+	cmd.Stdout = p.Stdout
+	cmd.Stderr = p.Stderr
+	cmd.Stdin = p.Stdin
+	return cmd.Run()
+}
+
+// Recieve gpg key.
+func recv(id string, p *UtilParameters) error {
+	cmd := exec.Command("gpg", "--recv-key", id)
+	cmd.Stdout = p.Stdout
+	cmd.Stderr = p.Stderr
+	cmd.Stdin = p.Stdin
+	return cmd.Run()
+}
+
+// Generate new GPG key with user input and etc.
+func generate(p *UtilParameters) error {
+	cmd := exec.Command("gpg", "--armor", "--export")
+	cmd.Stdout = p.Stdout
+	cmd.Stderr = p.Stderr
+	cmd.Stdin = p.Stdin
+	return cmd.Run()
 }
 
 // Return armored public key string from GnuPG.

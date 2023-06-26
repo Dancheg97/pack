@@ -8,7 +8,7 @@
 [![Generic badge](https://img.shields.io/badge/fmnx-repo-006db0.svg)](https://fmnx.su/core/pack)
 [![Generic badge](https://img.shields.io/badge/codeberg-repo-45a3fb.svg)](https://codeberg.org/fmnx/pack)
 [![Generic badge](https://img.shields.io/badge/github-repo-white.svg)](https://github.com/fmnx-io/pack)
-[![Generic badge](https://img.shields.io/badge/package-0.6.1_beta-00bcd4.svg)](https://fmnx.su/core/-/packages/arch/pack)
+[![Generic badge](https://img.shields.io/badge/package-0.6.2_alpha-00bcd4.svg)](https://fmnx.su/core/-/packages/arch/pack)
 
 Pack works as a wrapper over pacman providing additional functionality for software delivery and connection management.
 
@@ -113,9 +113,17 @@ usage:  pack {-B --build} [options] <(registry)/(owner)/package(s)>
 📄 Additional utilities
 
 options:
-        --key     Export public GnuPG key armor
+        --info    Show information about your GnuPG keys
+        --gen     Generate GnuPG key for package singing
+        --armor   Export public GnuPG key armor
+        --recv    Run recieve key operaion
+        --setpkgr Automatically set packager in makepkg.conf
         --flutter Generate PKGBUILD, app.sh and app.desktop for flutter application
         --gocli   Generate PKGBUILD for CLI utility in go
 
 usage:  pack {-U --util} [options] <(args)>
 ```
+
+<!-- recvkey
+gpg --recv-key 34F27D80E9AC9881528BE30744A372184A26D3EB
+ -->

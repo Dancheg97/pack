@@ -78,9 +78,13 @@ usage:  pack {-B --build} [options] <(registry)/(owner)/package(s)>`
 var UtilHelp = `Additional utilities
 
 options:
-	--key     Export public GnuPG key armor
-	--flutter Generate PKGBUILD, app.sh and app.desktop for flutter application
-	--gocli   Generate PKGBUILD for CLI utility in go
+        --info    Show information about your GnuPG keys
+        --gen     Generate GnuPG key for package singing
+        --armor   Export public GnuPG key armor
+        --recv    Run recieve key operaion
+        --setpkgr Automatically set packager in makepkg.conf
+        --flutter Generate PKGBUILD, app.sh and app.desktop for flutter application
+        --gocli   Generate PKGBUILD for CLI utility in go
 
 usage:  pack {-U --util} [options] <(args)>`
 
@@ -91,7 +95,7 @@ var Version = `             Pack - package manager.
    the terms of the GNU General Public License.
        Web page: https://fmnx.su/core/pack
  
-                 Version: 0.6.1`
+                 Version: 0.6.2`
 
 var Color bool
 
